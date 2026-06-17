@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.log
+.env
+.env.local
+
+# Local productions / generated artifacts (never commit rendered media)
+productions/
+*.mp3
+*.mov
+*.mp4
+*.wav
+
+# Allow committed example/reference media if ever needed
+!assets/**
