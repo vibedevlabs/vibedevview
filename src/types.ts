@@ -89,7 +89,7 @@ export const ManifestSchema = z.object({
   lessonId: z.string(),
   title: z.string(),
   track: z.string().optional(), // e.g. "BUILD / ABSORB 1"
-  voiceDefault: z.string().default("Courtney"),
+  voiceDefault: z.string().default("Ja'dan"),
   segments: z.array(SegmentSchema),
 });
 export type Manifest = z.infer<typeof ManifestSchema>;

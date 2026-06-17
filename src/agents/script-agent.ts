@@ -17,7 +17,7 @@ Output a single Markdown document in EXACTLY this format and nothing else:
 lesson: <slug>
 title: <title>
 track: <track name>
-voice: Courtney
+voice: Ja'dan
 ---
 
 ## <2-digit id> · <short label>

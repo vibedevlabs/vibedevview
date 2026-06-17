@@ -65,7 +65,7 @@ describe("parseScript", () => {
     expect(m.lessonId).toBe("B-AB1");
     expect(m.title).toBe("Build With AI");
     expect(m.track).toBe("BUILD / ABSORB 1");
-    expect(m.voiceDefault).toBe("Courtney");
+    expect(m.voiceDefault).toBe("Courtney"); // explicit `voice:` in frontmatter is honored over the default
     expect(m.segments).toHaveLength(3);
   });
 
@@ -113,7 +113,7 @@ describe("parseScript", () => {
     const m2 = parseScript("## 01 · Hi\nSAY:\nHello there.\n");
     expect(m2.lessonId).toBe("untitled");
     expect(m2.title).toBe("Untitled Lesson");
-    expect(m2.voiceDefault).toBe("Courtney");
+    expect(m2.voiceDefault).toBe("Ja'dan"); // no frontmatter -> HGDW default voice
     expect(m2.segments).toHaveLength(1);
     expect(m2.segments[0]!.say).toBe("Hello there.");
   });
