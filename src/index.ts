@@ -1,0 +1,14 @@
+export * from "./types.js";
+export * from "./brand.js";
+export * from "./workspace.js";
+export * from "./alignment.js";
+export * from "./orchestrator.js";
+export { parseScript } from "./script/parse.js";
+export { runScriptAgent } from "./agents/script-agent.js";
+export { runSlidesAgent } from "./agents/slides-agent.js";
+export { runVoiceAgent } from "./agents/voice-agent.js";
+export { runRecordingAgent } from "./agents/recording-agent.js";
+export { buildPlan, clipsBySegment } from "./timeline/backend.js";
+export type { TimelineBackend, TimelinePlan, PlacedClip } from "./timeline/backend.js";
+export { FfmpegBackend } from "./timeline/ffmpeg-backend.js";
+export { PalmierBackend } from "./timeline/palmier-backend.js";
