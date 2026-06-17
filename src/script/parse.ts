@@ -14,7 +14,7 @@ import {
  *   lesson: B-AB1
  *   title: Build With AI
  *   track: BUILD / ABSORB 1
- *   voice: Courtney
+ *   voice: Ja'dan
  *   ---
  *
  *   ## 01 · Cold open
@@ -195,7 +195,7 @@ export function parseScript(text: string): Manifest {
     lessonId: String(meta.lesson ?? meta.lessonId ?? "untitled"),
     title: String(meta.title ?? "Untitled Lesson"),
     track: meta.track ? String(meta.track) : undefined,
-    voiceDefault: String(meta.voice ?? meta.voiceDefault ?? "Courtney"),
+    voiceDefault: String(meta.voice ?? meta.voiceDefault ?? "Ja'dan"),
     segments,
   };
   return ManifestSchema.parse(manifest);

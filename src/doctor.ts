@@ -57,7 +57,7 @@ async function checkElevenLabs(): Promise<Check[]> {
       },
     ];
   }
-  const want = resolveVoice(process.env.PALMIER_VOICE ?? "Courtney");
+  const want = resolveVoice(process.env.PALMIER_VOICE);
   try {
     const res = await fetch("https://api.elevenlabs.io/v1/voices", { headers: { "xi-api-key": key } });
     if (!res.ok) {
