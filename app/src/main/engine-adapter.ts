@@ -39,6 +39,8 @@ export interface SpawnOpts {
   args: string[];
   onEvent?: (event: EngineEvent) => void;
   onStderr?: (line: string) => void;
+  /** Override the CLI entry (tests point this at a fixture). Defaults to the resolved engine. */
+  cliPath?: string;
 }
 
 /**
@@ -47,7 +49,7 @@ export interface SpawnOpts {
  * Exported (not Electron-coupled) so it can be exercised directly in tests.
  */
 export function spawnEngine(opts: SpawnOpts): Promise<RunResult> {
-  const { cliPath } = resolveEngine();
+  const cliPath = opts.cliPath ?? resolveEngine().cliPath;
   return new Promise<RunResult>((resolve) => {
     const child = spawn(opts.nodeBin, [cliPath, "--json", ...opts.args], {
       env: { ...process.env, ...opts.env },
@@ -101,7 +103,7 @@ export function spawnEngine(opts: SpawnOpts): Promise<RunResult> {
 
 /** Run a `--json` command that prints a single JSON object (doctor/status) and parse it. */
 export function runJsonCommand<T>(opts: Omit<SpawnOpts, "onEvent">): Promise<T> {
-  const { cliPath } = resolveEngine();
+  const cliPath = opts.cliPath ?? resolveEngine().cliPath;
   return new Promise<T>((resolve, reject) => {
     const child = spawn(opts.nodeBin, [cliPath, "--json", ...opts.args], {
       env: { ...process.env, ...opts.env },

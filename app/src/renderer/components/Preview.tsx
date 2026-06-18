@@ -1,15 +1,12 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { PreviewDeck } from "../lib/preview";
 
-interface DeckWindow extends Window {
-  __show?: (i: number) => void;
-  __deckReady?: boolean;
-}
-
 /**
  * Live WYSIWYG preview: loads the engine's own HTML deck into a sandboxed
- * iframe and jumps to the focused segment's frame via `window.__show(i)` — the
- * exact pixels the Slides agent will render, with zero Chromium spawn.
+ * same-origin iframe and shows the focused segment's frame — the exact pixels
+ * the Slides agent will render, with zero Chromium spawn. The app's strict CSP
+ * blocks the deck's inline navigation script, so we drive frame selection from
+ * the parent by toggling `.is-active` on the same-origin document instead.
  */
 export function Preview(props: { deck: PreviewDeck | null; focusIndex: number | null }): React.JSX.Element {
   const wrap = useRef<HTMLDivElement>(null);
@@ -26,29 +23,29 @@ export function Preview(props: { deck: PreviewDeck | null; focusIndex: number | 
     return () => ro.disconnect();
   }, []);
 
-  // Reload the deck HTML when it changes.
+  const lastHtml = useRef<string | null>(null);
+
+  // Reload the deck and/or show the focused frame. When the html changes we must
+  // wait for srcdoc to finish parsing (load event) before toggling `.is-active`,
+  // otherwise we'd mark the old document active and the freshly-loaded blank deck
+  // would show nothing. Focus-only changes apply immediately on the live doc.
   useEffect(() => {
     const iframe = frame.current;
     if (!iframe) return;
-    iframe.srcdoc = props.deck?.html ?? "<!doctype html><body style='background:#000'></body>";
-  }, [props.deck?.html]);
-
-  // Step to the focused frame once the deck signals ready.
-  useEffect(() => {
-    const iframe = frame.current;
-    if (!iframe || props.focusIndex == null) return;
-    const target = props.focusIndex;
-    let tries = 0;
-    const tick = () => {
-      const w = iframe.contentWindow as DeckWindow | null;
-      if (w?.__show) {
-        w.__show(target);
-      } else if (tries++ < 40) {
-        setTimeout(tick, 25);
-      }
+    const html = props.deck?.html ?? "<!doctype html><body style='background:#000'></body>";
+    const target = props.focusIndex ?? 0;
+    const applyActive = () => {
+      const frames = iframe.contentDocument?.querySelectorAll<HTMLElement>(".frame");
+      frames?.forEach((f, k) => f.classList.toggle("is-active", k === target));
     };
-    tick();
-  }, [props.focusIndex, props.deck?.html]);
+    if (lastHtml.current !== html) {
+      lastHtml.current = html;
+      iframe.onload = applyActive;
+      iframe.srcdoc = html;
+    } else {
+      applyActive();
+    }
+  }, [props.deck?.html, props.focusIndex]);
 
   return (
     <div className="preview-wrap">
@@ -56,7 +53,7 @@ export function Preview(props: { deck: PreviewDeck | null; focusIndex: number | 
         <iframe
           ref={frame}
           title="slide preview"
-          sandbox="allow-scripts"
+          sandbox="allow-scripts allow-same-origin"
           style={{ transform: `scale(${scale})` }}
         />
       </div>
