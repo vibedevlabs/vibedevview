@@ -1,11 +1,19 @@
 import React, { useState } from "react";
 import { studio } from "../lib/bridge";
 import { diffLines, hasChanges } from "../lib/diff";
+import type { DraftBackend } from "../../shared/ipc";
+
+const BACKEND_LABEL: Record<DraftBackend, string> = {
+  devin: "Devin",
+  claude: "Claude",
+  llm: "the configured LLM",
+};
 
 /**
- * Draft-with-AI: generate a script.md from a topic brief via the engine's LLM
- * drafter. The result is shown as a diff against the current script and only
- * applied on explicit approval (Hard Rule #5 holds for AI edits too).
+ * Draft-with-AI: generate a script.md from a topic brief. The backend is a local
+ * agent CLI (Devin/Claude) when available, else the engine's LLM drafter — chosen
+ * in the main process. The result is shown as a diff against the current script
+ * and only applied on explicit approval (Hard Rule #5 holds for AI edits too).
  */
 export function DraftWithAI(props: {
   lessonId: string;
@@ -15,6 +23,7 @@ export function DraftWithAI(props: {
 }): React.JSX.Element {
   const [brief, setBrief] = useState("");
   const [draft, setDraft] = useState<string | null>(null);
+  const [backend, setBackend] = useState<DraftBackend | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,8 +31,9 @@ export function DraftWithAI(props: {
     setBusy(true);
     setError(null);
     try {
-      const script = await studio.draft({ lessonId: props.lessonId, brief });
-      setDraft(script);
+      const res = await studio.draft({ lessonId: props.lessonId, brief });
+      setDraft(res.script);
+      setBackend(res.backend);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -52,6 +62,7 @@ export function DraftWithAI(props: {
         {draft != null && (
           <>
             <div className="note">
+              {backend != null && <>Drafted via <strong>{BACKEND_LABEL[backend]}</strong>. </>}
               {changed ? "Review the proposed script before applying:" : "The draft matches your current script."}
             </div>
             <div className="diff">
