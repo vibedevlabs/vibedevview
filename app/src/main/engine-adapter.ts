@@ -248,7 +248,13 @@ export interface TextCommandOpts {
 /** Spawn an arbitrary binary (an agent CLI) and capture stdout; reject on failure. */
 export function runTextCommand(opts: TextCommandOpts): Promise<string> {
   return new Promise<string>((resolve, reject) => {
-    const child = spawn(opts.bin, opts.args, { cwd: opts.cwd, env: { ...process.env, ...opts.env } });
+    // stdin: "ignore" (= /dev/null) so headless agent CLIs that read stdin in
+    // print mode (e.g. `claude -p`) don't block waiting for piped input.
+    const child = spawn(opts.bin, opts.args, {
+      cwd: opts.cwd,
+      env: { ...process.env, ...opts.env },
+      stdio: ["ignore", "pipe", "pipe"],
+    });
     let out = "";
     let err = "";
     const timer = opts.timeoutMs
