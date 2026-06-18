@@ -37,7 +37,8 @@ Goal: reliable runs on the iMac workstation with live Palmier Pro, plus real scr
 
 | Deliverable | Owner | Stream | Status |
 | --- | --- | --- | --- |
-| Validate live Palmier MCP `import_media` / `add_to_timeline` end-to-end on the iMac | Timeline Integration Team | **[SEQ]** (gates real-timeline output) | ⬜ |
+| Validate live Palmier MCP `import_media` / `add_clips` end-to-end on a real Mac | Timeline Integration Team | **[SEQ]** (gates real-timeline output) | ✅ |
+| Idempotent load: clean timeline **+** reset media bin by default (`--no-clean`/`--keep-bin` opt-outs); `palmier clear`; surgical `correct`; close MCP client after live ops | Timeline Integration Team | **[SEQ]** | ✅ |
 | Recording Agent **Mode B** (operate the Mac to capture real `.mov` screen recordings) | Recording Team | **[PAR]** | ⬜ |
 | Confirm the team's ElevenLabs voices (incl. Courtney) + per-voice settings | Voice & Audio Team | **[PAR]** | ⬜ |
 | Caption / lower-third (`D2`) auto-generation from `SAY` text | Slides & Brand Team | **[PAR]** | ⬜ |
@@ -48,17 +49,22 @@ Goal: reliable runs on the iMac workstation with live Palmier Pro, plus real scr
 ## Phase 2 — Electron app with markdown editor (⬜ planned)
 
 Wrap the **existing engine** (no rewrite) in a desktop app the team initiates productions from.
+Full scope, architecture diagrams, AI integration, and the per-team build plan are in
+**[`docs/ELECTRON-APP.md`](ELECTRON-APP.md)**. Summary of the critical path below.
 
 | Deliverable | Owner | Stream | Status |
 | --- | --- | --- | --- |
-| Electron shell + IPC bridge to the engine | App Platform Team | **[SEQ]** (foundation for all UI) | ⬜ |
-| Markdown editor for `script.md` with live frame-type hints | Frontend / Editor Team | **[PAR]** | ⬜ |
-| Draft preview pane (timeline scrub + per-segment status) | Frontend / Editor Team | **[PAR]** | ⬜ |
-| Inline feedback → correction-loop wiring | App Platform Team | **[SEQ]** (depends on IPC bridge) | ⬜ |
-| Packaging / signing / auto-update | App Platform Team | **[PAR]** | ⬜ |
+| Engine `--json` progress event stream (UI status depends on it) | Core Engine Team | **[SEQ]** | ⬜ |
+| Engine adapter (in-process vs child-CLI) + Electron shell + keychain secrets | Backend Architecture Team | **[SEQ]** (foundation) | ⬜ |
+| Markdown editor (`script.md` schema + frame autocomplete) + live slide preview | Frontend Integration Team / Slides & Brand Team | **[PAR]** | ⬜ |
+| Produce / Load-to-Palmier buttons + live status panel | Frontend / Timeline Integration Team | **[SEQ]** (needs event stream) | ⬜ |
+| "Draft with AI" (engine script drafter) + "Revise" → `palmier correct` w/ approval gate | Script & Parsing / Frontend Integration Team | **[PAR]** | ⬜ |
+| Scope "Generate in Palmier" (`list_models` / `generate_*`) after schema spike | Timeline Integration Team | **[PAR]** (post-MVP) | ⬜ |
+| Packaging / notarization / auto-update | Backend Architecture Team | **[SEQ]** (release gate) | ⬜ |
 
-**Parallelism note:** the Electron shell + IPC bridge **[SEQ]** must land before the editor and
-preview panes, but those two **[PAR]** panes can then be built side by side.
+**Parallelism note:** the engine event stream + adapter/shell **[SEQ]** must land first; then the
+editor/preview and produce/load tracks run largely **[PAR]**. See the scope doc for the full
+phased breakdown (E0–E4).
 
 ---
 

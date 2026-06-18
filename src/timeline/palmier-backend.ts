@@ -2,7 +2,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { log } from "../util/log.js";
 import type { Workspace } from "../workspace.js";
-import type { AssembleResult, TimelineBackend, TimelinePlan, TrackName } from "./backend.js";
+import type { AssembleResult, ClearOptions, ClearResult, TimelineBackend, TimelinePlan, TrackName } from "./backend.js";
 
 const SCOPE = "palmier";
 
@@ -24,6 +24,8 @@ const TOOL_CANDIDATES = {
   add: ["add_clips", "add_clip", "add_to_timeline", "place_clip"],
   state: ["get_timeline", "read_timeline", "timeline_state"],
   remove: ["remove_clips", "delete_clips", "remove_clip"],
+  listMedia: ["get_media", "list_media"],
+  deleteMedia: ["delete_media", "remove_media"],
 } as const;
 
 /** A single placement, in PROJECT frames, ready to hand to `add_clips`. */
@@ -63,6 +65,61 @@ export function planToTrackEntries(plan: TimelinePlan, fps: number): TrackEntrie
     if (entries.length) out.push({ track, entries });
   }
   return out;
+}
+
+/**
+ * Collect every clip id on the timeline, across all tracks. Palmier clips expose
+ * `id` (older builds: `clipId`); entries without either are skipped. Exported so
+ * the reset/clean path is unit-testable without a live MCP. Pure.
+ */
+export function collectClipIds(state: TlState): string[] {
+  const ids: string[] = [];
+  for (const t of state.tracks ?? []) {
+    for (const c of t.clips ?? []) {
+      const id = c.id ?? c.clipId;
+      if (id) ids.push(id);
+    }
+  }
+  return ids;
+}
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null && !Array.isArray(v);
+}
+function asArray(v: unknown): unknown[] | undefined {
+  return Array.isArray(v) ? v : undefined;
+}
+function pickString(v: unknown): string | undefined {
+  return typeof v === "string" && v.length > 0 ? v : undefined;
+}
+
+/**
+ * Extract media/asset ids from a Palmier `get_media` response. The live API
+ * returns `{ entries: [{ id, ... }] }`; we also accept `{ media }`, `{ items }`,
+ * or a bare array, read `id` | `mediaId` | `assetId`, and skip entries without
+ * one. Accepts the raw JSON text or an already-parsed value; non-JSON text or an
+ * unexpected shape yields `[]`. Exported for testing. Pure.
+ */
+export function extractMediaIds(raw: unknown): string[] {
+  let val: unknown = raw;
+  if (typeof val === "string") {
+    try {
+      val = JSON.parse(val);
+    } catch {
+      return [];
+    }
+  }
+  const list =
+    asArray(val) ??
+    (isRecord(val) ? asArray(val.entries) ?? asArray(val.media) ?? asArray(val.items) : undefined) ??
+    [];
+  const ids: string[] = [];
+  for (const item of list) {
+    if (!isRecord(item)) continue;
+    const id = pickString(item.id) ?? pickString(item.mediaId) ?? pickString(item.assetId);
+    if (id) ids.push(id);
+  }
+  return ids;
 }
 
 interface ToolContent {
@@ -199,6 +256,33 @@ export class PalmierBackend implements TimelineBackend {
       clipCount: count,
       notes: [`${total} clips on the Palmier timeline at ${fps}fps`],
     };
+  }
+
+  /**
+   * Reset the live Palmier project: remove every clip from the timeline (Palmier
+   * also prunes the now-empty tracks) and, when `media` is set, delete every
+   * imported asset from the project bin. Makes re-loading idempotent and lets an
+   * operator reset between takes/lessons without hand-written scripts.
+   * `delete_media` takes `assetIds` (not `clipIds`/`mediaIds`).
+   */
+  async clear(opts: ClearOptions = {}): Promise<ClearResult> {
+    await this.connect();
+    const clipIds = collectClipIds(await this.state());
+    if (clipIds.length) await this.call(this.resolveTool("remove"), { clipIds });
+    let deletedMedia = 0;
+    if (opts.media) {
+      const assetIds = extractMediaIds(await this.call(this.resolveTool("listMedia"), {}));
+      if (assetIds.length) {
+        await this.call(this.resolveTool("deleteMedia"), { assetIds });
+        deletedMedia = assetIds.length;
+      }
+    }
+    log.ok(
+      SCOPE,
+      `cleared timeline — removed ${clipIds.length} clip(s)` +
+        (opts.media ? `, deleted ${deletedMedia} media asset(s)` : ""),
+    );
+    return { removedClips: clipIds.length, deletedMedia };
   }
 
   async swap(plan: TimelinePlan, segId: string, _ws: Workspace): Promise<void> {

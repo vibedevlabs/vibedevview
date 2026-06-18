@@ -32,14 +32,63 @@ palmier produce <LESSON_ID>         # full pipeline → videos/<LESSON_ID>-previ
 
 - Default voice is whatever the script frontmatter `voice:` says (the B-AB1 example uses `Ja'dan`).
   Override per run with `PALMIER_VOICE="<name or ElevenLabs id>"`.
-- On the **iMac with Palmier Pro open**, drive the real timeline: `PALMIER_TIMELINE=palmier palmier produce <LESSON_ID>`.
+- On a **Mac with Palmier Pro open and a project loaded**, drive the real timeline:
+  `PALMIER_TIMELINE=palmier palmier produce <LESSON_ID>`. This must run on the **same Mac** as
+  Palmier (the MCP is localhost-only at `127.0.0.1:19789`) — a cloud child session on another VM
+  cannot reach it.
 - `produce` pauses for human review after the script is parsed. Pass `--no-review` for an
   unattended end-to-end run.
+
+## Timeline + media bin behavior (defaults)
+
+- **`assemble`/`produce` clear the timeline AND reset the media bin by default**, then import
+  only the current lesson. Re-running is therefore idempotent — it never stacks duplicate tracks
+  and the bin holds only this lesson's assets. Opt out with `--no-clean` (place without clearing
+  — old stacking behavior) or `--keep-bin` (clear timeline, leave the bin).
+- **`palmier clear`** wipes the timeline + bin between takes/lessons (`--keep-bin` = timeline
+  only). Use it instead of hand-writing reset scripts.
+- **Single-asset paths stay surgical.** `palmier correct` removes just the one old clip and
+  re-imports just the new asset — it does NOT clear the timeline or reset the bin. A stray
+  duplicate from one swap is harmless.
 
 ## Granular steps (for re-runs / corrections)
 
 `palmier script|slides|voice|assemble|correct|status <LESSON_ID>` run individual stages. After
-human feedback, `palmier correct <LESSON_ID>` re-runs only the affected agent.
+human feedback, `palmier correct <LESSON_ID> --kind <narration|slide|recording|retime> --seg <id>`
+re-runs only the affected agent and swaps that one clip.
+
+## Revision → hand off to the revision subagent
+
+For a *focused revision loop* (one piece of human feedback at a time on an already-loaded
+lesson), use the dedicated **[`hgdw-revision`](../hgdw-revision/SKILL.md)** skill. It owns the
+`feedback → palmier correct → verify one clip` loop, is scoped to surgical swaps only (can't
+re-`produce`), never wipes the bin, and gates script-text edits on human approval. Keep the
+Producer (this skill) for the clean full build; hand revisions to that subagent. If more than ~3
+segments need changing, a full re-`produce` is cleaner than many corrections.
+
+## Edge cases learned in production (don't relearn these)
+
+- **Project fps may differ from the script.** Fresh Palmier projects are often `30` fps even if
+  the script authored `24`. Placement reads the **project** fps from `get_timeline` and converts
+  seconds→frames with it — never hard-code 24.
+- **`import_media` does NOT dedupe.** Re-importing the same path creates a NEW bin entry, so the
+  bin bloats across re-runs (saw 76→100 in one session). This is exactly why the default resets
+  the bin.
+- **Real MCP payload shapes:** `get_media` → `{ entries: [{ id, name, source:{ external:{ absolutePath }}}]}`;
+  `delete_media({ assetIds: [...] })`; `remove_clips({ clipIds: [...] })`; `import_media` returns
+  the new id inside **text** (`… id: <UUID> …`), parse it out. `add_clips` with `trackIndex`
+  omitted auto-creates a new top track each call — that's why re-running without clearing stacks.
+- **Close the MCP client after a live op.** The Streamable-HTTP client keeps Node's event loop
+  alive; the CLI calls `backend.close?.()` after `assemble`/`produce`/`correct` so it exits in
+  ~0.5s instead of hanging. If you script the backend directly, close it yourself.
+- **macOS Screen Recording (TCC):** `screencapture` over SSH fails ("could not create image from
+  display") unless the SSH daemon/Terminal has Screen Recording permission. Verify the timeline
+  by reading it back via MCP, not by screenshotting.
+- **Fetching the repo on a Mac with a no-token remote** (avoids a hanging credential prompt):
+  `GIT_TERMINAL_PROMPT=0 git fetch -q 'https://<user>:<PAT>@github.com/vibedevlabs/vibedevview.git' <branch> && git reset -q --hard FETCH_HEAD`.
+  (A `failed to store: -25308` line is a harmless macOS keychain warning.)
+- **Voice never crashes a run.** A missing/unknown voice (or no `ELEVENLABS_API_KEY`) falls back
+  to a silent timed hold for that segment and is flagged — the pipeline still completes.
 
 ## Hard rules (do not violate)
 
