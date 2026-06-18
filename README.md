@@ -564,7 +564,7 @@ See [`.env.example`](.env.example) for a copy-paste starting point.
 | `palmier doctor` says ElevenLabs `auth failed (401)` | the key value is wrong — usually a leftover placeholder, e.g. `sk_your_key_heresk_…` from pasting after the example | re-run `export ELEVENLABS_API_KEY=<only your key>`; verify with `echo "$ELEVENLABS_API_KEY"` (no placeholder prefix) |
 | `palmier doctor` says ElevenLabs voice not found | the voice isn't in your key's account | use `PALMIER_VOICE="<a voice you own>"`, or add the voice in ElevenLabs |
 | Voice line is silent in the output | no/invalid `ELEVENLABS_API_KEY`, or voice missing | set the key; the run still completes with timed silent holds (and flags it) |
-| Studio: `npm run dev` fails with `Error: Electron uninstall` | your npm skipped Electron's postinstall (allow-scripts), so its binary wasn't downloaded | `cd app && node node_modules/electron/install.js`, then `npm run dev` |
+| Studio: `npm run dev` fails with `Error: Electron uninstall` or `dyld: … Electron Framework.framework … no such file` | Electron's binary didn't install/extract cleanly (skipped postinstall, or a half-unpacked `.app`) | see [`app/README.md`](app/README.md) → Troubleshooting (`node_modules/electron/install.js`, or re-extract the official zip with `ditto` + write `path.txt`) |
 | Palmier line in `doctor` says "not running" | Palmier isn't open with a project | open Palmier Pro → New project (only needed for live-timeline runs) |
 | Clips don't appear on the timeline | wrong backend | add `PALMIER_TIMELINE=palmier` (or `-b palmier`) and confirm Palmier is open |
 | Re-running stacked duplicate tracks | you used `--no-clean` | re-run without it — the default clears first |
@@ -641,6 +641,6 @@ npm run dev          # launch the app (Electron)
 npm run preview:web  # or: renderer-only in a browser, engine actions disabled
 ```
 
-If `npm run dev` fails with `Error: Electron uninstall`, your npm skipped Electron's
-install script — run `node node_modules/electron/install.js` once, then `npm run dev`.
-Full setup, scripts, layout, and troubleshooting are in [`app/README.md`](app/README.md).
+If `npm run dev` fails with `Error: Electron uninstall` or `dyld: … Electron Framework.framework`,
+Electron's binary didn't install cleanly — see the Troubleshooting section in
+[`app/README.md`](app/README.md) for the fix. Full setup, scripts, and layout live there too.

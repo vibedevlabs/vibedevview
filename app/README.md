@@ -45,22 +45,57 @@ npm install
 npm run dev          # launch the Electron app (electron-vite dev)
 ```
 
-> **If `npm run dev` fails with `Error: Electron uninstall`:** your npm is configured to
-> skip package install scripts (you'll have seen `npm warn allow-scripts … electron@… (postinstall: node install.js)`
-> during `npm install`). Electron's postinstall is what downloads its binary, so it must run.
-> Run it once, then start the app:
-> ```bash
-> node node_modules/electron/install.js   # downloads the Electron binary the postinstall skipped
-> npm run dev
-> ```
-> (Alternatively, allow the script and reinstall: `npm install --foreground-scripts`, or approve
-> `electron` in whatever allow-scripts tool your npm uses.)
+If `npm run dev` fails with `Error: Electron uninstall` (or `dyld: Library not loaded:
+@rpath/Electron Framework.framework`), see **Troubleshooting** below — Electron's binary
+didn't install cleanly.
 
 To exercise just the renderer (editor + preview + validation) in a browser, without Electron:
 
 ```bash
 npm run preview:web  # vite dev server; engine actions are disabled in browser mode
 ```
+
+## Troubleshooting
+
+### `Error: Electron uninstall` / `dyld: Library not loaded: @rpath/Electron Framework.framework`
+
+electron-vite locates Electron via `node_modules/electron/path.txt`, which points at the
+extracted binary. Either symptom means that binary didn't install cleanly:
+
+- **`Error: Electron uninstall`** — `path.txt` is missing. Usual cause: your npm skipped the
+  package's install scripts (you'll have seen `npm warn allow-scripts … electron@… (postinstall:
+  node install.js)`), so the download never ran.
+- **`dyld: … Electron Framework.framework … no such file`** — `path.txt` exists but the
+  `Electron.app` bundle is **incomplete** (only `Contents/MacOS/Electron` extracted, no
+  `Contents/Frameworks/`). Electron's bundled zip extractor can fail silently and leave a
+  half-unpacked bundle.
+
+First try Electron's own installer:
+
+```bash
+node node_modules/electron/install.js
+npm run dev
+```
+
+If that exits 0 but the app still won't launch (no `path.txt`, or the `dyld` error), download the
+official build and unpack it with macOS `ditto`, which handles `.app` bundles correctly:
+
+```bash
+cd node_modules/electron
+VER=$(node -p "require('./package.json').version")
+rm -rf dist path.txt
+curl -L -o /tmp/electron.zip "https://github.com/electron/electron/releases/download/v${VER}/electron-v${VER}-darwin-arm64.zip"
+mkdir -p dist
+ditto -x -k /tmp/electron.zip dist
+printf 'Electron.app/Contents/MacOS/Electron' > path.txt
+./dist/Electron.app/Contents/MacOS/Electron --version   # should print v$VER
+cd ../.. && npm run dev
+```
+
+Notes: on an Intel Mac use `darwin-x64` instead of `darwin-arm64`. If `--version` is blocked by
+Gatekeeper, run `xattr -dr com.apple.quarantine node_modules/electron/dist/Electron.app` once and
+retry. If you paste these into zsh and see `no such user or named directory`, your shell isn't
+treating `#` as a comment — drop the comments.
 
 ## Build & checks
 
