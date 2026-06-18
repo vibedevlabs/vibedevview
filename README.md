@@ -375,6 +375,12 @@ Run any command with `--help` for its options. Live-timeline commands need
 Pick the backend per run with `-b ffmpeg` (preview MP4) or `-b palmier` (live timeline), or set
 `PALMIER_TIMELINE` once (see below).
 
+Add `--json` to any command for machine-readable output: `produce`/`correct` stream NDJSON
+progress events (`phase`, `slide.rendered`, `voice.done`, `assemble.placed`, then a final
+`result`), and `doctor`/`status`/`script` print a single JSON object. This is the stream
+**vibedevview Studio** (the [desktop app](app/README.md)) consumes — so if you'd rather not use
+the terminal at all, run Studio instead and it drives these same commands for you.
+
 ---
 
 ## Configuration (environment variables)
