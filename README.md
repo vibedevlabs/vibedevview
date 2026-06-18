@@ -418,7 +418,7 @@ For more edge cases and the reasoning behind the defaults, see the
 | [`docs/OPERATOR-GUIDE.md`](docs/OPERATOR-GUIDE.md) | Full authoring reference (all 16 frames + examples), the complete CLI walkthrough, **Devin's role / agent topology**, reset behavior, and production gotchas. |
 | [`HGDW-DESIGN.md`](HGDW-DESIGN.md) | The brand system — wordmark, palette, typography, video spec, and the 16 frame types. |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | How the Orchestrator + agents work (they coordinate only through files). |
-| [`docs/ELECTRON-APP.md`](docs/ELECTRON-APP.md) | Scope for the future desktop app: a markdown script editor with live preview + produce/revise buttons, plus the Palmier AI ("Claude") integration. |
+| [`docs/ELECTRON-APP.md`](docs/ELECTRON-APP.md) | Full design & build spec for the future desktop app: UI wireframes, the engine integration contract (`--json` event stream + IPC), the Palmier AI ("Claude") integration, the Revise→`correct` contract, and a per-team [SEQ]/[PAR] plan with milestones. |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Phased build plan with per-team ownership. |
 | [`.devin/skills/`](.devin/skills/) | The skills local Devin auto-loads: `hgdw-video-production` (produce) and `hgdw-revision` (surgical fixes). |
 
