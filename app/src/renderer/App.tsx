@@ -202,8 +202,12 @@ export function App(): React.JSX.Element {
           lessonId={lessonId}
           currentScript={script}
           onClose={() => setModal(null)}
-          onApply={(s) => {
-            setScript(s);
+          onApply={async (s) => {
+            // Persist immediately so Produce can't run against a stale on-disk
+            // script (the "applied but never saved" footgun). Re-open from disk
+            // so the editor + outline reflect exactly what was written.
+            await studio.writeScript(lessonId, s);
+            await openLesson(lessonId);
             setModal(null);
           }}
         />

@@ -8,6 +8,7 @@ import {
   agentDraftArgv,
   buildAgentDraftPrompt,
   cleanScriptMarkdown,
+  pinLessonId,
   commandExists,
   resolveDraftBackend,
   runEngineCommand,
@@ -172,6 +173,43 @@ describe("cleanScriptMarkdown", () => {
 });
 
 /**
+ * Contract — pinLessonId(script, lessonId): force the frontmatter `lesson:` to
+ * the working-dir lesson id so produce can't mislabel/misroute (the live bug:
+ * a draft for B-DEMO1 carried `lesson: B-AB1` → B-AB1-preview.mp4).
+ *  - replaces an existing lesson value (preserving other frontmatter + body).
+ *  - inserts the field when frontmatter exists but omits it.
+ *  - returns input unchanged when there is no frontmatter (nothing to pin).
+ * Failure modes: extra whitespace in `lesson :`, body lines that look like
+ * `lesson:` (must NOT be touched), CRLF-free multi-field blocks.
+ */
+describe("pinLessonId", () => {
+  it("rewrites an existing lesson value, leaving other frontmatter + body intact", () => {
+    const src = "---\nlesson: B-AB1\ntitle: Example\nvoice: Ja'dan\n---\n\n## 01 · X\nSAY:\nhi\n";
+    const out = pinLessonId(src, "B-DEMO1");
+    expect(out).toBe("---\nlesson: B-DEMO1\ntitle: Example\nvoice: Ja'dan\n---\n\n## 01 · X\nSAY:\nhi\n");
+  });
+
+  it("tolerates `lesson :` spacing and only rewrites the frontmatter field", () => {
+    // The body mentions `lesson:` in prose — it must survive untouched.
+    const src = "---\nlesson :  B-AB1\ntitle: T\n---\n\nSAY:\nthe lesson: do the work\n";
+    const out = pinLessonId(src, "B-NEW");
+    expect(out).toContain("lesson: B-NEW");
+    expect(out).not.toContain("B-AB1");
+    expect(out).toContain("the lesson: do the work"); // body untouched
+  });
+
+  it("inserts lesson as the first field when frontmatter omits it", () => {
+    const src = "---\ntitle: T\nvoice: Ja'dan\n---\nbody\n";
+    expect(pinLessonId(src, "B-DEMO1")).toBe("---\nlesson: B-DEMO1\ntitle: T\nvoice: Ja'dan\n---\nbody\n");
+  });
+
+  it("returns the script unchanged when there is no frontmatter", () => {
+    const src = "## 01 · X\nSAY:\nno frontmatter here\n";
+    expect(pinLessonId(src, "B-DEMO1")).toBe(src);
+  });
+});
+
+/**
  * Contract — commandExists(bin): true iff `bin` resolves on PATH.
  * Uses the platform `which`/`where`. We assert against a binary we know exists
  * (the current node) and one that cannot.
@@ -193,7 +231,7 @@ describe("runTextCommand", () => {
   it("resolves with stdout on success", async () => {
     const out = await runTextCommand({ bin: process.execPath, args: [fakeAgent, "-p", "--", 'lesson id "B-AB1"'] });
     expect(out).toContain("```markdown");
-    expect(out).toContain("# Title: B-AB1");
+    expect(out).toContain("lesson: B-AB1");
   });
 
   it("rejects with the stderr tail on non-zero exit", async () => {
@@ -287,12 +325,10 @@ describe("EngineAdapter.draft — local agent CLI path (integration)", () => {
     const adapter = new EngineAdapter(process.execPath);
     const res = await adapter.draft({ lessonId: "B-DEMO1", brief: "intro to AI" });
     expect(res.backend).toBe("devin");
-    // Outer ```markdown wrapper stripped, INNER ```yaml SLIDE fence preserved,
-    // single trailing newline. This is the end-to-end multi-fence regression.
-    expect(res.script).toBe(
-      "# Title: B-DEMO1\nsep:true\nphase: HOOK\n\nSAY:\nHello from the fake agent.\n\n" +
-        "SLIDE:\n```yaml\nframe: N1-title\ntitle: B-DEMO1\n```\n",
-    );
+    // Outer ```markdown wrapper stripped; the agent emitted `lesson: B-AB1`
+    // (like the seeded example) but draft() PINS it to the requested id.
+    expect(res.script).toContain("lesson: B-DEMO1");
+    expect(res.script).not.toContain("lesson: B-AB1");
     // sep:true proves agentDraftArgv passed the devin "--" separator through to the CLI
     expect(res.script).toContain("sep:true");
     // the inner SLIDE yaml survived (the first-fence bug would have dropped it)

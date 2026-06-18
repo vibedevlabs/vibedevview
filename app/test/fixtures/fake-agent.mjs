@@ -30,20 +30,29 @@ if (process.env.FAKE_AGENT_EMPTY === "1") {
   process.exit(0);
 }
 
+// A realistic draft: frontmatter (deliberately with the WRONG lesson id, like
+// the seeded B-AB1 example) + an inner ```yaml SLIDE fence, wrapped in a
+// ```markdown fence with prose around it. Exercises, end to end: fence
+// extraction, multi-fence preservation, and lesson-id pinning.
 process.stdout.write(
   `Sure, here's a draft:\n\n` +
     "```markdown\n" +
-    `# Title: ${id}\n` +
+    `---\n` +
+    `lesson: B-AB1\n` +
+    `title: Example — ${id}\n` +
+    `track: BUILD / ABSORB 1\n` +
+    `voice: Ja'dan\n` +
+    `---\n\n` +
+    `## 01 · Cold open\n` +
     `sep:${sawSep}\n` +
-    `phase: HOOK\n\n` +
+    `phase: SOURCE\n` +
+    `duration: 9\n\n` +
     `SAY:\n` +
     `Hello from the fake agent.\n\n` +
-    // An inner ```yaml SLIDE fence: the adapter must preserve this, not truncate
-    // the script at the first closing fence.
     `SLIDE:\n` +
     "```yaml\n" +
     `frame: N1-title\n` +
-    `title: ${id}\n` +
+    `title: Example\n` +
     "```\n" +
     "```\n\n" +
     `Let me know if you'd like changes.\n`,

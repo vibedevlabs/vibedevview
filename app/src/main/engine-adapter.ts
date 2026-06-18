@@ -329,6 +329,25 @@ entire script in a single \`\`\`markdown code fence and output nothing outside i
 }
 
 /**
+ * Pin the frontmatter `lesson:` field to the real lesson id. Agents copy the
+ * worked example's `lesson:` value, and `palmier init` seeds every folder with
+ * the example's `lesson: B-AB1` — so a draft for B-DEMO1 can carry the wrong id,
+ * which makes `produce` mislabel/misroute its output (e.g. B-AB1-preview.mp4 in
+ * the B-DEMO1 folder). Rewriting the field to the working-dir lesson id keeps the
+ * script and its production folder in sync. Inserts the field if missing; a
+ * no-frontmatter script is returned unchanged (validation surfaces that).
+ */
+export function pinLessonId(script: string, lessonId: string): string {
+  const fm = script.match(/^---\n([\s\S]*?)\n---/);
+  if (!fm) return script;
+  const block = fm[1]!;
+  const newBlock = /^lesson\s*:/m.test(block)
+    ? block.replace(/^lesson\s*:.*$/m, `lesson: ${lessonId}`)
+    : `lesson: ${lessonId}\n${block}`;
+  return `---\n${newBlock}\n---` + script.slice(fm[0].length);
+}
+
+/**
  * Extract the script.md from an agent's stdout. An HGDW script contains MANY
  * inner ```yaml fences (one per SLIDE/DO), so we must NOT grab the first fenced
  * block — that truncates everything after the cold open. Instead, if the agent
@@ -502,12 +521,12 @@ export class EngineAdapter {
         env: this.baseEnv,
         args: ["script", req.lessonId, "--force", "--brief", req.brief],
       });
-      return { script: res.script, backend };
+      return { script: pinLessonId(res.script, req.lessonId), backend };
     }
 
     const { bin, args } = agentDraftArgv(backend, buildAgentDraftPrompt(req.lessonId, req.brief));
     const raw = await runTextCommand({ bin, args, cwd: resolveEngine().root, env: this.baseEnv, timeoutMs: 300_000 });
-    const script = cleanScriptMarkdown(raw);
+    const script = pinLessonId(cleanScriptMarkdown(raw), req.lessonId);
     if (!script.trim()) throw new Error(`${bin} returned no script content`);
     return { script, backend };
   }
