@@ -19,7 +19,7 @@ export function DraftWithAI(props: {
   lessonId: string;
   currentScript: string;
   onClose: () => void;
-  onApply: (script: string) => void;
+  onApply: (script: string) => void | Promise<void>;
 }): React.JSX.Element {
   const [brief, setBrief] = useState("");
   const [draft, setDraft] = useState<string | null>(null);
@@ -37,6 +37,18 @@ export function DraftWithAI(props: {
     } catch (e) {
       setError((e as Error).message);
     } finally {
+      setBusy(false);
+    }
+  }
+
+  async function apply() {
+    if (draft == null) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await props.onApply(draft);
+    } catch (e) {
+      setError((e as Error).message);
       setBusy(false);
     }
   }
@@ -85,8 +97,8 @@ export function DraftWithAI(props: {
               {busy ? "Drafting…" : "Generate"}
             </button>
           ) : (
-            <button className="primary" onClick={() => props.onApply(draft)} disabled={!changed}>
-              Apply to editor
+            <button className="primary" onClick={apply} disabled={!changed || busy}>
+              {busy ? "Saving…" : "Apply & save"}
             </button>
           )}
         </div>
