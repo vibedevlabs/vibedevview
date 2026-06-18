@@ -71,3 +71,46 @@ export async function probeDuration(file: string): Promise<number> {
   }
   return seconds;
 }
+
+export interface VideoProbe {
+  durationSeconds: number;
+  width: number;
+  height: number;
+  fps: number;
+}
+
+/** Parse the JSON ffprobe emits for `-show_streams -show_format` into a VideoProbe. */
+export function parseFfprobeJson(json: string): VideoProbe {
+  const data = JSON.parse(json) as {
+    streams?: Array<{ width?: number; height?: number; avg_frame_rate?: string; r_frame_rate?: string }>;
+    format?: { duration?: string };
+  };
+  const stream = data.streams?.[0];
+  if (!stream || typeof stream.width !== "number" || typeof stream.height !== "number") {
+    throw new Error("ffprobe returned no video stream");
+  }
+  const rate = stream.avg_frame_rate && stream.avg_frame_rate !== "0/0" ? stream.avg_frame_rate : stream.r_frame_rate;
+  const [num, den] = (rate ?? "0/1").split("/").map((n) => Number.parseFloat(n));
+  const fps = den && den !== 0 ? (num ?? 0) / den : (num ?? 0);
+  const durationSeconds = Number.parseFloat(data.format?.duration ?? "");
+  if (!Number.isFinite(durationSeconds)) throw new Error("ffprobe returned no duration");
+  return { durationSeconds, width: stream.width, height: stream.height, fps };
+}
+
+/** Probe a video file's duration, dimensions, and frame rate with ffprobe. */
+export async function probeVideo(file: string): Promise<VideoProbe> {
+  const { stdout } = await run("ffprobe", [
+    "-v",
+    "error",
+    "-select_streams",
+    "v:0",
+    "-show_entries",
+    "stream=width,height,avg_frame_rate,r_frame_rate",
+    "-show_entries",
+    "format=duration",
+    "-of",
+    "json",
+    file,
+  ]);
+  return parseFfprobeJson(stdout);
+}

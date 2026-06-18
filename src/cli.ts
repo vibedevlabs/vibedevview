@@ -176,6 +176,64 @@ program
   });
 
 program
+  .command("export")
+  .description("Render a single finished MP4 deliverable from produced assets (backend-independent)")
+  .argument("<lessonId>")
+  .option("-o, --out <path>", "output MP4 path (default: workspace videos/<lessonId>.mp4)")
+  .option("--tolerance <seconds>", "max allowed duration drift before warning (default 1.0)")
+  .action(async (lessonId, o) => {
+    const { exportLesson } = await import("./deliver/export.js");
+    const res = await exportLesson(lessonId, {
+      out: o.out,
+      toleranceSeconds: o.tolerance !== undefined ? Number(o.tolerance) : undefined,
+    });
+    process.stdout.write(JSON.stringify(res, null, 2) + "\n");
+  });
+
+program
+  .command("publish")
+  .description("Upload the exported MP4 to a hosting target (Mux) → playback id. Dry run by default.")
+  .argument("<lessonId>")
+  .option("-t, --target <name>", "publish target: dryrun | mux (default: dryrun, or PALMIER_PUBLISH_TARGET)")
+  .option("-f, --file <path>", "MP4 to publish (default: workspace videos/<lessonId>.mp4)")
+  .action(async (lessonId, o) => {
+    const { publishLesson } = await import("./deliver/mux.js");
+    const res = await publishLesson(lessonId, {
+      target: o.target as "dryrun" | "mux" | undefined,
+      file: o.file,
+    });
+    process.stdout.write(JSON.stringify(res, null, 2) + "\n");
+  });
+
+program
+  .command("moments")
+  .description("Compile moments.yaml → JSON bundle + idempotent SQL for the LMS. Dry run; never writes a DB.")
+  .argument("<lessonId>")
+  .option("--playback-id <id>", "Mux playback id (default: read from publish receipt)")
+  .action(async (lessonId, o) => {
+    const { compileLessonMoments } = await import("./deliver/moments.js");
+    const res = await compileLessonMoments(lessonId, { playbackId: o.playbackId });
+    process.stdout.write(JSON.stringify(res, null, 2) + "\n");
+  });
+
+program
+  .command("attach")
+  .description("Attach a lesson's video + moments to the LMS. SAFE: needs --target api|supabase AND --apply to write.")
+  .argument("<lessonId>")
+  .option("-t, --target <name>", "attach target: sql | api | supabase (default: sql, or PALMIER_ATTACH_TARGET)")
+  .option("--apply", "actually write to the platform (api/supabase only); without it this dry-runs")
+  .option("--playback-id <id>", "Mux playback id (default: read from publish receipt)")
+  .action(async (lessonId, o) => {
+    const { attachLesson } = await import("./deliver/attach.js");
+    const res = await attachLesson(lessonId, {
+      target: o.target as "sql" | "api" | "supabase" | undefined,
+      apply: o.apply === true,
+      playbackId: o.playbackId,
+    });
+    process.stdout.write(JSON.stringify(res, null, 2) + "\n");
+  });
+
+program
   .command("status")
   .description("Show the production timeline (segments, timings, asset status)")
   .argument("<lessonId>")

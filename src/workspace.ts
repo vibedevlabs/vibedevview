@@ -67,6 +67,27 @@ export class Workspace {
   get videosDir() {
     return path.join(this.root, "videos");
   }
+  /** Finished, single-file deliverable produced by the `export` step. */
+  get exportPath() {
+    return path.join(this.videosDir, `${this.lessonId}.mp4`);
+  }
+  /** Optional sidecar where moments (sections / checkpoints / artifacts) are authored. */
+  get momentsAuthorPath() {
+    return path.join(this.root, "moments.yaml");
+  }
+  /** Directory for LMS-bound delivery artifacts (publish receipts, moments SQL/JSON). */
+  get lmsDir() {
+    return path.join(this.root, "lms");
+  }
+  get publishReceiptPath() {
+    return path.join(this.lmsDir, "publish.json");
+  }
+  get momentsJsonPath() {
+    return path.join(this.lmsDir, `${this.lessonId}-moments.json`);
+  }
+  get momentsSqlPath() {
+    return path.join(this.lmsDir, `${this.lessonId}-moments.sql`);
+  }
   slidePath(frameId: string) {
     return path.join(this.slidesDir, `${frameId}.png`);
   }

@@ -83,6 +83,63 @@ function audioFor(clips: PlacedClip[]): string | undefined {
   return clips.find((c) => c.track === "Voiceover")?.mediaPath;
 }
 
+export interface RenderResult {
+  output: string;
+  clipCount: number;
+  notes: string[];
+}
+
+/**
+ * Flatten a three-track plan into a single MP4 at `output` using ffmpeg.
+ * Backend-independent: each segment is encoded to a normalized clip (image or
+ * footage + audio, pinned to the exact segment duration — never `-shortest`)
+ * and the clips are losslessly concatenated. Shared by the ffmpeg timeline
+ * backend (preview) and the `export` step (finished deliverable).
+ */
+export async function renderPlanToVideo(plan: TimelinePlan, ws: Workspace, output: string): Promise<RenderResult> {
+  await ws.ensure();
+  const work = path.join(ws.videosDir, "_clips");
+  await fs.mkdir(work, { recursive: true });
+  await fs.mkdir(path.dirname(output), { recursive: true });
+
+  const grouped = clipsBySegment(plan);
+  const segIds = [...grouped.keys()];
+  const clipPaths: string[] = [];
+  const notes: string[] = [];
+
+  let i = 0;
+  for (const segId of segIds) {
+    const clips = grouped.get(segId)!;
+    const duration = clips[0]?.duration ?? 0;
+    if (duration <= 0) continue;
+    const visual = visualFor(clips);
+    const audio = audioFor(clips);
+    if (visual && !(await ws.exists(visual))) {
+      notes.push(`seg ${segId}: visual missing (${path.basename(visual)})`);
+    }
+    const out = path.join(work, `clip-${String(i).padStart(3, "0")}-${segId}.mp4`);
+    log.info(SCOPE, `encode seg ${segId} (${duration.toFixed(2)}s)`);
+    await encodeSegment(
+      visual && (await ws.exists(visual)) ? visual : undefined,
+      audio && (await ws.exists(audio)) ? audio : undefined,
+      duration,
+      out,
+    );
+    clipPaths.push(out);
+    i++;
+  }
+
+  if (clipPaths.length === 0) throw new Error("no clips to assemble");
+
+  const listFile = path.join(work, "concat.txt");
+  await fs.writeFile(listFile, clipPaths.map((p) => `file '${p.replace(/'/g, "'\\''")}'`).join("\n") + "\n");
+  log.step(SCOPE, `concatenating ${clipPaths.length} clips → ${path.basename(output)}`);
+  await run("ffmpeg", ["-y", "-f", "concat", "-safe", "0", "-i", listFile, "-c", "copy", "-movflags", "+faststart", output]);
+
+  log.ok(SCOPE, `wrote ${output}`);
+  return { output, clipCount: clipPaths.length, notes };
+}
+
 /**
  * FFmpeg backend — flattens the three-track plan into a single preview MP4.
  * Portable (runs anywhere ffmpeg exists) so the whole pipeline is verifiable
@@ -92,46 +149,8 @@ export class FfmpegBackend implements TimelineBackend {
   readonly name = "ffmpeg";
 
   async assemble(plan: TimelinePlan, ws: Workspace): Promise<AssembleResult> {
-    await ws.ensure();
-    const work = path.join(ws.videosDir, "_clips");
-    await fs.mkdir(work, { recursive: true });
-
-    const grouped = clipsBySegment(plan);
-    const segIds = [...grouped.keys()];
-    const clipPaths: string[] = [];
-    const notes: string[] = [];
-
-    let i = 0;
-    for (const segId of segIds) {
-      const clips = grouped.get(segId)!;
-      const duration = clips[0]?.duration ?? 0;
-      if (duration <= 0) continue;
-      const visual = visualFor(clips);
-      const audio = audioFor(clips);
-      if (visual && !(await ws.exists(visual))) {
-        notes.push(`seg ${segId}: visual missing (${path.basename(visual)})`);
-      }
-      const out = path.join(work, `clip-${String(i).padStart(3, "0")}-${segId}.mp4`);
-      log.info(SCOPE, `encode seg ${segId} (${duration.toFixed(2)}s)`);
-      await encodeSegment(
-        visual && (await ws.exists(visual)) ? visual : undefined,
-        audio && (await ws.exists(audio)) ? audio : undefined,
-        duration,
-        out,
-      );
-      clipPaths.push(out);
-      i++;
-    }
-
-    if (clipPaths.length === 0) throw new Error("no clips to assemble");
-
-    const listFile = path.join(work, "concat.txt");
-    await fs.writeFile(listFile, clipPaths.map((p) => `file '${p.replace(/'/g, "'\\''")}'`).join("\n") + "\n");
     const output = path.join(ws.videosDir, `${plan.lessonId}-preview.mp4`);
-    log.step(SCOPE, `concatenating ${clipPaths.length} clips → ${path.basename(output)}`);
-    await run("ffmpeg", ["-y", "-f", "concat", "-safe", "0", "-i", listFile, "-c", "copy", "-movflags", "+faststart", output]);
-
-    log.ok(SCOPE, `wrote ${output}`);
-    return { backend: this.name, output, clipCount: clipPaths.length, notes };
+    const res = await renderPlanToVideo(plan, ws, output);
+    return { backend: this.name, output: res.output, clipCount: res.clipCount, notes: res.notes };
   }
 }
