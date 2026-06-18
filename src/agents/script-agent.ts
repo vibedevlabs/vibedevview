@@ -54,6 +54,8 @@ Frame types: ${FRAME_TYPES.join(", ")}.`;
 export interface ScriptAgentOptions {
   llm?: LlmConfig;
   topicBrief?: string;
+  /** Draft even when script.md already exists, overwriting it. Used by the app's "Draft with AI". */
+  force?: boolean;
 }
 
 /**
@@ -64,7 +66,7 @@ export interface ScriptAgentOptions {
  */
 export async function runScriptAgent(ws: Workspace, opts: ScriptAgentOptions = {}): Promise<string> {
   await ws.ensure();
-  if (await ws.exists(ws.scriptPath)) {
+  if (!opts.force && (await ws.exists(ws.scriptPath))) {
     log.info(SCOPE, "script.md already exists — leaving it untouched");
     return await fs.readFile(ws.scriptPath, "utf8");
   }

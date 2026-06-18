@@ -1,4 +1,5 @@
 export * from "./types.js";
+export * from "./events.js";
 export * from "./brand.js";
 export * from "./workspace.js";
 export * from "./alignment.js";

@@ -11,6 +11,7 @@ import { FfmpegBackend } from "./timeline/ffmpeg-backend.js";
 import { PalmierBackend } from "./timeline/palmier-backend.js";
 import type { RendererOptions } from "./slides/renderer.js";
 import { log } from "./util/log.js";
+import { noopSink, type EngineEventSink } from "./events.js";
 import { Workspace } from "./workspace.js";
 
 export type BackendName = "ffmpeg" | "palmier";
@@ -22,6 +23,7 @@ export interface ProduceOptions {
   renderer?: RendererOptions;
   clean?: boolean; // clear the timeline before assembling (palmier; default true — stays idempotent)
   keepBin?: boolean; // when cleaning, keep existing media-bin assets (default false — bin is reset to this import)
+  onEvent?: EngineEventSink; // structured progress sink (for the app); defaults to no-op
 }
 
 export interface ProductionResult {
@@ -51,16 +53,21 @@ function chooseBackendName(opt?: BackendName): BackendName {
  */
 export async function produce(lessonId: string, opts: ProduceOptions = {}): Promise<ProductionResult> {
   const ws = Workspace.for(lessonId);
+  const onEvent = opts.onEvent ?? noopSink;
   await ws.ensure();
   log.step("orchestrator", `producing "${lessonId}" → ${ws.root}`);
 
   // 1. Script (human-in-the-loop gate on first generation).
   if (!(await ws.exists(ws.scriptPath))) {
+    onEvent({ type: "phase", name: "script", status: "start" });
     await runScriptAgent(ws);
+    onEvent({ type: "phase", name: "script", status: "done" });
     if (opts.review !== false) {
       const msg = `Generated ${ws.scriptPath}. Review/edit it, then re-run to build the draft.`;
       log.ok("orchestrator", msg);
-      return { lessonId, status: "awaiting-script-review", segments: 0, totalDuration: 0, message: msg };
+      const result: ProductionResult = { lessonId, status: "awaiting-script-review", segments: 0, totalDuration: 0, message: msg };
+      onEvent({ type: "result", result });
+      return result;
     }
   }
 
@@ -70,20 +77,26 @@ export async function produce(lessonId: string, opts: ProduceOptions = {}): Prom
   log.info("orchestrator", `${manifest.segments.length} segments`);
 
   // 3. Slides + Voice in parallel (independent assets).
+  onEvent({ type: "phase", name: "slides", status: "start" });
+  onEvent({ type: "phase", name: "voice", status: "start" });
   const [slides, timeline] = await Promise.all([
-    runSlidesAgent(ws, manifest, { renderer: opts.renderer }),
-    runVoiceAgent(ws, manifest),
+    runSlidesAgent(ws, manifest, { renderer: opts.renderer, onEvent }),
+    runVoiceAgent(ws, manifest, { onEvent }),
   ]);
+  onEvent({ type: "phase", name: "slides", status: "done" });
+  onEvent({ type: "phase", name: "voice", status: "done" });
 
   // 4. Timing authority → alignment.
   const alignment = computeAlignment(manifest, timeline);
   await ws.writeAlignment(alignment);
 
   // 5. Recording agent (needs durations).
+  onEvent({ type: "phase", name: "recording", status: "start" });
   const recording = await runRecordingAgent(ws, manifest, timeline, {
     placeholders: opts.placeholders ?? true,
     renderer: opts.renderer,
   });
+  onEvent({ type: "phase", name: "recording", status: "done" });
 
   // 6. Assemble onto the timeline backend.
   const plan = buildPlan(manifest, alignment, timeline, recording, ws);
@@ -95,8 +108,11 @@ export async function produce(lessonId: string, opts: ProduceOptions = {}): Prom
     log.info("orchestrator", `removed ${cleared.removedClips} clip(s), ${cleared.deletedMedia} media asset(s)`);
   }
   log.step("orchestrator", `assembling via ${backend.name} backend`);
+  onEvent({ type: "phase", name: "assemble", status: "start" });
   const assemble = await backend.assemble(plan, ws);
   await backend.close?.();
+  onEvent({ type: "assemble.placed", clipCount: assemble.clipCount, output: assemble.output });
+  onEvent({ type: "phase", name: "assemble", status: "done" });
 
   // 7. Notify human.
   const message =
@@ -106,7 +122,7 @@ export async function produce(lessonId: string, opts: ProduceOptions = {}): Prom
     `. Review and give feedback by timestamp.`;
   log.ok("orchestrator", message);
 
-  return {
+  const result: ProductionResult = {
     lessonId,
     status: "assembled",
     segments: manifest.segments.length,
@@ -115,6 +131,8 @@ export async function produce(lessonId: string, opts: ProduceOptions = {}): Prom
     assemble,
     message,
   };
+  onEvent({ type: "result", result });
+  return result;
 }
 
 export type FeedbackKind = "narration" | "slide" | "recording" | "retime";
@@ -125,6 +143,7 @@ export interface CorrectionOptions {
   kind: FeedbackKind;
   backend?: BackendName;
   renderer?: RendererOptions;
+  onEvent?: EngineEventSink;
 }
 
 /**
@@ -133,6 +152,7 @@ export interface CorrectionOptions {
  */
 export async function correct(lessonId: string, opts: CorrectionOptions): Promise<ProductionResult> {
   const ws = Workspace.for(lessonId);
+  const onEvent = opts.onEvent ?? noopSink;
   const manifest = await ws.readManifest();
   const alignment0 = await ws.readAlignment();
 
@@ -145,9 +165,13 @@ export async function correct(lessonId: string, opts: CorrectionOptions): Promis
   log.step("correct", `segment ${segId} · ${opts.kind}`);
 
   if (opts.kind === "narration") {
-    await runVoiceAgent(ws, manifest, { only: [segId] });
+    onEvent({ type: "phase", name: "voice", status: "start" });
+    await runVoiceAgent(ws, manifest, { only: [segId], onEvent });
+    onEvent({ type: "phase", name: "voice", status: "done" });
   } else if (opts.kind === "slide") {
-    await runSlidesAgent(ws, manifest, { only: [segId], renderer: opts.renderer });
+    onEvent({ type: "phase", name: "slides", status: "start" });
+    await runSlidesAgent(ws, manifest, { only: [segId], renderer: opts.renderer, onEvent });
+    onEvent({ type: "phase", name: "slides", status: "done" });
   }
   // retime/recording: re-run recording agent for this segment after re-reading timeline.
   const timeline = await ws.readTimeline();
@@ -162,6 +186,7 @@ export async function correct(lessonId: string, opts: CorrectionOptions): Promis
   await writeProjectFile(ws, plan);
 
   const backend = makeBackend(chooseBackendName(opts.backend));
+  onEvent({ type: "phase", name: "assemble", status: "start" });
   let assemble: AssembleResult;
   if (backend.swap) {
     await backend.swap(plan, segId, ws);
@@ -170,9 +195,11 @@ export async function correct(lessonId: string, opts: CorrectionOptions): Promis
     assemble = await backend.assemble(plan, ws);
   }
   await backend.close?.();
+  onEvent({ type: "assemble.placed", clipCount: assemble.clipCount, output: assemble.output });
+  onEvent({ type: "phase", name: "assemble", status: "done" });
   const message = `Corrected segment ${segId} (${opts.kind}).`;
   log.ok("correct", message);
-  return {
+  const result: ProductionResult = {
     lessonId,
     status: "assembled",
     segments: manifest.segments.length,
@@ -180,6 +207,8 @@ export async function correct(lessonId: string, opts: CorrectionOptions): Promis
     assemble,
     message,
   };
+  onEvent({ type: "result", result });
+  return result;
 }
 
 async function writeProjectFile(ws: Workspace, plan: unknown): Promise<void> {
