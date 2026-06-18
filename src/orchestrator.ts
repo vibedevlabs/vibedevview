@@ -96,6 +96,7 @@ export async function produce(lessonId: string, opts: ProduceOptions = {}): Prom
   }
   log.step("orchestrator", `assembling via ${backend.name} backend`);
   const assemble = await backend.assemble(plan, ws);
+  await backend.close?.();
 
   // 7. Notify human.
   const message =
@@ -168,6 +169,7 @@ export async function correct(lessonId: string, opts: CorrectionOptions): Promis
   } else {
     assemble = await backend.assemble(plan, ws);
   }
+  await backend.close?.();
   const message = `Corrected segment ${segId} (${opts.kind}).`;
   log.ok("correct", message);
   return {

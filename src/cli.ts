@@ -109,6 +109,7 @@ program
       log.info("cli", `cleared ${cleared.removedClips} clip(s), ${cleared.deletedMedia} media asset(s)`);
     }
     const res = await backend.assemble(plan, ws);
+    await backend.close?.();
     process.stdout.write(JSON.stringify(res, null, 2) + "\n");
   });
 
