@@ -37,7 +37,14 @@ process.stdout.write(
     `sep:${sawSep}\n` +
     `phase: HOOK\n\n` +
     `SAY:\n` +
-    `Hello from the fake agent.\n` +
+    `Hello from the fake agent.\n\n` +
+    // An inner ```yaml SLIDE fence: the adapter must preserve this, not truncate
+    // the script at the first closing fence.
+    `SLIDE:\n` +
+    "```yaml\n" +
+    `frame: N1-title\n` +
+    `title: ${id}\n` +
+    "```\n" +
     "```\n\n" +
     `Let me know if you'd like changes.\n`,
 );

@@ -83,56 +83,89 @@ describe("agentDraftArgv", () => {
  * Contract — buildAgentDraftPrompt(lessonId, brief): the instruction text.
  *  - Embeds BOTH the lessonId and the brief verbatim (so the agent drafts the
  *    right lesson from the right topic).
- *  - Tells the agent to output ONLY script.md (no commentary) — this is what makes
- *    cleanScriptMarkdown's job tractable.
- *  - Points at the skill + frame-type docs so the output is on-format.
+ *  - Is SELF-CONTAINED: headless `-p` agents can't read repo files, so the prompt
+ *    must embed the format (frontmatter, `## NN ·` segments, SAY/SLIDE, the frame
+ *    codes, the four phases) and a worked example.
+ *  - Explicitly forbids the failure mode we hit live (generic class script with
+ *    timestamps / instructor labels) and asks for a single ```markdown wrapper.
  */
 describe("buildAgentDraftPrompt", () => {
   it("includes the lessonId and brief verbatim", () => {
     const p = buildAgentDraftPrompt("B-AB1", "a 90s intro to prompt-driven dev");
     expect(p).toContain('lesson id "B-AB1"');
     expect(p).toContain("a 90s intro to prompt-driven dev");
+    // lessonId is also pinned into the example frontmatter.
+    expect(p).toContain("lesson: B-AB1");
   });
 
-  it("instructs output-only and references the skill + frame docs", () => {
+  it("embeds the format: SAY/SLIDE labels, the four phases, and frame codes", () => {
     const p = buildAgentDraftPrompt("X", "y");
-    expect(p).toContain("Output ONLY the script.md content");
-    expect(p).toContain("hgdw-video-production");
-    expect(p).toContain("HGDW-DESIGN");
+    expect(p).toContain("SAY:");
+    expect(p).toContain("SLIDE:");
+    expect(p).toContain("phase:");
+    for (const phase of ["SOURCE", "ABSORB", "MIRROR", "COMMAND"]) expect(p).toContain(phase);
+    // A representative spread of the frame catalog (start, middle, outro).
+    for (const frame of ["N1-title", "N5-agenda", "C2-statement", "O1-outro"]) expect(p).toContain(frame);
+  });
+
+  it("forbids the generic-essay failure mode and asks for a single markdown fence", () => {
+    const p = buildAgentDraftPrompt("X", "y");
+    expect(p).toContain("Output ONLY a valid HGDW script.md");
+    expect(p).toContain("timestamps");
+    expect(p).toMatch(/instructor/i);
+    expect(p).toContain("```markdown");
   });
 });
 
 /**
  * Contract — cleanScriptMarkdown(raw): turn agent stdout into a clean script.md.
- *  - When the output contains a ```markdown (or ```) fence, return ONLY the first
- *    fenced block's contents (agents wrap output + add prose around it).
- *  - When there is no fence, return the whole text.
- *  - Strip any stray leading/trailing fence, trim surrounding whitespace, and
- *    guarantee exactly one trailing newline.
- * Failure modes: prose around a fence, bare ``` (no lang), no fence at all,
- * leading/trailing blank lines, multiple fences (first wins), empty input.
+ * KEY INVARIANT (the bug we shipped): an HGDW script contains MANY inner ```yaml
+ * SLIDE/DO fences. Extraction must keep ALL of them — i.e. when the whole script
+ * is wrapped in a ```markdown fence, strip from that opener to the LAST closing
+ * fence, NOT the first (the first-fence bug truncated everything after the cold
+ * open).
+ *  - ```markdown wrapper (with optional prose around it): inner content incl.
+ *    every nested ```yaml fence is preserved.
+ *  - bare ``` wrapper: stripped ONLY when it directly wraps `---` frontmatter
+ *    (otherwise a leading ```yaml is real content, not a wrapper).
+ *  - no wrapper: return the whole text.
+ *  - always trim + exactly one trailing newline; empty → "\n".
  */
 describe("cleanScriptMarkdown", () => {
-  it("extracts the fenced block and drops surrounding prose", () => {
-    const raw = 'Sure!\n\n```markdown\n# Title\nSAY:\nhi\n```\n\nWant changes?';
-    expect(cleanScriptMarkdown(raw)).toBe("# Title\nSAY:\nhi\n");
+  // A realistic multi-fence script: frontmatter + two SLIDE yaml fences.
+  const innerScript =
+    "---\nlesson: B-X\ntitle: T\n---\n\n" +
+    "## 01 · Cold open\nphase: SOURCE\nduration: 9\n\nSAY:\nhi\n\nSLIDE:\n" +
+    "```yaml\nframe: N1-title\ntitle: T\n```\n\n" +
+    "## 02 · Outro\nphase: COMMAND\nduration: 7\n\nSAY:\nbye\n\nSLIDE:\n" +
+    "```yaml\nframe: O1-outro\ntitle: End\n```";
+
+  it("keeps EVERY inner yaml fence when unwrapping a ```markdown block (regression)", () => {
+    const raw = "Sure, here's a draft:\n\n```markdown\n" + innerScript + "\n```\n\nWant changes?";
+    const out = cleanScriptMarkdown(raw);
+    expect(out).toBe(innerScript + "\n");
+    // Both segments + both SLIDE fences survive — not truncated after segment 01.
+    expect(out).toContain("## 02 · Outro");
+    expect(out).toContain("frame: O1-outro");
+    expect((out.match(/```yaml/g) ?? []).length).toBe(2);
   });
 
-  it("handles a bare ``` fence (no language tag)", () => {
-    const raw = "```\n# A\nSAY:\nb\n```";
-    expect(cleanScriptMarkdown(raw)).toBe("# A\nSAY:\nb\n");
+  it("strips a bare ``` wrapper only when it wraps `---` frontmatter", () => {
+    const raw = "```\n" + innerScript + "\n```";
+    expect(cleanScriptMarkdown(raw)).toBe(innerScript + "\n");
+  });
+
+  it("does NOT treat a leading content ```yaml as a wrapper to strip", () => {
+    const raw = "```yaml\nframe: N1-title\ntitle: T\n```";
+    // No frontmatter after the opener → not a wrapper; returned verbatim.
+    expect(cleanScriptMarkdown(raw)).toBe("```yaml\nframe: N1-title\ntitle: T\n```\n");
   });
 
   it("returns the whole text when there is no fence, trimmed + single trailing NL", () => {
     expect(cleanScriptMarkdown("\n\n# Plain\nSAY:\nx\n\n\n")).toBe("# Plain\nSAY:\nx\n");
   });
 
-  it("keeps only the FIRST fenced block when several are present", () => {
-    const raw = "```markdown\nFIRST\n```\nmiddle\n```markdown\nSECOND\n```";
-    expect(cleanScriptMarkdown(raw)).toBe("FIRST\n");
-  });
-
-  it("collapses empty input to a single newline", () => {
+  it("collapses empty / whitespace-only input to a single newline", () => {
     expect(cleanScriptMarkdown("")).toBe("\n");
     expect(cleanScriptMarkdown("   \n  ")).toBe("\n");
   });
@@ -254,10 +287,16 @@ describe("EngineAdapter.draft — local agent CLI path (integration)", () => {
     const adapter = new EngineAdapter(process.execPath);
     const res = await adapter.draft({ lessonId: "B-DEMO1", brief: "intro to AI" });
     expect(res.backend).toBe("devin");
-    // fences stripped, single trailing newline
-    expect(res.script).toBe("# Title: B-DEMO1\nsep:true\nphase: HOOK\n\nSAY:\nHello from the fake agent.\n");
+    // Outer ```markdown wrapper stripped, INNER ```yaml SLIDE fence preserved,
+    // single trailing newline. This is the end-to-end multi-fence regression.
+    expect(res.script).toBe(
+      "# Title: B-DEMO1\nsep:true\nphase: HOOK\n\nSAY:\nHello from the fake agent.\n\n" +
+        "SLIDE:\n```yaml\nframe: N1-title\ntitle: B-DEMO1\n```\n",
+    );
     // sep:true proves agentDraftArgv passed the devin "--" separator through to the CLI
     expect(res.script).toContain("sep:true");
+    // the inner SLIDE yaml survived (the first-fence bug would have dropped it)
+    expect(res.script).toContain("frame: N1-title");
   });
 
   it("drafts via claude: backend tag + argv had NO -- separator (sep:false)", async () => {
