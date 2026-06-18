@@ -22,6 +22,7 @@ already assembled, ready for you to tweak and export.
 - [Part 3 — Produce the video](#part-3--produce-the-video)
 - [Part 4 — Load it onto Palmier (and reset between takes)](#part-4--load-it-onto-palmier-and-reset-between-takes)
 - [Part 5 — Revise one piece](#part-5--revise-one-piece)
+- [Part 6 — Deliver: export → publish → attach + moments](#part-6--deliver-export--publish--attach--moments)
 - [Command reference](#command-reference)
 - [Configuration (environment variables)](#configuration-environment-variables)
 - [Troubleshooting](#troubleshooting)
@@ -47,6 +48,17 @@ already assembled, ready for you to tweak and export.
         YOU                    THE ENGINE + DEVIN                       YOU EDIT & EXPORT
 ```
 
+Once you're happy with the cut, **Part 6** carries it the rest of the way — export one finished
+MP4, publish it to Mux, and attach it (plus its interactive **moments**) to the right lesson in
+the LMS:
+
+```
+  3. PALMIER TIMELINE  ──▶  EXPORT (one MP4)  ──▶  PUBLISH (Mux)  ──▶  ATTACH + MOMENTS (LMS)
+```
+
+The deliver steps are **safe by default** — nothing is uploaded or written to the platform until
+you explicitly opt in (see Part 6).
+
 Two facts that explain *everything* else in this guide:
 
 1. **The engine *creates* the media; Palmier only *arranges* it.** Voiceover, slides, and
@@ -59,19 +71,22 @@ Two facts that explain *everything* else in this guide:
    exactly how this is designed, and it means **no servers, no Tailscale, no networking** — it
    all happens locally on your laptop.
 
-### Two ways to run it — pick one
+### Three ways to run it — pick one
 
-| | **A. Devin (recommended)** | **B. The `palmier` command line** |
-| --- | --- | --- |
-| **Who it's for** | Everyone. You describe what you want in plain English. | People comfortable typing commands. |
-| **How you drive it** | Open the project in **Devin CLI** or **Devin Desktop**, then say e.g. *"Draft a script for a lesson on prompting, then load it onto Palmier."* | You run `palmier produce <LESSON_ID>` yourself. |
-| **Who writes the script** | Devin drafts it from your topic (you approve), or you paste your own. | You write the script, or the engine's built-in drafter does (needs an LLM key). |
-| **Setup** | Part 1 **+** install Devin (one command). | Part 1 only. |
+| | **A. Devin (recommended)** | **B. The `palmier` command line** | **C. vibedevview Studio (the app)** |
+| --- | --- | --- | --- |
+| **Who it's for** | Everyone. You describe what you want in plain English. | People comfortable typing commands. | People who want a GUI — no terminal, see every slide live. |
+| **How you drive it** | Open the project in **Devin CLI** or **Devin Desktop**, then say e.g. *"Draft a script for a lesson on prompting, then load it onto Palmier."* | You run `palmier produce <LESSON_ID>` yourself. | Open the desktop app and use buttons: edit → preview → Produce → Revise → Deliver. |
+| **Who writes the script** | Devin drafts it from your topic (you approve), or you paste your own. | You write the script, or the engine's built-in drafter does (needs an LLM key). | You edit in structured cards (or raw source), or click **Draft with AI**. |
+| **Setup** | Part 1 **+** install Devin (one command). | Part 1 only. | Part 1, then run the app from source (see [`app/README.md`](app/README.md)). |
 
-Both run **entirely on your own Mac** — no remote machine, no Tailscale. We recommend **A
-(Devin)** because you never have to remember commands; Devin already knows this workflow (the
-repo ships it a skill file). The rest of this guide shows both. **Where a step differs, look
-for the 🅰️ Devin and 🅱️ CLI labels.**
+All three run **entirely on your own Mac** — no remote machine, no Tailscale. They're the same
+engine underneath: Devin and Studio both just drive the `palmier` commands for you. We recommend
+**A (Devin)** because you never have to remember commands; Devin already knows this workflow (the
+repo ships it a skill file). **C (Studio)** is the no-terminal GUI — it wraps the exact same
+commands behind an editor + live preview + Produce/Revise/Deliver panels. The rest of this guide
+shows the CLI/Devin steps; **where a step differs, look for the 🅰️ Devin and 🅱️ CLI labels, and
+the 🖥️ Studio note shows the equivalent in the app.**
 
 ### What to expect (so there are no surprises)
 
@@ -258,6 +273,10 @@ palmier script DEMO-1                        # drafts + validates script.md
 > **Important:** the drafter only writes `script.md` **if one doesn't already exist** — your
 > hand-edited script is always the source of truth and is never overwritten.
 
+> **🖥️ Studio:** open the app, pick the lesson, and edit in structured **segment cards** (one
+> card per slide, with a SAY box) or flip to **`</>` Source** for raw markdown — every change
+> re-renders the live slide preview instantly. **Draft with AI** is Option C from a topic brief.
+
 ---
 
 ## Part 3 — Produce the video
@@ -286,6 +305,9 @@ Palmier (Part 4).
 > **Voice** calls ElevenLabs and measures the real clip length (that length, not your
 > `duration:`, is what aligns the timeline); **Recording** makes a placeholder for any `DO:`
 > segment instead of ever faking footage.
+
+> **🖥️ Studio:** click **Produce** (the backend selector picks *ffmpeg (preview)* or *palmier
+> (Mac)*). The status bar streams the same script → slides → voice → assemble events live.
 
 ---
 
@@ -352,6 +374,124 @@ PALMIER_TIMELINE=palmier palmier correct DEMO-1 --kind slide --seg 04
 the single clip, and verifies only that clip changed. It will **not** rebuild the whole lesson
 for a one-line fix. (See [`.devin/skills/hgdw-revision`](.devin/skills/hgdw-revision/SKILL.md).)
 
+> **🖥️ Studio:** select the segment, click **Revise**, and pick what changed (narration / slide
+> / recording / retime). If your edit changes `script.md`, Studio shows the diff and requires
+> explicit approval before it writes and re-renders just that one segment.
+
+---
+
+## Part 6 — Deliver: export → publish → attach + moments
+
+Parts 1–5 get a lesson onto the Palmier timeline. **Part 6 turns it into a finished, published
+lesson** in the LMS: one flat MP4, hosted on Mux, attached to the right course lesson, with its
+interactive **moments** (sections, pause-points, copy-paste prompts, links). Each step is its own
+command so you can stop and check after any of them.
+
+```
+   export            publish              moments / attach
+ ┌─────────┐      ┌───────────┐        ┌──────────────────────┐
+ │ one MP4 │ ───▶ │ Mux video │ ─────▶ │ LMS lesson + moments │
+ └─────────┘      └───────────┘        └──────────────────────┘
+  ffprobe-          playback_id          sections · pauses ·
+  verified          (mux:<id>)           prompts · links
+```
+
+> **Safety first.** Publishing and attaching are the only steps that can touch the outside world,
+> so they are **safe by default**: `publish` is a *dry run* unless you pick a real target, and
+> `attach` only writes to the platform when you pass **both** `--target` **and** `--apply`. With no
+> flags, both just tell you what they *would* do and write reviewable files — nothing is uploaded
+> and no database is changed.
+
+### 6.1 Export — render one finished MP4
+
+```bash
+palmier export DEMO-1
+# → ~/hgdw-productions/DEMO-1/videos/DEMO-1.mp4   (also prints a JSON report)
+```
+
+Flattens the lesson's slides + voiceover into a single H.264/AAC MP4 and verifies it with
+`ffprobe`. Works regardless of which backend you used to assemble — it always renders with ffmpeg,
+so you don't need Palmier open for this step. The JSON report includes `durationSeconds`,
+`driftSeconds`, and `withinTolerance` so you can confirm the file matches the plan.
+
+### 6.2 Publish — upload to Mux
+
+```bash
+palmier publish DEMO-1                 # DRY RUN — uploads nothing, writes a receipt
+palmier publish DEMO-1 --target mux    # real upload (needs MUX_TOKEN_ID + MUX_TOKEN_SECRET)
+```
+
+Uploads the exported MP4 to **Mux** via Direct Upload and waits for the asset to be `ready`,
+returning a `playback_id`. The LMS stores this as `video_url = mux:<playback_id>`. The result is
+saved to `lms/publish.json` so later steps can pick the playback id up automatically.
+
+### 6.3 Moments — author the interactive layer
+
+Moments are authored in a **`moments.yaml`** sidecar next to your script (in the lesson folder).
+You anchor each one to a segment (`seg:`) or an absolute time (`at:`), and the engine resolves it
+to a real timestamp using the voiceover alignment:
+
+```yaml
+lesson:
+  course: ai-mastery          # course slug in the LMS
+  slug: meet-claude           # lesson slug in the LMS
+sections:                     # → lesson_video_chapters (the chapter rail)
+  - { seg: "01", title: "Why Claude" }
+  - { at: "1:30", title: "Setup" }
+moments:                      # → lesson_moments (the interactive cuepoints)
+  - { seg: "04", kind: snippet, title: "Install", body: "curl -fsSL … | sh", copyable: true }
+  - { at: "2:10", kind: link, title: "Docs", url: "https://docs.anthropic.com" }
+  - { seg: "07", kind: pause, title: "Try it yourself",
+      instructions: "Run the command, then continue.", cta: "I did it — continue" }
+```
+
+| Authoring `kind` | Becomes in the LMS |
+| --- | --- |
+| `prompt` / `snippet` / `note` | a copy-paste artifact (`artifact_kind`, `artifact_body`) |
+| `link` | a link artifact (`artifact_url`) |
+| `file` | a downloadable file artifact (`artifact_url`, not copyable by default) |
+| `pause` | a **checkpoint** (`is_checkpoint=true` + instructions + CTA label) |
+| `sections:` entry | a **section** in `lesson_video_chapters` |
+
+```bash
+palmier moments DEMO-1
+# → lms/DEMO-1-moments.json  +  lms/DEMO-1-moments.sql   (dry run, never touches a DB)
+```
+
+This always just **emits files**: a JSON bundle (what the Electron app / `api` target sends) and an
+**idempotent** `moments.sql` (wrapped in `BEGIN/COMMIT`, resolves the lesson by slug, replaces its
+sections + moments — safe to re-run). The safest way to ship is to review that SQL and run it in the
+Supabase SQL editor yourself.
+
+### 6.4 Attach — write it into the LMS
+
+`attach` takes the same bundle and lands it on the platform. There are **three targets**, layered
+from safest to most direct:
+
+| `--target` | How it lands | Creds (local env) | When to use |
+| --- | --- | --- | --- |
+| `sql` *(default)* | emits `moments.sql` for you to run | none | always safe; the manual last step |
+| `api` *(recommended)* | `POST`s the bundle to an authenticated hgdw-lms endpoint that wraps the LMS's own server actions | `HGDW_LMS_API_BASE` + `HGDW_LMS_API_TOKEN` | the real automated path — validation + schema stay in the LMS |
+| `supabase` *(fallback)* | direct PostgREST write with the service key | `HGDW_SUPABASE_URL` + `HGDW_SUPABASE_SERVICE_KEY` | only when no endpoint exists yet; bypasses app logic + RLS |
+
+```bash
+palmier attach DEMO-1                      # sql/dry-run: emits files, no writes
+palmier attach DEMO-1 --target api         # still a DRY RUN (no --apply) — prints what it WOULD send
+palmier attach DEMO-1 --target api --apply # the real write (needs creds + a published Mux id)
+```
+
+**Both gates are required for a real write:** a real `--target` (`api`/`supabase`) **and** `--apply`.
+A real write also refuses to run without a Mux playback id (so you never publish a lesson with a
+null video — `publish` first). The reviewable JSON + SQL files are written every time, regardless of
+target. See the [Operator Guide](docs/OPERATOR-GUIDE.md#part-4--deliver-export--publish--attach--moments)
+for the full safety model and the `api` endpoint request/response contract.
+
+> **🖥️ Studio:** the **Deliver** panel runs this chain in **dry-run only**: it exports the MP4
+> (with the ffprobe verdict), previews the Mux publish, and shows the moments + LMS SQL it *would*
+> write — uploading nothing and changing no database. A real publish (`--target mux`) or real
+> attach (`--target api|supabase --apply`) stays a deliberate CLI / Devin step, so the GUI can
+> never trip the two-gate write.
+
 ---
 
 ## Command reference
@@ -371,9 +511,19 @@ Run any command with `--help` for its options. Live-timeline commands need
 | `palmier correct <id>` | Surgically revise one segment. `--kind narration\|slide\|recording\|retime` + `--seg <id>` or `--at <m:ss>`. |
 | `palmier clear` | Reset the Palmier timeline + media bin between takes/lessons. `--keep-bin` = timeline only. |
 | `palmier status <id>` | List every segment with its id, timestamp span, and which assets exist. |
+| `palmier export <id>` | Render one finished MP4 (ffmpeg flatten + ffprobe verify). `-o <path>`, `--tolerance <seconds>`. |
+| `palmier publish <id>` | Upload the MP4 to Mux → `playback_id`. **Dry run by default**; `--target mux` to upload; `-f <path>`. |
+| `palmier moments <id>` | Compile `moments.yaml` → `moments.json` + idempotent `moments.sql`. Never writes a DB. `--playback-id <id>`. |
+| `palmier attach <id>` | Land the lesson + moments in the LMS. **Safe by default**; needs `--target api\|supabase` **and** `--apply` to write. `--playback-id <id>`. |
 
 Pick the backend per run with `-b ffmpeg` (preview MP4) or `-b palmier` (live timeline), or set
 `PALMIER_TIMELINE` once (see below).
+
+Add `--json` to any command for machine-readable output: `produce`/`correct` stream NDJSON
+progress events (`phase`, `slide.rendered`, `voice.done`, `assemble.placed`, then a final
+`result`), and `doctor`/`status`/`script` print a single JSON object. This is the stream
+**vibedevview Studio** (the [desktop app](app/README.md)) consumes — so if you'd rather not use
+the terminal at all, run Studio instead and it drives these same commands for you.
 
 ---
 
@@ -389,6 +539,11 @@ Pick the backend per run with `-b ffmpeg` (preview MP4) or `-b palmier` (live ti
 | `PALMIER_LLM_API_KEY` | — | Enables the engine's built-in script drafter (Option C). |
 | `PALMIER_LLM_PROVIDER` | `anthropic` | `anthropic` (Claude) · `openai` · `moonshot` · `deepseek`. |
 | `PALMIER_LLM_MODEL` | provider default | e.g. `claude-3-7-sonnet-latest`, `gpt-4o`. |
+| `PALMIER_PUBLISH_TARGET` | `dryrun` | Set to `mux` to make `palmier publish` upload for real by default. |
+| `MUX_TOKEN_ID` / `MUX_TOKEN_SECRET` | — | Mux API credentials, required for a real `publish --target mux`. |
+| `PALMIER_ATTACH_TARGET` | `sql` | Default `attach` target: `sql` (safe) · `api` · `supabase`. Still needs `--apply` for a real write. |
+| `HGDW_LMS_API_BASE` / `HGDW_LMS_API_TOKEN` | — | Base URL + scoped bearer token for the `api` attach target (recommended). |
+| `HGDW_SUPABASE_URL` / `HGDW_SUPABASE_SERVICE_KEY` | — | Project URL + service key for the `supabase` attach fallback (bypasses RLS). |
 
 See [`.env.example`](.env.example) for a copy-paste starting point.
 
@@ -405,6 +560,9 @@ See [`.env.example`](.env.example) for a copy-paste starting point.
 | Re-running stacked duplicate tracks | you used `--no-clean` | re-run without it — the default clears first |
 | Timing looks slightly off vs. your `duration:` | the real voiceover length wins over `duration:` | expected — `SAY:` narration is the timing authority |
 | `command not found: palmier` | you skipped `npm link` | use `node dist/cli.js …`, or run `npm link` in the repo |
+| `palmier publish` uploaded nothing | it's a dry run by default | add `--target mux` (and set `MUX_TOKEN_ID` / `MUX_TOKEN_SECRET`) |
+| `palmier attach` didn't write to the LMS | safe by default — needs both gates | pass `--target api` (or `supabase`) **and** `--apply`, with creds set |
+| attach refuses: "no Mux playback id" | attaching would publish a lesson with no video | run `palmier publish <id> --target mux` first, or pass `--playback-id` |
 
 For more edge cases and the reasoning behind the defaults, see the
 [Operator Guide](docs/OPERATOR-GUIDE.md#gotchas--edge-cases-learned-in-production).
@@ -418,7 +576,8 @@ For more edge cases and the reasoning behind the defaults, see the
 | [`docs/OPERATOR-GUIDE.md`](docs/OPERATOR-GUIDE.md) | Full authoring reference (all 16 frames + examples), the complete CLI walkthrough, **Devin's role / agent topology**, reset behavior, and production gotchas. |
 | [`HGDW-DESIGN.md`](HGDW-DESIGN.md) | The brand system — wordmark, palette, typography, video spec, and the 16 frame types. |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | How the Orchestrator + agents work (they coordinate only through files). |
-| [`docs/ELECTRON-APP.md`](docs/ELECTRON-APP.md) | Scope for the future desktop app: a markdown script editor with live preview + produce/revise buttons, plus the Palmier AI ("Claude") integration. |
+| [`app/`](app) — **vibedevview Studio** | The desktop app that wraps the engine: structured script editor + live slide preview + produce/revise + deliver, no terminal needed. MVP (E0–E3, plus the Deliver panel) is built; see [`app/README.md`](app/README.md) to run it. |
+| [`docs/ELECTRON-APP.md`](docs/ELECTRON-APP.md) | Design & build spec + as-built notes for the desktop app: UI wireframes, the engine integration contract (`--json` event stream + IPC), the Deliver chain, the Palmier AI ("Claude") integration, the Revise→`correct` contract, and a per-team [SEQ]/[PAR] plan with milestones. |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Phased build plan with per-team ownership. |
 | [`.devin/skills/`](.devin/skills/) | The skills local Devin auto-loads: `hgdw-video-production` (produce) and `hgdw-revision` (surgical fixes). |
 
@@ -459,3 +618,17 @@ npm run build         # compile to dist/
 npm test              # vitest — parser, alignment, plan, voices, backend
 npm run palmier -- doctor   # run the CLI from source without building
 ```
+
+### Desktop app (vibedevview Studio)
+
+The Electron app lives in [`app/`](app) and is a thin client of this engine (it spawns
+`dist/cli.js --json`). Build the engine first (`npm run build` above), then:
+
+```bash
+cd app
+npm install
+npm run dev          # launch the app (Electron)
+npm run preview:web  # or: renderer-only in a browser, engine actions disabled
+```
+
+Full setup, scripts, and layout are in [`app/README.md`](app/README.md).

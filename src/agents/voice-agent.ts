@@ -3,6 +3,7 @@ import { hasSay, type Manifest, type Timeline, type TimelineEntry } from "../typ
 import { resolveVoice, TTS_MODEL, VOICE_SETTINGS } from "../voices.js";
 import { probeDuration } from "../util/exec.js";
 import { log } from "../util/log.js";
+import { noopSink, type EngineEventSink } from "../events.js";
 import type { Workspace } from "../workspace.js";
 
 const SCOPE = "voice";
@@ -29,6 +30,7 @@ export interface VoiceAgentOptions {
   /** Restrict to specific segment ids (for the correction loop). */
   only?: string[];
   apiKey?: string;
+  onEvent?: EngineEventSink;
 }
 
 /**
@@ -45,6 +47,7 @@ export async function runVoiceAgent(
   await ws.ensure();
   const apiKey = opts.apiKey ?? process.env.ELEVENLABS_API_KEY ?? "";
   const only = opts.only ? new Set(opts.only) : undefined;
+  const onEvent = opts.onEvent ?? noopSink;
 
   // Start from existing timeline so corrections only touch targeted segments.
   const existing = (await ws.exists(ws.timelinePath)) ? await ws.readTimeline() : undefined;
@@ -59,10 +62,12 @@ export async function runVoiceAgent(
 
     if (!hasSay(seg)) {
       segments[seg.id] = { duration: seg.durationEstimate, source: "silent" };
+      onEvent({ type: "voice.done", segId: seg.id, duration: seg.durationEstimate, source: "silent" });
       continue;
     }
     if (!apiKey) {
       segments[seg.id] = { duration: seg.durationEstimate, source: "estimate" };
+      onEvent({ type: "voice.done", segId: seg.id, duration: seg.durationEstimate, source: "estimate" });
       continue;
     }
 
@@ -74,12 +79,14 @@ export async function runVoiceAgent(
       await fs.writeFile(out, audio);
       const duration = await probeDuration(out);
       segments[seg.id] = { audioPath: out, duration, source: "tts" };
+      onEvent({ type: "voice.done", segId: seg.id, duration, source: "tts" });
       log.ok(SCOPE, `seg ${seg.id} → ${duration.toFixed(2)}s`);
     } catch (err) {
       // One bad voice/segment must not abort the whole production — fall back
       // to the duration estimate and flag it for the human.
       log.warn(SCOPE, `seg ${seg.id} TTS failed (${(err as Error).message.slice(0, 120)}); using estimate`);
       segments[seg.id] = { duration: seg.durationEstimate, source: "estimate" };
+      onEvent({ type: "voice.done", segId: seg.id, duration: seg.durationEstimate, source: "estimate" });
     }
   }
 

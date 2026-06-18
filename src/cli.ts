@@ -8,6 +8,7 @@ import { Workspace } from "./workspace.js";
 import { formatTimestamp } from "./alignment.js";
 import type { RendererOptions, RendererMode } from "./slides/renderer.js";
 import { log } from "./util/log.js";
+import type { EngineEvent, EngineEventSink } from "./events.js";
 
 function rendererOpts(o: { renderer?: string; cdpUrl?: string }): RendererOptions {
   return { mode: o.renderer as RendererMode | undefined, cdpUrl: o.cdpUrl };
@@ -17,7 +18,19 @@ const program = new Command();
 program
   .name("palmier")
   .description("HGDW Palmier — multi-agent video production system")
-  .version("0.1.0");
+  .version("0.1.0")
+  .option("--json", "emit machine-readable output (NDJSON progress events on stdout) for the app");
+
+/** True when the global --json flag is set. */
+function jsonMode(): boolean {
+  return program.opts().json === true;
+}
+
+/** In --json mode, returns a sink that writes one NDJSON EngineEvent per line. */
+function reporter(): EngineEventSink | undefined {
+  if (!jsonMode()) return undefined;
+  return (e: EngineEvent) => process.stdout.write(JSON.stringify(e) + "\n");
+}
 
 program
   .command("produce")
@@ -38,21 +51,30 @@ program
       renderer: rendererOpts(o),
       clean: o.clean,
       keepBin: o.keepBin,
+      onEvent: reporter(),
     });
-    process.stdout.write(JSON.stringify(res, null, 2) + "\n");
+    // In --json mode the result is already emitted as a {type:"result"} event.
+    if (!jsonMode()) process.stdout.write(JSON.stringify(res, null, 2) + "\n");
   });
 
 program
   .command("script")
   .description("Generate (or validate) script.md for a lesson")
   .argument("<lessonId>")
-  .action(async (lessonId) => {
+  .option("--brief <text>", "topic brief to draft from")
+  .option("--force", "overwrite an existing script.md (used by the app's Draft-with-AI)")
+  .option("--stdout", "print the drafted script.md to stdout instead of a status line")
+  .action(async (lessonId, o) => {
     const { runScriptAgent } = await import("./agents/script-agent.js");
     const ws = Workspace.for(lessonId);
-    const md = await runScriptAgent(ws);
+    const md = await runScriptAgent(ws, { topicBrief: o.brief, force: o.force });
     const manifest = parseScript(md);
     await ws.writeManifest(manifest);
-    log.ok("cli", `script.md OK — ${manifest.segments.length} segments → ${ws.manifestPath}`);
+    if (o.stdout || jsonMode()) {
+      process.stdout.write(jsonMode() ? JSON.stringify({ type: "script", lessonId, script: md, segments: manifest.segments.length }) + "\n" : md);
+    } else {
+      log.ok("cli", `script.md OK — ${manifest.segments.length} segments → ${ws.manifestPath}`);
+    }
   });
 
 program
@@ -148,6 +170,65 @@ program
       segId: o.seg,
       backend: o.backend as BackendName | undefined,
       renderer: rendererOpts(o),
+      onEvent: reporter(),
+    });
+    if (!jsonMode()) process.stdout.write(JSON.stringify(res, null, 2) + "\n");
+  });
+
+program
+  .command("export")
+  .description("Render a single finished MP4 deliverable from produced assets (backend-independent)")
+  .argument("<lessonId>")
+  .option("-o, --out <path>", "output MP4 path (default: workspace videos/<lessonId>.mp4)")
+  .option("--tolerance <seconds>", "max allowed duration drift before warning (default 1.0)")
+  .action(async (lessonId, o) => {
+    const { exportLesson } = await import("./deliver/export.js");
+    const res = await exportLesson(lessonId, {
+      out: o.out,
+      toleranceSeconds: o.tolerance !== undefined ? Number(o.tolerance) : undefined,
+    });
+    process.stdout.write(JSON.stringify(res, null, 2) + "\n");
+  });
+
+program
+  .command("publish")
+  .description("Upload the exported MP4 to a hosting target (Mux) → playback id. Dry run by default.")
+  .argument("<lessonId>")
+  .option("-t, --target <name>", "publish target: dryrun | mux (default: dryrun, or PALMIER_PUBLISH_TARGET)")
+  .option("-f, --file <path>", "MP4 to publish (default: workspace videos/<lessonId>.mp4)")
+  .action(async (lessonId, o) => {
+    const { publishLesson } = await import("./deliver/mux.js");
+    const res = await publishLesson(lessonId, {
+      target: o.target as "dryrun" | "mux" | undefined,
+      file: o.file,
+    });
+    process.stdout.write(JSON.stringify(res, null, 2) + "\n");
+  });
+
+program
+  .command("moments")
+  .description("Compile moments.yaml → JSON bundle + idempotent SQL for the LMS. Dry run; never writes a DB.")
+  .argument("<lessonId>")
+  .option("--playback-id <id>", "Mux playback id (default: read from publish receipt)")
+  .action(async (lessonId, o) => {
+    const { compileLessonMoments } = await import("./deliver/moments.js");
+    const res = await compileLessonMoments(lessonId, { playbackId: o.playbackId });
+    process.stdout.write(JSON.stringify(res, null, 2) + "\n");
+  });
+
+program
+  .command("attach")
+  .description("Attach a lesson's video + moments to the LMS. SAFE: needs --target api|supabase AND --apply to write.")
+  .argument("<lessonId>")
+  .option("-t, --target <name>", "attach target: sql | api | supabase (default: sql, or PALMIER_ATTACH_TARGET)")
+  .option("--apply", "actually write to the platform (api/supabase only); without it this dry-runs")
+  .option("--playback-id <id>", "Mux playback id (default: read from publish receipt)")
+  .action(async (lessonId, o) => {
+    const { attachLesson } = await import("./deliver/attach.js");
+    const res = await attachLesson(lessonId, {
+      target: o.target as "sql" | "api" | "supabase" | undefined,
+      apply: o.apply === true,
+      playbackId: o.playbackId,
     });
     process.stdout.write(JSON.stringify(res, null, 2) + "\n");
   });
@@ -162,6 +243,25 @@ program
     const manifest = await ws.readManifest();
     const timeline = (await ws.exists(ws.timelinePath)) ? await ws.readTimeline() : undefined;
     const alignment = timeline ? computeAlignment(manifest, timeline) : undefined;
+    if (jsonMode()) {
+      const segments = manifest.segments.map((seg) => {
+        const a = alignment?.segments[seg.id];
+        return {
+          id: seg.id,
+          label: seg.label ?? null,
+          phase: seg.phase ?? null,
+          frame: seg.slide?.frame ?? null,
+          kinds: { say: !!seg.say, slide: !!seg.slide, do: !!seg.do },
+          start: a?.start ?? null,
+          end: a?.end ?? null,
+          duration: a?.duration ?? seg.durationEstimate,
+        };
+      });
+      process.stdout.write(
+        JSON.stringify({ lessonId: manifest.lessonId, title: manifest.title, totalDuration: alignment?.totalDuration ?? null, segments }) + "\n",
+      );
+      return;
+    }
     for (const seg of manifest.segments) {
       const a = alignment?.segments[seg.id];
       const stamp = a ? `${formatTimestamp(a.start)}–${formatTimestamp(a.end)}` : "—";
@@ -177,6 +277,11 @@ program
   .action(async () => {
     const { doctor } = await import("./doctor.js");
     const { checks, ok } = await doctor();
+    if (jsonMode()) {
+      process.stdout.write(JSON.stringify({ ok, checks }) + "\n");
+      process.exitCode = ok ? 0 : 1;
+      return;
+    }
     for (const c of checks) {
       const mark = c.ok ? "ok  " : "FAIL";
       process.stdout.write(`[${mark}] ${c.name.padEnd(22)} ${c.detail}\n`);

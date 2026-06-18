@@ -3,6 +3,7 @@ import { buildDeck, defaultBg, type DeckSlide } from "../slides/deck-template.js
 import { SlideRenderer, type RendererOptions } from "../slides/renderer.js";
 import { verifySlide } from "../slides/verify.js";
 import { log } from "../util/log.js";
+import { noopSink, type EngineEventSink } from "../events.js";
 import type { Workspace } from "../workspace.js";
 
 const SCOPE = "slides";
@@ -10,6 +11,7 @@ const SCOPE = "slides";
 export interface SlidesAgentOptions {
   only?: string[];
   renderer?: RendererOptions;
+  onEvent?: EngineEventSink;
 }
 
 export interface SlideResult {
@@ -42,6 +44,7 @@ export async function runSlidesAgent(
     return [];
   }
 
+  const onEvent = opts.onEvent ?? noopSink;
   const deckHtml = buildDeck(slides);
   const renderer = new SlideRenderer(opts.renderer);
   const results: SlideResult[] = [];
@@ -59,6 +62,7 @@ export async function runSlidesAgent(
         const bg = spec.bg ?? defaultBg(spec.frame);
         const v = await verifySlide(pngPath, bg);
         results.push({ frameId, path: pngPath, verified: v.ok, reason: v.reason });
+        onEvent({ type: "slide.rendered", frameId, path: pngPath, verified: v.ok, reason: v.reason });
         if (v.ok) log.ok(SCOPE, `${frameId} (${spec.frame}) ✓`);
         else log.warn(SCOPE, `${frameId} (${spec.frame}) verification failed: ${v.reason}`);
       },

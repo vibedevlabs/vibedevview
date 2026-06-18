@@ -238,6 +238,27 @@ timestamps. By default the timeline + media bin are cleared first (see Part 3).
 > [appendix](#appendix--driving-a-remote-mac-over-ssh). For a team, the recommended path is
 > that each person runs locally on their own Mac (above), with no SSH or Tailscale.
 
+### C. vibedevview Studio (the desktop app — no terminal)
+
+For operators who'd rather not touch the terminal, **vibedevview Studio** is a desktop GUI that
+wraps this exact engine. It's a thin client: every button spawns the same `palmier` CLI with
+`--json` and renders the streamed events, so there's no second copy of the logic to drift.
+
+```bash
+cd vibedevview/app
+npm install
+npm run dev            # launches the Electron app
+# or: npm run preview:web   # renderer-only, in a browser (editor + live preview; engine actions disabled)
+```
+
+It gives you a structured **segment-card editor** with a `</>` raw-source toggle, a pixel-accurate
+**live slide preview** (the engine's own deck HTML), **Produce** with a streaming status bar,
+**Doctor**, surgical **Revise** (with the diff-approval gate), **Draft with AI**, and a **Deliver**
+panel. The Deliver panel is **dry-run only** — it exports the MP4 and previews publish/attach
+(the SQL it *would* write), but never uploads to Mux or writes a database; real `--apply` writes
+stay a CLI/Devin step (§4.1). The app needs the engine built first (`npm install && npm run build`
+in the repo root). See [`app/README.md`](../app/README.md).
+
 ---
 
 ## Launching via Devin (CLI or Desktop)
@@ -315,6 +336,10 @@ All commands take a `<LESSON_ID>` (except `clear`/`doctor`). Add `-b palmier` or
 | `palmier correct <id>` | **Surgically** revise one segment (the revision loop). | `--kind narration\|slide\|recording\|retime` · `--seg <id>` · `--at <m:ss>` |
 | `palmier clear` | Reset the Palmier timeline + media bin between takes/lessons. | `--keep-bin` (timeline only) · `-b` |
 | `palmier status <id>` | Print every segment with id, timestamp span, and which assets exist. | — |
+| `palmier export <id>` | Render one finished MP4 (ffmpeg flatten + ffprobe verify). Backend-independent. | `-o <path>` · `--tolerance <seconds>` |
+| `palmier publish <id>` | Upload the MP4 to Mux → `playback_id`. **Dry run unless `--target mux`.** | `-t mux` · `-f <path>` |
+| `palmier moments <id>` | Compile `moments.yaml` → `moments.json` + idempotent `moments.sql`. Never writes a DB. | `--playback-id <id>` |
+| `palmier attach <id>` | Land the lesson + moments in the LMS. **Needs `--target api\|supabase` AND `--apply` to write.** | `-t sql\|api\|supabase` · `--apply` · `--playback-id <id>` |
 
 **Typical sequences:**
 
@@ -331,6 +356,12 @@ PALMIER_TIMELINE=palmier palmier correct DEMO-1 --kind narration --seg 07
 
 # Wipe everything between two lessons
 PALMIER_TIMELINE=palmier palmier clear
+
+# Deliver a finished lesson (each step is safe / inspectable on its own)
+palmier export DEMO-1                                  # one MP4, ffprobe-verified
+palmier publish DEMO-1 --target mux                    # → playback_id (real upload)
+palmier moments DEMO-1                                 # → moments.json + moments.sql (no writes)
+palmier attach DEMO-1 --target api --apply             # real LMS write (both gates + creds)
 ```
 
 ---
@@ -361,6 +392,154 @@ current lesson's assets. Re-run as many times as you like without stacking dupli
 The single-asset path (`correct`, the swap/replace flow) is intentionally **surgical**: it
 removes just the one clip being replaced and re-imports just that asset. Wholesale bin-clearing
 doesn't apply there — a stray duplicate from a single swap is harmless.
+
+---
+
+# Part 4 — Deliver: export → publish → attach + moments
+
+Parts 1–3 get a lesson onto the Palmier timeline. Part 4 turns that into a **published lesson in
+the LMS**: one flat MP4, hosted on Mux, attached to the right course lesson, with its interactive
+**moments**. The four steps are a **strict sequence** (`[SEQ]`) — each one consumes the previous
+one's output — but you can stop and inspect after any of them:
+
+```
+   export  ─▶  publish  ─▶  moments  ─▶  attach
+   one MP4     mux:<id>     *.json/*.sql   LMS rows
+   (ffprobe)   (Mux)        (no writes)    (gated)
+```
+
+> **Why these are separate commands.** Export and moments are pure/local and always safe.
+> Publish and attach are the only steps that touch the outside world, so they are isolated and
+> **gated** — you can rehearse the whole chain as dry runs, eyeball the emitted SQL, and only
+> then flip the real switches.
+
+## 4.1 The safety model (read before `--apply`)
+
+| Step | Default behavior | What makes it "real" | Extra guard |
+| --- | --- | --- | --- |
+| `export` | always renders the MP4 locally | n/a (no external effect) | ffprobe drift check vs. the plan |
+| `publish` | **dry run** — writes a receipt, uploads nothing | `--target mux` (or `PALMIER_PUBLISH_TARGET=mux`) | needs `MUX_TOKEN_ID` + `MUX_TOKEN_SECRET` |
+| `moments` | emits `*.json` + `*.sql` only | n/a (never writes a DB) | SQL is idempotent (`BEGIN/COMMIT`, replace-by-slug) |
+| `attach` | **dry run** — emits files, prints what it *would* write | `--target api\|supabase` **AND** `--apply` | refuses without a Mux playback id |
+
+The **two-gate rule** for `attach` is the important one: a real write requires **both** a real
+`--target` *and* `--apply`. Either alone (or neither) is a dry run. On top of that, a real write
+**throws** if there's no Mux playback id resolved (from `lms/publish.json` or `--playback-id`), so
+you can never publish a lesson row pointing at a null video. The reviewable JSON + SQL are written
+on **every** run regardless of target, so `sql` (the default) is a complete, safe workflow on its
+own: emit → review → run in the Supabase SQL editor yourself.
+
+## 4.2 Authoring `moments.yaml`
+
+Moments live in a **sidecar** `moments.yaml` in the lesson folder (next to `script.md`). You don't
+hand-compute timestamps — you anchor each moment to a **segment** (`seg:`, optionally `offset:`
+seconds) or an **absolute time** (`at: "m:ss"`), and the engine resolves it against the real
+voiceover alignment (the same alignment that drives the timeline).
+
+```yaml
+lesson:
+  course: ai-mastery            # course slug in the LMS (resolves course_id)
+  slug: meet-claude             # lesson slug in the LMS (resolves lesson_id, with course)
+  title: Meet Your New Coworker # optional — updates the lesson title
+  content: Claude & Cowork 101  # optional — updates the lesson description
+sections:                       # → lesson_video_chapters (the chapter rail)
+  - { seg: "01", title: "Why Claude" }
+  - { at: "1:30", title: "Setup" }
+moments:                        # → lesson_moments (the interactive cuepoints)
+  - { seg: "04", kind: snippet, title: "Install Claude Code",
+      body: "curl -fsSL https://claude.ai/install.sh | sh", copyable: true }
+  - { at: "2:10", kind: link, title: "Docs", url: "https://docs.anthropic.com" }
+  - { seg: "07", kind: pause, title: "Try it yourself",
+      instructions: "Run the command above, then continue.", cta: "I did it — continue" }
+```
+
+**Anchor fields** (`sections` and `moments` both accept these):
+
+| Field | Meaning |
+| --- | --- |
+| `seg: "04"` | anchor to the start of segment `04` (matches the `##` id in `script.md`) |
+| `offset: 2.5` | optional seconds added to the segment start |
+| `at: "1:30"` | absolute timestamp instead of a segment anchor (`m:ss` or seconds) |
+
+A negative resolved time, or one past the end of the video, is a hard error — so a typo'd anchor
+fails loudly instead of producing a broken cuepoint.
+
+**`kind` → LMS mapping** (this is exactly what the SQL/bundle emit):
+
+| `kind` | `lesson_moments` result |
+| --- | --- |
+| `prompt` | `artifact_kind='prompt'`, `artifact_copyable=true` |
+| `snippet` | `artifact_kind='snippet'` (a shell/code block), `artifact_copyable=true` |
+| `note` | `artifact_kind='note'`, `artifact_copyable=true` |
+| `link` | `artifact_kind='link'` + `artifact_url` |
+| `file` | `artifact_kind='file'` + `artifact_url`, `artifact_copyable=false` by default |
+| `pause` | `is_checkpoint=true` + `checkpoint_instructions` + `checkpoint_cta_label` (no artifact unless `body` set) |
+
+`sections` entries become `lesson_video_chapters` rows (a coarse "chapter" rail). ABSORB-only
+explainer segments deliberately carry **no** moments — moments are for the hands-on tracks.
+
+When you run `palmier moments <id>`, the bundle also sets the lesson's playback fields so the LMS
+renders it as an interactive video: `video_url='mux:<playback_id>'`, `lesson_type='video'`,
+`player_type='interactive'`, `is_published=true`, `allow_preview=true`.
+
+## 4.3 The `api` attach target (recommended) — endpoint contract
+
+`--target api` POSTs the moments bundle to a small authenticated endpoint **owned by hgdw-lms**,
+which wraps the LMS's own `lesson-moments` server actions. This keeps schema + validation in the
+app (so the tool never tracks migrations) and means a **scoped token**, not a god-mode service
+key, lives on each operator's Mac.
+
+- **Request:** `POST {HGDW_LMS_API_BASE}/api/admin/lessons/moments`
+  - Headers: `Authorization: Bearer {HGDW_LMS_API_TOKEN}`, `Content-Type: application/json`
+  - Body: the moments **bundle** (`lms/<id>-moments.json`):
+
+    ```jsonc
+    {
+      "lesson": {
+        "course": "ai-mastery", "slug": "meet-claude",
+        "title": "Meet Your New Coworker", "content": "…",
+        "videoUrl": "mux:abc123", "lessonType": "video",
+        "playerType": "interactive", "isPublished": true, "allowPreview": true
+      },
+      "sections": [ { "title": "Why Claude", "startSeconds": 0.0, "sortOrder": 1 } ],
+      "moments":  [ { "startSeconds": 41.2, "title": "Install Claude Code",
+                      "artifactKind": "snippet", "artifactBody": "curl … | sh",
+                      "artifactCopyable": true, "isCheckpoint": false, "sortOrder": 1 } ]
+    }
+    ```
+  - **Server responsibilities:** authenticate the token, confirm the Mux asset is `ready` before
+    flipping `is_published`, resolve `course`+`slug` → `lesson_id`, then upsert the lesson row +
+    **replace** its chapters and moments **inside one transaction** (idempotent — safe to re-send).
+- **Response (200):**
+
+    ```json
+    { "lessonSlug": "meet-claude", "sectionCount": 2, "momentCount": 5 }
+    ```
+  - The CLI treats any non-2xx as a failure and surfaces the body. `lessonSlug` must be a
+    non-empty string; `sectionCount` / `momentCount` default to `0` if omitted.
+
+> The endpoint itself is a **separate, confirmed-next** PR on `hgdw-lms` (target `staging`, no
+> production data) — this guide documents the contract the CLI already speaks so the two sides can
+> be built independently. Until it exists, use `--target sql` (review + run the SQL) or, as a
+> fallback, `--target supabase`.
+
+## 4.4 The `supabase` attach target (fallback)
+
+`--target supabase` writes directly to Supabase via PostgREST with the service key
+(`HGDW_SUPABASE_URL` + `HGDW_SUPABASE_SERVICE_KEY`). It resolves `course → lesson`, PATCHes the
+lesson row, deletes the lesson's existing chapters + moments, then inserts the new ones. It is the
+fastest path but **bypasses app logic and RLS** and couples the tool to the live schema, so prefer
+`api`. Same two-gate rule applies (`--target supabase --apply`).
+
+## 4.5 Verify a delivery
+
+- `export`: the JSON report shows `withinTolerance: true` and the expected `durationSeconds` /
+  `1920x1080`; or run `ffprobe` on the MP4 yourself.
+- `publish`: `lms/publish.json` has a non-null `playbackId` and `status: "ready"`.
+- `moments` / `attach` (dry run): open `lms/<id>-moments.sql` — confirm the section + moment rows,
+  the `mux:<id>` video_url, and that it's wrapped in `BEGIN; … COMMIT;`.
+- `attach --apply`: the result JSON shows `applied: true` and the `sectionCount` / `momentCount`
+  the server (or PostgREST) acknowledged.
 
 ---
 

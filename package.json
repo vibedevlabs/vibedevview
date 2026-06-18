@@ -7,7 +7,12 @@
     "palmier": "./dist/cli.js"
   },
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/index.js",
+    "./package.json": "./package.json",
+    "./types": "./dist/types.js",
+    "./events": "./dist/events.js",
+    "./script/parse": "./dist/script/parse.js",
+    "./slides/deck": "./dist/slides/deck-template.js"
   },
   "files": [
     "dist",
