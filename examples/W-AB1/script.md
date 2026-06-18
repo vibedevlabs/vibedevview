@@ -36,20 +36,20 @@ subtitle: Claude reads, writes, and organizes inside your actual workspace.
 
 ## 03 · The roadmap
 phase: SOURCE
-duration: 8
+duration: 7
 
 SAY:
-Here's where we're headed. Three moves: first, the key features that make this work. Second, the best practices that keep your team in sync. And third, a live demo so you see it in action.
+Here's where we're headed. Three features that change the way your team handles files: shared context, agentic organization, and admin controls.
 
 SLIDE:
 ```yaml
 frame: N5-agenda
 eyebrow: ROADMAP
-title: Three moves
+title: Three features
 body:
-  - ABSORB — key features for team workspaces
-  - MIRROR — best practices for seamless collaboration
-  - COMMAND — live cleanup on a real directory
+  - Shared Context Hub — single source of truth
+  - Agentic Organization — Claude cleans the mess
+  - Team Admin Controls — your files, your rules
 ```
 
 ## 04 · The Shared Context Hub
@@ -127,90 +127,17 @@ columns:
       - Admin-controlled access
 ```
 
-## 08 · Best practice — Set up a sandbox
-phase: MIRROR
-duration: 14
-
-SAY:
-Now, to get the most out of Claude without creating chaos, follow three simple best practices. Number one: set up a sandbox. Always point Claude to specific, designated workspaces — like an active project folder. Do not give it access to broad directories like your entire hard drive. Keep it focused.
-
-SLIDE:
-```yaml
-frame: C5-callout
-title: "Best practice #1 — Set up a sandbox"
-body:
-  - Point Claude to specific, designated project folders
-  - Never grant access to your entire hard drive
-  - Keep the scope focused and intentional
-```
-
-## 09 · Best practice — Standardize naming
-phase: MIRROR
-duration: 12
-
-SAY:
-Number two: standardize naming conventions. Give Claude explicit instructions on how you want things labeled. If you use project codes or specific date formats, state that clearly so Claude maintains total consistency across the whole team.
-
-SLIDE:
-```yaml
-frame: C5-callout
-title: "Best practice #2 — Standardize naming"
-body:
-  - Tell Claude your exact naming patterns
-  - Project codes, date formats, tag prefixes
-  - Consistency across the whole team, automatically
-```
-
-## 10 · Best practice — Draft context files
-phase: MIRROR
-duration: 14
-
-SAY:
-Number three, and this is a game-changer: draft context files. By creating a dot-claude-slash-rules directory or a CLAUDE dot md file directly in your project folders, Claude instantly inherits the project's goals, tech stacks, and team roles. You won't have to re-explain the context at the start of every new session.
-
-SLIDE:
-```yaml
-frame: C6-code
-title: Context files — instant project memory
-lang: bash
-code: |
-  my-project/
-    .claude/
-      rules/        # project goals, constraints
-    CLAUDE.md        # tech stack, team roles, conventions
-    src/
-    docs/
-```
-
-## 11 · Live demo
-phase: COMMAND
-duration: 18
-
-SAY:
-Alright, enough theory. Let's see how this actually works in the real world. Watch the screen as we run a live cleanup on an unorganized project directory.
-
-DO:
-```yaml
-- action: Open Claude Code in a messy project directory
-  target: Terminal
-- action: Run an agentic organization pass
-  target: "Claude: organize and rename all files using YYYY-MM-DD pattern"
-  note: let the agent work through the directory in real time
-- action: Show the cleaned result
-  target: File explorer showing the organized structure
-```
-
-## 12 · Your move
+## 08 · Your move
 phase: COMMAND
 duration: 7
 
 SAY:
-Your turn. Set up a sandbox folder, drop in a CLAUDE dot md context file, and let Claude organize one real project directory. I'll see you in the next one.
+That's the whole system. Shared context so everyone's on the same page, agentic organization so Claude handles the mess, and admin controls so nothing moves without permission. Set it up once and automate it after. I'll see you in the next one.
 
 SLIDE:
 ```yaml
 frame: O1-outro
 eyebrow: NEXT
-title: Organize your first project folder
-subtitle: Set up the sandbox, add context, and let Claude work
+title: Set up your first Claude workspace
+subtitle: Shared context, agentic org, admin controls — go.
 ```
