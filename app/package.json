@@ -1,0 +1,43 @@
+{
+  "name": "vibedevview-studio",
+  "version": "0.1.0",
+  "description": "vibedevview Studio — desktop UI (markdown/segment editor + live slide preview + Produce/Load/Revise) that drives the vibedevview engine via its CLI.",
+  "type": "module",
+  "main": "out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "typecheck:node": "tsc -p tsconfig.node.json --noEmit",
+    "typecheck:web": "tsc -p tsconfig.web.json --noEmit",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "preview:web": "vite --config vite.web.config.ts",
+    "test": "vitest run",
+    "dist": "electron-vite build && electron-builder"
+  },
+  "dependencies": {
+    "vibedevview": "file:..",
+    "yaml": "^2.6.1"
+  },
+  "devDependencies": {
+    "@codemirror/autocomplete": "^6.18.4",
+    "@codemirror/commands": "^6.7.1",
+    "@codemirror/lang-markdown": "^6.3.1",
+    "@codemirror/language": "^6.10.6",
+    "@codemirror/lint": "^6.8.4",
+    "@codemirror/state": "^6.5.0",
+    "@codemirror/theme-one-dark": "^6.1.2",
+    "@codemirror/view": "^6.36.1",
+    "codemirror": "^6.0.1",
+    "@types/react": "^18.3.17",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^2.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.7.2",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  }
+}
