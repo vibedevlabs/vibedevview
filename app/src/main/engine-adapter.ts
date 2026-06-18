@@ -209,32 +209,159 @@ export function agentDraftArgv(backend: "devin" | "claude", prompt: string): { b
 }
 
 /**
- * The instruction handed to the agent CLI. Pure so the contract is testable.
- * Run from the engine repo root so the agent can read the hgdw-video-production
- * skill + HGDW-DESIGN frame types.
+ * The instruction handed to the agent CLI. Headless single-turn modes
+ * (`devin -p`, `claude -p`) DON'T reliably read repo files, so the full HGDW
+ * `script.md` contract + a worked example are embedded inline here (pure, so the
+ * contract is unit-tested). Without this the agent invents a generic "class
+ * script" with timestamps/instructor labels instead of the SLIDE/SAY format.
  */
 export function buildAgentDraftPrompt(lessonId: string, brief: string): string {
-  return [
-    `You are drafting a vibedevview HGDW lesson script for lesson id "${lessonId}".`,
-    `Topic brief: ${brief}`,
-    ``,
-    `Write a complete, valid HGDW script.md following this repo's`,
-    `.devin/skills/hgdw-video-production skill and the frame types in docs/HGDW-DESIGN.md`,
-    `(SLIDE: blocks with a frame code, SAY: narration, optional DO: directions).`,
-    `Output ONLY the script.md content — no preamble, no explanation, no commentary.`,
-    `If you wrap it in a code fence, use \`\`\`markdown.`,
-  ].join("\n");
+  return `You are drafting a vibedevview "HGDW" lesson script for lesson id "${lessonId}".
+
+Topic brief: ${brief}
+
+Output ONLY a valid HGDW script.md and NOTHING else — no preamble, no explanation,
+no closing remarks. Do NOT use timestamps (e.g. "[00:00]"), speaker/instructor
+labels, headings like "Introduction", bold prose, or any free-form essay. Follow
+this EXACT format.
+
+FORMAT
+- A YAML frontmatter block delimited by --- with: lesson, title, track, voice.
+  Keep lesson="${lessonId}" and voice="Ja'dan".
+- Then a sequence of segments. Each segment is:
+    ## NN · Short label        (NN = zero-padded order: 01, 02, ...; "·" separator)
+    phase: ONE OF [SOURCE, ABSORB, MIRROR, COMMAND]
+    duration: <seconds, integer>
+    SAY:
+    <one or two sentences of spoken narration — plain prose, no labels>
+    SLIDE:
+    \`\`\`yaml
+    frame: <one frame code from the catalog>
+    <fields for that frame>
+    \`\`\`
+- SAY is the narration that is read aloud. SLIDE is the on-screen card. A segment
+  may use DO: (with a \`\`\`yaml list of {action, target, note}) instead of/with a
+  SLIDE for screen-recording/demo steps. A purely visual segment can set
+  "silent: true" and omit SAY.
+- Aim for 8–12 segments: a cold-open (N1-title), an agenda (N5-agenda), content
+  segments, and an outro (O1-outro). Phases should progress SOURCE → ABSORB →
+  MIRROR → COMMAND.
+
+FRAME CODES (frame: value → its fields)
+  N1-title    title, subtitle, eyebrow         (big title card)
+  N2-section  title, eyebrow                    (section divider)
+  N3-quote    title                             (large mantra/quote)
+  N4-vocab    tags[]                            (vocab tags, often silent)
+  N5-agenda   title, body[]                     (roadmap/agenda list)
+  C1-bullets  title, body[]                     (title + bullet list)
+  C2-statement title                            (single big statement)
+  C3-compare  title, columns[]{heading,items[]} (two-column comparison)
+  C4-steps    title, body[]                     (numbered steps)
+  C5-callout  title, body[]                     (callout/warning box)
+  C6-code     title, lang, code                 (code block; code is a literal block)
+  C7-stat     stat, statLabel                   (big stat/number)
+  C8-figure   image, caption                    (image/figure)
+  D1-placeholder eyebrow, title                 (demo placeholder)
+  D2-lowerthird  title, subtitle                (lower-third over a recording)
+  O1-outro    title, subtitle, footer           (closing/CTA card)
+
+WORKED EXAMPLE (format only — write NEW content for the brief above)
+\`\`\`markdown
+---
+lesson: ${lessonId}
+title: <a punchy lesson title from the brief>
+track: BUILD / ABSORB 1
+voice: Ja'dan
+---
+
+## 01 · Cold open
+phase: SOURCE
+duration: 9
+
+SAY:
+By the end of this session you'll do three concrete things most people never do.
+
+SLIDE:
+\`\`\`yaml
+frame: N1-title
+eyebrow: BUILD · ABSORB 1
+title: <Lesson Title>
+subtitle: <one-line subtitle>
+\`\`\`
+
+## 02 · The roadmap
+phase: SOURCE
+duration: 8
+
+SAY:
+Here's where we're headed — four moves.
+
+SLIDE:
+\`\`\`yaml
+frame: N5-agenda
+eyebrow: ROADMAP
+title: Four moves
+body:
+  - First move
+  - Second move
+  - Third move
+  - Fourth move
+\`\`\`
+
+## 03 · Outro
+phase: COMMAND
+duration: 7
+
+SAY:
+Your turn — go try it, and I'll see you in the next one.
+
+SLIDE:
+\`\`\`yaml
+frame: O1-outro
+eyebrow: NEXT
+title: <call to action>
+subtitle: <what's next>
+\`\`\`
+\`\`\`
+
+Now write the complete script.md for "${lessonId}" based on the brief. Wrap the
+entire script in a single \`\`\`markdown code fence and output nothing outside it.`;
 }
 
 /**
- * Extract the script.md from an agent's stdout: prefer the first fenced code
- * block (agents often wrap output in ```markdown), else use the whole text;
- * strip any stray fences and normalize to a single trailing newline.
+ * Extract the script.md from an agent's stdout. An HGDW script contains MANY
+ * inner ```yaml fences (one per SLIDE/DO), so we must NOT grab the first fenced
+ * block — that truncates everything after the cold open. Instead, if the agent
+ * wrapped the whole script in a ```markdown wrapper (optionally with prose around
+ * it), strip from that opening fence to the LAST closing fence, preserving every
+ * inner yaml fence. A bare ``` wrapper is only stripped when it directly wraps
+ * the `---` frontmatter. Otherwise return the text as-is. Always normalize to a
+ * single trailing newline.
  */
 export function cleanScriptMarkdown(raw: string): string {
-  const fence = raw.match(/```(?:markdown|md)?\s*\n([\s\S]*?)\n```/i);
-  const body = fence ? fence[1] : raw;
-  return body.replace(/^```(?:markdown|md)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim() + "\n";
+  const lines = raw.split("\n");
+  // Prefer an explicit markdown wrapper fence (agents often add prose around it).
+  let openIdx = lines.findIndex((l) => /^```(?:markdown|md)\s*$/i.test(l.trim()));
+  // Else a generic fence as the first non-empty line that wraps the frontmatter.
+  if (openIdx === -1) {
+    const firstNonEmpty = lines.findIndex((l) => l.trim() !== "");
+    if (firstNonEmpty !== -1 && /^```[\w-]*$/.test(lines[firstNonEmpty]!.trim())) {
+      const after = lines.slice(firstNonEmpty + 1).find((l) => l.trim() !== "");
+      if (after !== undefined && after.trim().startsWith("---")) openIdx = firstNonEmpty;
+    }
+  }
+  if (openIdx !== -1) {
+    let closeIdx = -1;
+    for (let i = lines.length - 1; i > openIdx; i--) {
+      if (/^```\s*$/.test(lines[i]!.trim())) {
+        closeIdx = i;
+        break;
+      }
+    }
+    const inner = closeIdx !== -1 ? lines.slice(openIdx + 1, closeIdx) : lines.slice(openIdx + 1);
+    return inner.join("\n").trim() + "\n";
+  }
+  return raw.trim() + "\n";
 }
 
 export interface TextCommandOpts {
