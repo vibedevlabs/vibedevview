@@ -418,7 +418,8 @@ For more edge cases and the reasoning behind the defaults, see the
 | [`docs/OPERATOR-GUIDE.md`](docs/OPERATOR-GUIDE.md) | Full authoring reference (all 16 frames + examples), the complete CLI walkthrough, **Devin's role / agent topology**, reset behavior, and production gotchas. |
 | [`HGDW-DESIGN.md`](HGDW-DESIGN.md) | The brand system — wordmark, palette, typography, video spec, and the 16 frame types. |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | How the Orchestrator + agents work (they coordinate only through files). |
-| [`docs/ELECTRON-APP.md`](docs/ELECTRON-APP.md) | Scope for the future desktop app: a markdown script editor with live preview + produce/revise buttons, plus the Palmier AI ("Claude") integration. |
+| [`app/`](app) — **vibedevview Studio** | The desktop app that wraps the engine: structured script editor + live slide preview + produce/revise, no terminal needed. MVP (E0–E3) is built; see [`app/README.md`](app/README.md) to run it. |
+| [`docs/ELECTRON-APP.md`](docs/ELECTRON-APP.md) | Scope + as-built notes for the desktop app: structured editor with live preview + produce/revise buttons, plus the Palmier AI ("Claude") integration. |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Phased build plan with per-team ownership. |
 | [`.devin/skills/`](.devin/skills/) | The skills local Devin auto-loads: `hgdw-video-production` (produce) and `hgdw-revision` (surgical fixes). |
 
@@ -459,3 +460,17 @@ npm run build         # compile to dist/
 npm test              # vitest — parser, alignment, plan, voices, backend
 npm run palmier -- doctor   # run the CLI from source without building
 ```
+
+### Desktop app (vibedevview Studio)
+
+The Electron app lives in [`app/`](app) and is a thin client of this engine (it spawns
+`dist/cli.js --json`). Build the engine first (`npm run build` above), then:
+
+```bash
+cd app
+npm install
+npm run dev          # launch the app (Electron)
+npm run preview:web  # or: renderer-only in a browser, engine actions disabled
+```
+
+Full setup, scripts, and layout are in [`app/README.md`](app/README.md).
