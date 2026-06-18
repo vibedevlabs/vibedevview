@@ -136,40 +136,47 @@ should nudge the user toward a full re-produce instead.
 
 > Mirrors [`ROADMAP.md`](ROADMAP.md) conventions: explicit ownership, **[SEQ]** vs **[PAR]**.
 
-### Phase E0 — Foundations (⬜planned)
+> **Status (MVP landed):** E0–E3 are implemented in [`app/`](../app) and verified on Linux
+> against the **ffmpeg** backend. See [§5a Implementation notes](#5a-implementation-notes-as-built)
+> for the two intentional deviations from this plan. E4 (macOS packaging) and live-Palmier /
+> ElevenLabs verification are the Mac-only follow-up.
 
-| Deliverable | Owner | Stream |
-| --- | --- | --- |
-| Engine `--json` progress event stream (`slide.rendered`, `voice.done`, `assemble.placed`, `error`) | Core Engine Team | **[SEQ]** (UI status hard-depends on it) |
-| Engine adapter decision: in-process vs child-CLI (spike both, pick (b) unless perf forces (a)) | Backend Architecture Team | **[SEQ]** (defines the app↔engine boundary) |
-| Electron shell + secure IPC + secrets via OS keychain (ElevenLabs / LLM keys) | Backend Architecture Team | **[SEQ]** (foundation) |
+### Phase E0 — Foundations (✅ done)
 
-### Phase E1 — Editor + preview (⬜planned)
+| Deliverable | Owner | Stream | Status |
+| --- | --- | --- | --- |
+| Engine `--json` progress event stream (`slide.rendered`, `voice.done`, `assemble.placed`, `error`) | Core Engine Team | **[SEQ]** (UI status hard-depends on it) | ✅ |
+| Engine adapter decision: in-process vs child-CLI | Backend Architecture Team | **[SEQ]** (defines the app↔engine boundary) | ✅ child-CLI |
+| Electron shell + secure IPC | Backend Architecture Team | **[SEQ]** (foundation) | ✅ |
+| Secrets via OS keychain (ElevenLabs / LLM keys) | Backend Architecture Team | **[SEQ]** | ⬜ (Mac follow-up — not needed for ffmpeg/draft) |
 
-| Deliverable | Owner | Stream |
-| --- | --- | --- |
-| Markdown editor (CodeMirror) with `script.md` schema awareness + frame autocomplete | Frontend Integration Team | **[PAR]** |
-| Live slide preview (render the focused segment's frame to a thumbnail via the Slides agent) | Slides & Brand Team | **[PAR]** |
-| Segment list / outline with phase + duration + status chips | Frontend Integration Team | **[PAR]** |
-| Inline validation (surface `parseScript` errors as editor squiggles) | Script & Parsing Team | **[PAR]** |
+### Phase E1 — Editor + preview (✅ done)
 
-### Phase E2 — Produce / Load / status (⬜planned)
+| Deliverable | Owner | Stream | Status |
+| --- | --- | --- | --- |
+| Markdown editor (CodeMirror) with `script.md` schema awareness + frame autocomplete | Frontend Integration Team | **[PAR]** | ✅ |
+| Structured segment-card editor (per-frame fields + SAY/DO) with a `</> Source` raw-markdown toggle | Frontend Integration Team | **[PAR]** | ✅ |
+| Live slide preview (the engine's own `buildDeck()` HTML in a same-origin iframe — exact pixels, no Chromium) | Slides & Brand Team | **[PAR]** | ✅ |
+| Segment list / outline with phase + duration + status chips | Frontend Integration Team | **[PAR]** | ✅ |
+| Inline validation (surface `parseScript` errors as editor squiggles) | Script & Parsing Team | **[PAR]** | ✅ |
 
-| Deliverable | Owner | Stream |
-| --- | --- | --- |
-| Produce button → run engine, stream agent progress to a status panel | Frontend Integration Team | **[SEQ]** (needs E0 event stream) |
-| Load-to-Palmier button + live timeline readback (reuse default clean behavior) | Timeline Integration Team | **[PAR]** |
-| Doctor/preflight panel (green-checks before enabling Produce) | Core Engine Team | **[PAR]** |
+### Phase E2 — Produce / Load / status (🟡 ffmpeg done; Palmier load = Mac follow-up)
 
-### Phase E3 — AI + Revise (⬜planned)
+| Deliverable | Owner | Stream | Status |
+| --- | --- | --- | --- |
+| Produce button → run engine, stream agent progress to a status panel | Frontend Integration Team | **[SEQ]** (needs E0 event stream) | ✅ |
+| Doctor/preflight panel (green-checks before enabling Produce) | Core Engine Team | **[PAR]** | ✅ |
+| Load-to-Palmier button + live timeline readback (reuse default clean behavior) | Timeline Integration Team | **[PAR]** | ⬜ (Mac follow-up) |
 
-| Deliverable | Owner | Stream |
-| --- | --- | --- |
-| "Draft with AI" → engine script drafter (surface 1) | Script & Parsing Team | **[PAR]** |
-| "Revise" button → `palmier correct` with the approval-diff gate | Frontend Integration Team | **[SEQ]** (must enforce Hard Rule #5) |
-| Spike + scope "Generate in Palmier" (`list_models` / `generate_*`, surface 2) | Timeline Integration Team | **[PAR]** (post-MVP) |
+### Phase E3 — AI + Revise (✅ done)
 
-### Phase E4 — Packaging (⬜planned)
+| Deliverable | Owner | Stream | Status |
+| --- | --- | --- | --- |
+| "Draft with AI" → engine script drafter (surface 1) | Script & Parsing Team | **[PAR]** | ✅ |
+| "Revise" button → `palmier correct` with the approval-diff gate | Frontend Integration Team | **[SEQ]** (must enforce Hard Rule #5) | ✅ |
+| Spike + scope "Generate in Palmier" (`list_models` / `generate_*`, surface 2) | Timeline Integration Team | **[PAR]** (post-MVP) | ⬜ |
+
+### Phase E4 — Packaging (⬜ planned — Mac follow-up)
 
 | Deliverable | Owner | Stream |
 | --- | --- | --- |
@@ -182,15 +189,35 @@ produce/load (E2) tracks run largely **[PAR]** across the Frontend, Slides, and 
 
 ---
 
-## 6. Open questions (resolve before E0)
+## 5a. Implementation notes (as built)
 
-1. **Which "Claude feature"?** Confirm whether the priority is (1) engine script drafting
-   (already supported) or (2) Palmier's in-app `generate_*` — the latter needs a schema spike.
-2. **In-process vs child-CLI adapter** — settle in the E0 spike (recommended: child-CLI).
-3. **Where do lesson folders live** relative to the app (keep `~/hgdw-productions`, or an
-   app-managed library with import/export)?
-4. **Multi-machine** — is there ever a need to drive a *remote* Palmier from the app, or is it
-   strictly local (matching the CLI)? Default assumption: strictly local.
+Two intentional deviations from the original plan, both adopted to make the tool genuinely
+non-technical-operator-friendly rather than merely terminal-removed:
+
+1. **Preview is the engine's own deck HTML, not a Slides-agent thumbnail render.** `buildDeck()`
+   already emits a self-contained, brand-accurate HTML deck with one `.frame` section per slide.
+   The Studio loads that HTML into a same-origin `srcdoc` iframe and shows the focused segment by
+   toggling `.is-active` — keystroke-fast, pixel-identical to the produced video, and **zero**
+   Chromium spawn / engine round-trip. (The app's strict CSP blocks the deck's inline navigation
+   script, so the parent drives frame selection directly on the same-origin document, gated on the
+   iframe `load` event.) Parse→deck is pure and browser-safe, so the whole editor+preview slice
+   ships with no engine changes beyond E0.
+2. **Primary editing surface is structured segment cards** (frame-type picker + per-frame fields +
+   SAY box), with a `</> Source` escape hatch to the raw markdown. Hand-writing `SLIDE:` YAML with
+   codes like `C3-compare`/`columns[]` was the real intuitiveness gap. The card↔markdown round-trip
+   is property-tested (`app/test/serialize.test.ts`).
+
+---
+
+## 6. Open questions — resolved
+
+1. **Which "Claude feature"?** → **(1) engine script drafting** for the MVP ("Draft with AI");
+   Palmier's in-app `generate_*` (surface 2) is deferred post-MVP pending a schema spike.
+2. **In-process vs child-CLI adapter** → **child-CLI** (`node cli.js --json`, NDJSON parsed by
+   `app/src/main/engine-adapter.ts`).
+3. **Where do lesson folders live** → keep `~/hgdw-productions` (via `PALMIER_PRODUCTIONS_DIR`);
+   an app-managed library with import/export is a later enhancement.
+4. **Multi-machine** → strictly local, matching the CLI.
 
 ---
 

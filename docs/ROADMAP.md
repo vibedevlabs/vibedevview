@@ -46,25 +46,27 @@ Goal: reliable runs on the iMac workstation with live Palmier Pro, plus real scr
 
 ---
 
-## Phase 2 — Electron app with markdown editor (⬜ planned)
+## Phase 2 — Electron app (vibedevview Studio) (🟡 MVP landed)
 
 Wrap the **existing engine** (no rewrite) in a desktop app the team initiates productions from.
-Full scope, architecture diagrams, AI integration, and the per-team build plan are in
-**[`docs/ELECTRON-APP.md`](ELECTRON-APP.md)**. Summary of the critical path below.
+The app lives in-repo under [`app/`](../app). Full scope, architecture diagrams, AI integration,
+and the per-team build plan are in **[`docs/ELECTRON-APP.md`](ELECTRON-APP.md)**.
 
 | Deliverable | Owner | Stream | Status |
 | --- | --- | --- | --- |
-| Engine `--json` progress event stream (UI status depends on it) | Core Engine Team | **[SEQ]** | ⬜ |
-| Engine adapter (in-process vs child-CLI) + Electron shell + keychain secrets | Backend Architecture Team | **[SEQ]** (foundation) | ⬜ |
-| Markdown editor (`script.md` schema + frame autocomplete) + live slide preview | Frontend Integration Team / Slides & Brand Team | **[PAR]** | ⬜ |
-| Produce / Load-to-Palmier buttons + live status panel | Frontend / Timeline Integration Team | **[SEQ]** (needs event stream) | ⬜ |
-| "Draft with AI" (engine script drafter) + "Revise" → `palmier correct` w/ approval gate | Script & Parsing / Frontend Integration Team | **[PAR]** | ⬜ |
+| **E0** Engine `--json` progress event stream (UI status depends on it) | Core Engine Team | **[SEQ]** | ✅ |
+| **E2** Engine adapter (child-CLI + NDJSON) + Electron shell | Backend Architecture Team | **[SEQ]** (foundation) | ✅ |
+| **E1** Structured segment editor + raw markdown source + frame autocomplete + live slide preview | Frontend Integration Team / Slides & Brand Team | **[PAR]** | ✅ |
+| **E2** Produce + live status panel + Doctor (ffmpeg backend verified) | Frontend / Timeline Integration Team | **[SEQ]** (needs event stream) | ✅ |
+| **E3** "Draft with AI" (engine script drafter) + "Revise" → `palmier correct` w/ diff approval gate | Script & Parsing / Frontend Integration Team | **[PAR]** | ✅ |
+| Live Palmier backend Load/Revise verification (Mac-only) | Timeline Integration Team | **[SEQ]** | ⬜ (Mac follow-up) |
 | Scope "Generate in Palmier" (`list_models` / `generate_*`) after schema spike | Timeline Integration Team | **[PAR]** (post-MVP) | ⬜ |
-| Packaging / notarization / auto-update | Backend Architecture Team | **[SEQ]** (release gate) | ⬜ |
+| **E4** Packaging / notarization / auto-update | Backend Architecture Team | **[SEQ]** (release gate) | ⬜ (Mac follow-up) |
 
-**Parallelism note:** the engine event stream + adapter/shell **[SEQ]** must land first; then the
-editor/preview and produce/load tracks run largely **[PAR]**. See the scope doc for the full
-phased breakdown (E0–E4).
+**Parallelism note:** the engine event stream + adapter/shell **[SEQ]** landed first; then the
+editor/preview and produce/status tracks ran largely **[PAR]**. The MVP (E0–E3) is built and
+verified on Linux against the ffmpeg backend; ElevenLabs voices, live Palmier load/correct, and
+notarized macOS packaging (E4) are the remaining Mac-only follow-up.
 
 ---
 
