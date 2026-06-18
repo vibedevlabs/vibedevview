@@ -45,6 +45,17 @@ npm install
 npm run dev          # launch the Electron app (electron-vite dev)
 ```
 
+> **If `npm run dev` fails with `Error: Electron uninstall`:** your npm is configured to
+> skip package install scripts (you'll have seen `npm warn allow-scripts … electron@… (postinstall: node install.js)`
+> during `npm install`). Electron's postinstall is what downloads its binary, so it must run.
+> Run it once, then start the app:
+> ```bash
+> node node_modules/electron/install.js   # downloads the Electron binary the postinstall skipped
+> npm run dev
+> ```
+> (Alternatively, allow the script and reinstall: `npm install --foreground-scripts`, or approve
+> `electron` in whatever allow-scripts tool your npm uses.)
+
 To exercise just the renderer (editor + preview + validation) in a browser, without Electron:
 
 ```bash

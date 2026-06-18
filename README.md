@@ -155,13 +155,21 @@ you skipped `npm link`, use `node dist/cli.js` anywhere this guide says `palmier
 The voiceover uses [ElevenLabs](https://elevenlabs.io). Create a free account, then
 **Profile → API Keys → copy your key.**
 
+Your key looks like `sk_xxxxxxxx…`. In the commands below, **replace the whole word
+`PASTE_KEY_HERE` with your key** — don't leave any placeholder text in front of it (a value
+like `sk_your_key_heresk_abc…` is the #1 cause of a `doctor` 401):
+
 ```bash
-# Paste your key after the = sign (no spaces, no quotes needed).
-export ELEVENLABS_API_KEY=sk_your_key_here
+# Replace PASTE_KEY_HERE with your actual key (no spaces, no quotes needed).
+export ELEVENLABS_API_KEY=PASTE_KEY_HERE
 
 # Make it permanent so you don't re-do this every terminal session:
-echo 'export ELEVENLABS_API_KEY=sk_your_key_here' >> ~/.zshrc
+echo "export ELEVENLABS_API_KEY=$ELEVENLABS_API_KEY" >> ~/.zshrc
 ```
+
+> Verify it took — this should print your key, with no `sk_your_key_here`/`PASTE_KEY_HERE`
+> prefix: `echo "$ELEVENLABS_API_KEY"`. If `palmier doctor` still says `auth failed (401)`,
+> the value is wrong (usually a leftover placeholder) — re-run the `export` with only the key.
 
 > **The default voice is "Ja'dan"** (set in each script's frontmatter). It must exist in the
 > ElevenLabs account your key belongs to. To use a different voice for a run, set
@@ -553,8 +561,10 @@ See [`.env.example`](.env.example) for a copy-paste starting point.
 
 | Symptom | Why | Fix |
 | --- | --- | --- |
+| `palmier doctor` says ElevenLabs `auth failed (401)` | the key value is wrong — usually a leftover placeholder, e.g. `sk_your_key_heresk_…` from pasting after the example | re-run `export ELEVENLABS_API_KEY=<only your key>`; verify with `echo "$ELEVENLABS_API_KEY"` (no placeholder prefix) |
 | `palmier doctor` says ElevenLabs voice not found | the voice isn't in your key's account | use `PALMIER_VOICE="<a voice you own>"`, or add the voice in ElevenLabs |
 | Voice line is silent in the output | no/invalid `ELEVENLABS_API_KEY`, or voice missing | set the key; the run still completes with timed silent holds (and flags it) |
+| Studio: `npm run dev` fails with `Error: Electron uninstall` | your npm skipped Electron's postinstall (allow-scripts), so its binary wasn't downloaded | `cd app && node node_modules/electron/install.js`, then `npm run dev` |
 | Palmier line in `doctor` says "not running" | Palmier isn't open with a project | open Palmier Pro → New project (only needed for live-timeline runs) |
 | Clips don't appear on the timeline | wrong backend | add `PALMIER_TIMELINE=palmier` (or `-b palmier`) and confirm Palmier is open |
 | Re-running stacked duplicate tracks | you used `--no-clean` | re-run without it — the default clears first |
@@ -631,4 +641,6 @@ npm run dev          # launch the app (Electron)
 npm run preview:web  # or: renderer-only in a browser, engine actions disabled
 ```
 
-Full setup, scripts, and layout are in [`app/README.md`](app/README.md).
+If `npm run dev` fails with `Error: Electron uninstall`, your npm skipped Electron's
+install script — run `node node_modules/electron/install.js` once, then `npm run dev`.
+Full setup, scripts, layout, and troubleshooting are in [`app/README.md`](app/README.md).
