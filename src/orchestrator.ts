@@ -20,6 +20,8 @@ export interface ProduceOptions {
   review?: boolean; // stop for human review after generating a fresh script
   placeholders?: boolean;
   renderer?: RendererOptions;
+  clean?: boolean; // clear the timeline before assembling (palmier: avoids stacking duplicate tracks)
+  cleanMedia?: boolean; // with clean, also delete previously imported assets from the bin
 }
 
 export interface ProductionResult {
@@ -87,6 +89,11 @@ export async function produce(lessonId: string, opts: ProduceOptions = {}): Prom
   const plan = buildPlan(manifest, alignment, timeline, recording, ws);
   await writeProjectFile(ws, plan);
   const backend = makeBackend(chooseBackendName(opts.backend));
+  if (opts.clean && backend.clear) {
+    log.step("orchestrator", "clearing timeline before assemble (--clean)");
+    const cleared = await backend.clear({ media: opts.cleanMedia });
+    log.info("orchestrator", `removed ${cleared.removedClips} clip(s), ${cleared.deletedMedia} media asset(s)`);
+  }
   log.step("orchestrator", `assembling via ${backend.name} backend`);
   const assemble = await backend.assemble(plan, ws);
 

@@ -36,11 +36,29 @@ export interface AssembleResult {
   notes?: string[];
 }
 
+export interface ClearOptions {
+  /** Also delete imported assets from the project media bin, not just timeline clips. */
+  media?: boolean;
+}
+
+export interface ClearResult {
+  removedClips: number;
+  deletedMedia: number;
+}
+
 export interface TimelineBackend {
   readonly name: string;
   assemble(plan: TimelinePlan, ws: Workspace): Promise<AssembleResult>;
   /** Replace a single segment's clips (correction loop). Optional. */
   swap?(plan: TimelinePlan, segId: string, ws: Workspace): Promise<void>;
+  /**
+   * Reset the backing timeline (and optionally the media bin). Only backends
+   * with a persistent project — i.e. palmier — implement this; the ffmpeg
+   * backend re-renders a fresh file each run and so has nothing to clear.
+   */
+  clear?(opts?: ClearOptions): Promise<ClearResult>;
+  /** Release any held connection. Optional. */
+  close?(): Promise<void>;
 }
 
 /**

@@ -28,12 +28,16 @@ program
   .option("--cdp-url <url>", "CDP endpoint when --renderer=cdp")
   .option("--no-placeholders", "do not render placeholders for missing recordings")
   .option("--no-review", "do not stop for human review after generating a script")
+  .option("--clean", "clear the timeline before assembling (palmier: avoids stacking duplicate tracks)")
+  .option("--clean-media", "with --clean, also delete previously imported assets from the bin")
   .action(async (lessonId, o) => {
     const res = await produce(lessonId, {
       backend: o.backend as BackendName | undefined,
       review: o.review,
       placeholders: o.placeholders,
       renderer: rendererOpts(o),
+      clean: o.clean,
+      cleanMedia: o.cleanMedia,
     });
     process.stdout.write(JSON.stringify(res, null, 2) + "\n");
   });
@@ -87,6 +91,8 @@ program
   .description("(Re)assemble the timeline from already-produced assets")
   .argument("<lessonId>")
   .option("-b, --backend <name>", "ffmpeg | palmier")
+  .option("--clean", "clear the timeline before placing (palmier: avoids stacking duplicate tracks)")
+  .option("--clean-media", "with --clean, also delete previously imported assets from the bin")
   .action(async (lessonId, o) => {
     const { computeAlignment } = await import("./alignment.js");
     const { buildPlan, makeBackendForCli } = await loadAssembleDeps();
@@ -98,7 +104,30 @@ program
     const recording = (await ws.exists(ws.recordingManifestPath)) ? await ws.readRecordingManifest() : undefined;
     const plan = buildPlan(manifest, alignment, timeline, recording, ws);
     const backend = makeBackendForCli((o.backend as BackendName) ?? undefined);
+    if (o.clean && backend.clear) {
+      const cleared = await backend.clear({ media: Boolean(o.cleanMedia) });
+      log.info("cli", `cleared ${cleared.removedClips} clip(s), ${cleared.deletedMedia} media asset(s)`);
+    }
     const res = await backend.assemble(plan, ws);
+    process.stdout.write(JSON.stringify(res, null, 2) + "\n");
+  });
+
+program
+  .command("clear")
+  .description("Clear the Palmier timeline (and optionally the media bin) — reset between takes/lessons")
+  .option("-b, --backend <name>", "ffmpeg | palmier (default: palmier)")
+  .option("--media", "also delete imported assets from the project media bin")
+  .action(async (o) => {
+    const { makeBackend } = await import("./orchestrator.js");
+    const name =
+      (o.backend as BackendName) ?? ((process.env.PALMIER_TIMELINE as BackendName) === "ffmpeg" ? "ffmpeg" : "palmier");
+    const backend = makeBackend(name);
+    if (!backend.clear) {
+      log.warn("cli", `the ${backend.name} backend has no persistent timeline to clear`);
+      return;
+    }
+    const res = await backend.clear({ media: Boolean(o.media) });
+    await backend.close?.();
     process.stdout.write(JSON.stringify(res, null, 2) + "\n");
   });
 
