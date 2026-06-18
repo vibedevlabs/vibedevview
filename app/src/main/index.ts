@@ -24,6 +24,7 @@ function registerIpc(): void {
   ipcMain.handle("studio:draft", (_e, req: DraftRequest) => adapter.draft(req));
   ipcMain.handle("studio:produce", (_e, req: ProduceRequest) => adapter.produce(req, broadcast));
   ipcMain.handle("studio:correct", (_e, req: CorrectRequest) => adapter.correct(req, broadcast));
+  ipcMain.handle("studio:deliverPreview", (_e, id: string) => adapter.deliverPreview(id));
   ipcMain.handle("studio:slideUrl", async (_e, id: string, frameId: string) => {
     const p = await adapter.slidePath(id, frameId);
     return p ? pathToFileURL(p).href : null;

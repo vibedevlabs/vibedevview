@@ -10,6 +10,7 @@ import { SegmentForm } from "./components/SegmentForm";
 import { Doctor } from "./components/Doctor";
 import { ReviseDialog } from "./components/ReviseDialog";
 import { DraftWithAI } from "./components/DraftWithAI";
+import { DeliverDialog } from "./components/DeliverDialog";
 import { StatusPanel, initialRunState, type RunState } from "./components/StatusPanel";
 import type { Segment } from "vibedevview/types";
 import type { BackendName, EngineEvent } from "../shared/ipc";
@@ -24,7 +25,7 @@ export function App(): React.JSX.Element {
   const [mode, setMode] = useState<EditorMode>("structured");
   const [backend, setBackend] = useState<BackendName>("ffmpeg");
   const [run, setRun] = useState<RunState>(initialRunState);
-  const [modal, setModal] = useState<"doctor" | "revise" | "draft" | null>(null);
+  const [modal, setModal] = useState<"doctor" | "revise" | "draft" | "deliver" | null>(null);
 
   // Load lesson list + first lesson on mount.
   useEffect(() => {
@@ -116,6 +117,9 @@ export function App(): React.JSX.Element {
           Revise segment
         </button>
         <button onClick={() => setModal("doctor")}>Doctor</button>
+        <button onClick={() => setModal("deliver")} disabled={!lessonId}>
+          Deliver
+        </button>
         <button onClick={save} disabled={!lessonId}>
           Save
         </button>
@@ -167,6 +171,7 @@ export function App(): React.JSX.Element {
       <StatusPanel state={run} />
 
       {modal === "doctor" && <Doctor onClose={() => setModal(null)} />}
+      {modal === "deliver" && lessonId && <DeliverDialog lessonId={lessonId} onClose={() => setModal(null)} />}
       {modal === "revise" && lessonId && activeSeg && (
         <ReviseDialog
           lessonId={lessonId}

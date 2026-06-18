@@ -21,6 +21,10 @@ load/correct are a Mac-only follow-up.
 - **Doctor** — preflight checks before producing.
 - **Draft with AI** and **Revise** — generate or surgically correct a script; both show a diff and
   require approval before anything is written (Hard Rule #5).
+- **Deliver** — runs the deliver chain (export → publish → attach + moments) as a **dry-run-only**
+  preview: the ffprobe export verdict, the Mux publish dry-run, and the LMS moments + SQL it *would*
+  write. It uploads nothing and writes no database; a real publish/attach (`--apply`) stays a
+  CLI/Devin step, so the GUI can never trip the engine's two-gate write.
 
 ## Prerequisites
 

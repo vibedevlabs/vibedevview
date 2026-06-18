@@ -238,6 +238,27 @@ timestamps. By default the timeline + media bin are cleared first (see Part 3).
 > [appendix](#appendix--driving-a-remote-mac-over-ssh). For a team, the recommended path is
 > that each person runs locally on their own Mac (above), with no SSH or Tailscale.
 
+### C. vibedevview Studio (the desktop app — no terminal)
+
+For operators who'd rather not touch the terminal, **vibedevview Studio** is a desktop GUI that
+wraps this exact engine. It's a thin client: every button spawns the same `palmier` CLI with
+`--json` and renders the streamed events, so there's no second copy of the logic to drift.
+
+```bash
+cd vibedevview/app
+npm install
+npm run dev            # launches the Electron app
+# or: npm run preview:web   # renderer-only, in a browser (editor + live preview; engine actions disabled)
+```
+
+It gives you a structured **segment-card editor** with a `</>` raw-source toggle, a pixel-accurate
+**live slide preview** (the engine's own deck HTML), **Produce** with a streaming status bar,
+**Doctor**, surgical **Revise** (with the diff-approval gate), **Draft with AI**, and a **Deliver**
+panel. The Deliver panel is **dry-run only** — it exports the MP4 and previews publish/attach
+(the SQL it *would* write), but never uploads to Mux or writes a database; real `--apply` writes
+stay a CLI/Devin step (§4.1). The app needs the engine built first (`npm install && npm run build`
+in the repo root). See [`app/README.md`](../app/README.md).
+
 ---
 
 ## Launching via Devin (CLI or Desktop)

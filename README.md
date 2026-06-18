@@ -71,19 +71,22 @@ Two facts that explain *everything* else in this guide:
    exactly how this is designed, and it means **no servers, no Tailscale, no networking** — it
    all happens locally on your laptop.
 
-### Two ways to run it — pick one
+### Three ways to run it — pick one
 
-| | **A. Devin (recommended)** | **B. The `palmier` command line** |
-| --- | --- | --- |
-| **Who it's for** | Everyone. You describe what you want in plain English. | People comfortable typing commands. |
-| **How you drive it** | Open the project in **Devin CLI** or **Devin Desktop**, then say e.g. *"Draft a script for a lesson on prompting, then load it onto Palmier."* | You run `palmier produce <LESSON_ID>` yourself. |
-| **Who writes the script** | Devin drafts it from your topic (you approve), or you paste your own. | You write the script, or the engine's built-in drafter does (needs an LLM key). |
-| **Setup** | Part 1 **+** install Devin (one command). | Part 1 only. |
+| | **A. Devin (recommended)** | **B. The `palmier` command line** | **C. vibedevview Studio (the app)** |
+| --- | --- | --- | --- |
+| **Who it's for** | Everyone. You describe what you want in plain English. | People comfortable typing commands. | People who want a GUI — no terminal, see every slide live. |
+| **How you drive it** | Open the project in **Devin CLI** or **Devin Desktop**, then say e.g. *"Draft a script for a lesson on prompting, then load it onto Palmier."* | You run `palmier produce <LESSON_ID>` yourself. | Open the desktop app and use buttons: edit → preview → Produce → Revise → Deliver. |
+| **Who writes the script** | Devin drafts it from your topic (you approve), or you paste your own. | You write the script, or the engine's built-in drafter does (needs an LLM key). | You edit in structured cards (or raw source), or click **Draft with AI**. |
+| **Setup** | Part 1 **+** install Devin (one command). | Part 1 only. | Part 1, then run the app from source (see [`app/README.md`](app/README.md)). |
 
-Both run **entirely on your own Mac** — no remote machine, no Tailscale. We recommend **A
-(Devin)** because you never have to remember commands; Devin already knows this workflow (the
-repo ships it a skill file). The rest of this guide shows both. **Where a step differs, look
-for the 🅰️ Devin and 🅱️ CLI labels.**
+All three run **entirely on your own Mac** — no remote machine, no Tailscale. They're the same
+engine underneath: Devin and Studio both just drive the `palmier` commands for you. We recommend
+**A (Devin)** because you never have to remember commands; Devin already knows this workflow (the
+repo ships it a skill file). **C (Studio)** is the no-terminal GUI — it wraps the exact same
+commands behind an editor + live preview + Produce/Revise/Deliver panels. The rest of this guide
+shows the CLI/Devin steps; **where a step differs, look for the 🅰️ Devin and 🅱️ CLI labels, and
+the 🖥️ Studio note shows the equivalent in the app.**
 
 ### What to expect (so there are no surprises)
 
@@ -270,6 +273,10 @@ palmier script DEMO-1                        # drafts + validates script.md
 > **Important:** the drafter only writes `script.md` **if one doesn't already exist** — your
 > hand-edited script is always the source of truth and is never overwritten.
 
+> **🖥️ Studio:** open the app, pick the lesson, and edit in structured **segment cards** (one
+> card per slide, with a SAY box) or flip to **`</>` Source** for raw markdown — every change
+> re-renders the live slide preview instantly. **Draft with AI** is Option C from a topic brief.
+
 ---
 
 ## Part 3 — Produce the video
@@ -298,6 +305,9 @@ Palmier (Part 4).
 > **Voice** calls ElevenLabs and measures the real clip length (that length, not your
 > `duration:`, is what aligns the timeline); **Recording** makes a placeholder for any `DO:`
 > segment instead of ever faking footage.
+
+> **🖥️ Studio:** click **Produce** (the backend selector picks *ffmpeg (preview)* or *palmier
+> (Mac)*). The status bar streams the same script → slides → voice → assemble events live.
 
 ---
 
@@ -363,6 +373,10 @@ PALMIER_TIMELINE=palmier palmier correct DEMO-1 --kind slide --seg 04
 **revision** skill: it finds the segment, gets your approval before changing any wording, swaps
 the single clip, and verifies only that clip changed. It will **not** rebuild the whole lesson
 for a one-line fix. (See [`.devin/skills/hgdw-revision`](.devin/skills/hgdw-revision/SKILL.md).)
+
+> **🖥️ Studio:** select the segment, click **Revise**, and pick what changed (narration / slide
+> / recording / retime). If your edit changes `script.md`, Studio shows the diff and requires
+> explicit approval before it writes and re-renders just that one segment.
 
 ---
 
@@ -471,6 +485,12 @@ A real write also refuses to run without a Mux playback id (so you never publish
 null video — `publish` first). The reviewable JSON + SQL files are written every time, regardless of
 target. See the [Operator Guide](docs/OPERATOR-GUIDE.md#part-4--deliver-export--publish--attach--moments)
 for the full safety model and the `api` endpoint request/response contract.
+
+> **🖥️ Studio:** the **Deliver** panel runs this chain in **dry-run only**: it exports the MP4
+> (with the ffprobe verdict), previews the Mux publish, and shows the moments + LMS SQL it *would*
+> write — uploading nothing and changing no database. A real publish (`--target mux`) or real
+> attach (`--target api|supabase --apply`) stays a deliberate CLI / Devin step, so the GUI can
+> never trip the two-gate write.
 
 ---
 

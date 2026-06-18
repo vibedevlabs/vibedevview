@@ -89,6 +89,11 @@ const stub: StudioApi = {
   draft: async () => SAMPLE_SCRIPT,
   produce: async () => ({ ok: false, error: "Produce requires the desktop app (Electron)." }),
   correct: async () => ({ ok: false, error: "Revise requires the desktop app (Electron)." }),
+  deliverPreview: async () => ({
+    export: { ok: false, error: "Deliver requires the desktop app (Electron)." },
+    publish: { ok: false, error: "Deliver requires the desktop app (Electron)." },
+    attach: { ok: false, error: "Deliver requires the desktop app (Electron)." },
+  }),
   onEvent: (_handler: (e: EngineEvent) => void) => () => {},
   slideUrl: async () => null,
 };

@@ -39,6 +39,24 @@ palmier produce <LESSON_ID>         # full pipeline → videos/<LESSON_ID>-previ
 - `produce` pauses for human review after the script is parsed. Pass `--no-review` for an
   unattended end-to-end run.
 
+## Deliver a finished lesson (export → publish → attach)
+
+Once a cut is approved, `palmier export|publish|moments|attach <LESSON_ID>` carry it to the LMS:
+`export` flattens one ffprobe-verified MP4, `publish` uploads to Mux (dry-run unless `--target
+mux`), `attach` writes the lesson + interactive moments (dry-run unless **both** `--target
+api|supabase` **and** `--apply`). Safe by default — nothing is uploaded or written without those
+explicit flags. Full safety model + the `moments.yaml` schema + the `api` endpoint contract are in
+the [Operator Guide Part 4](../../../docs/OPERATOR-GUIDE.md#part-4--deliver-export--publish--attach--moments).
+
+## GUI alternative — vibedevview Studio
+
+If the operator prefers a desktop app over the terminal, **vibedevview Studio** (`app/`) wraps this
+same engine: structured script editor + live slide preview + **Produce** / **Revise** / **Doctor**
+/ **Draft with AI** / **Deliver** buttons. It's a thin client — it spawns this CLI with `--json`
+and renders the streamed events, so behavior is identical (its **Deliver** panel stays dry-run
+only). Build the engine first (`npm install && npm run build`), then `cd app && npm install &&
+npm run dev`. See [`app/README.md`](../../../app/README.md).
+
 ## Timeline + media bin behavior (defaults)
 
 - **`assemble`/`produce` clear the timeline AND reset the media bin by default**, then import

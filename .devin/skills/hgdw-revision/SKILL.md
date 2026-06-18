@@ -56,6 +56,11 @@ reach the Mac's Palmier or its on-disk assets, so revision must happen where the
    voiceover length is sane (if narration).
 6. **Report** one line: `seg <id> · <kind> · <old span> → <new span>`.
 
+> **GUI alternative — vibedevview Studio:** the same surgical loop is the app's **Revise** dialog.
+> The operator selects the segment, picks the `--kind`, and Studio enforces this exact contract —
+> if the edit changes `script.md` it shows the diff and blocks on explicit approval (Hard Rule #5)
+> before writing and running `palmier correct --seg`. It drives this CLI; behavior is identical.
+
 ## Hard rules (inherited from hgdw-video-production)
 
 1. Never fake a screen recording — emit a labeled `D1` placeholder and flag it.

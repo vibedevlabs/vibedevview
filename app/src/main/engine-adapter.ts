@@ -4,11 +4,16 @@ import { promises as fs } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 import type {
+  AttachResult,
   CorrectRequest,
+  DeliverOutcome,
+  DeliverPreview,
   DoctorResult,
   DraftRequest,
   EngineEvent,
+  ExportResult,
   ProduceRequest,
+  PublishResult,
   RunResult,
   StatusResult,
 } from "../shared/ipc";
@@ -125,6 +130,57 @@ export function runJsonCommand<T>(opts: Omit<SpawnOpts, "onEvent">): Promise<T> 
   });
 }
 
+/**
+ * Run a command that prints a single (possibly pretty-printed, multi-line) JSON
+ * object and parse the WHOLE stdout. The deliver commands (export/publish/
+ * moments/attach) print `JSON.stringify(res, null, 2)`, so — unlike doctor/
+ * status — the last line alone isn't valid JSON. No `--json` flag is added;
+ * these commands aren't part of the NDJSON progress stream.
+ */
+export function runJsonObjectCommand<T>(opts: Omit<SpawnOpts, "onEvent">): Promise<T> {
+  const cliPath = opts.cliPath ?? resolveEngine().cliPath;
+  return new Promise<T>((resolve, reject) => {
+    const child = spawn(opts.nodeBin, [cliPath, ...opts.args], {
+      env: { ...process.env, ...opts.env },
+    });
+    let out = "";
+    let err = "";
+    child.stdout.on("data", (c) => (out += c));
+    child.stderr.on("data", (c) => (err += c));
+    child.on("error", reject);
+    child.on("close", () => {
+      const text = out.trim();
+      if (!text) return reject(new Error(err.trim().split("\n").slice(-1)[0] || "no output"));
+      try {
+        resolve(JSON.parse(text) as T);
+      } catch (e) {
+        reject(new Error(`bad JSON from engine: ${(e as Error).message}; stderr: ${err.slice(-200)}`));
+      }
+    });
+  });
+}
+
+/** The three deliver steps the GUI runs, all in safe-by-default (dry-run) mode. */
+export type DeliverStep = "export" | "publish" | "attach";
+
+/**
+ * The exact CLI argv for a GUI deliver step. This is the single source of the
+ * safety contract: `publish` is pinned to `--target dryrun` and `attach` to
+ * `--target sql`, and **no step ever emits `--apply`** or a real target
+ * (`mux`/`api`/`supabase`). So a GUI click can never trip the engine's
+ * write-gate, regardless of `PALMIER_PUBLISH_TARGET`/`PALMIER_ATTACH_TARGET`.
+ */
+export function deliverArgs(step: DeliverStep, lessonId: string): string[] {
+  switch (step) {
+    case "export":
+      return ["export", lessonId];
+    case "publish":
+      return ["publish", lessonId, "--target", "dryrun"];
+    case "attach":
+      return ["attach", lessonId, "--target", "sql"];
+  }
+}
+
 /** High-level adapter bound to a node binary + env, used by the IPC handlers. */
 export class EngineAdapter {
   constructor(
@@ -185,6 +241,52 @@ export class EngineAdapter {
       args: ["correct", req.lessonId, "--kind", req.kind, "--seg", req.segId, "--backend", req.backend],
       onEvent,
     });
+  }
+
+  /** `palmier export <id>` — flatten produced assets into one ffprobe-verified MP4. */
+  exportLesson(lessonId: string): Promise<ExportResult> {
+    return runJsonObjectCommand<ExportResult>({ nodeBin: this.nodeBin, env: this.baseEnv, args: deliverArgs("export", lessonId) });
+  }
+
+  /**
+   * `palmier publish <id> --target dryrun` — always dry-run from the GUI.
+   * `--target dryrun` is passed explicitly so an inherited `PALMIER_PUBLISH_TARGET=mux`
+   * can never turn a GUI click into a real upload.
+   */
+  publish(lessonId: string): Promise<PublishResult> {
+    return runJsonObjectCommand<PublishResult>({
+      nodeBin: this.nodeBin,
+      env: this.baseEnv,
+      args: deliverArgs("publish", lessonId),
+    });
+  }
+
+  /**
+   * `palmier attach <id> --target sql` — the dry-run LMS preview. `--target sql`
+   * is forced and `--apply` is never passed, so the double-gate (target+apply+
+   * playbackId) can't be tripped from the GUI; it only emits reviewable SQL/JSON.
+   */
+  attachPreview(lessonId: string): Promise<AttachResult> {
+    return runJsonObjectCommand<AttachResult>({
+      nodeBin: this.nodeBin,
+      env: this.baseEnv,
+      args: deliverArgs("attach", lessonId),
+    });
+  }
+
+  /** Staged, dry-run deliver preview for the Deliver panel. Each step degrades to an error string. */
+  async deliverPreview(lessonId: string): Promise<DeliverPreview> {
+    const step = async <T>(run: () => Promise<T>): Promise<DeliverOutcome<T>> => {
+      try {
+        return { ok: true, value: await run() };
+      } catch (e) {
+        return { ok: false, error: (e as Error).message };
+      }
+    };
+    const exp = await step(() => this.exportLesson(lessonId));
+    const pub = await step(() => this.publish(lessonId));
+    const att = await step(() => this.attachPreview(lessonId));
+    return { export: exp, publish: pub, attach: att };
   }
 
   async slidePath(lessonId: string, frameId: string): Promise<string | null> {

@@ -127,3 +127,14 @@ button.danger { border-color: var(--bad); color: var(--bad); }
 .doctor-row .name { font-weight: 700; min-width: 180px; }
 .doctor-row .detail { color: var(--soft); font-size: 12px; }
 .doctor-row .fix { color: var(--yellow); font-size: 12px; }
+
+/* ── deliver ── */
+.deliver-steps { display: flex; flex-direction: column; gap: 10px; }
+.deliver-step { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--panel-2); }
+.deliver-step-head { display: flex; align-items: center; gap: 8px; }
+.deliver-step-title { font-weight: 700; }
+.deliver-step-body { margin-top: 6px; }
+.deliver-step .kv { display: flex; flex-direction: column; gap: 3px; font-size: 12px; }
+.deliver-step .kv code { font-family: var(--mono); color: var(--soft); word-break: break-all; }
+.deliver-step .verdict.ok { color: var(--ok); }
+.deliver-step .verdict.bad { color: var(--bad); }
