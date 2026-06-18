@@ -172,6 +172,20 @@ describe("runTextCommand", () => {
   it("rejects with a clear message when the binary is missing", async () => {
     await expect(runTextCommand({ bin: "no-such-bin-xyz123", args: [] })).rejects.toThrow(/not found on PATH/);
   });
+
+  // Regression: agents like `claude -p` read stdin in print mode. If we don't
+  // close the child's stdin it blocks forever waiting for input. With stdin
+  // ignored (/dev/null) the agent gets immediate EOF and completes. A short
+  // timeout makes the hang (the bug) observable: it would reject on timeout.
+  it("does not hang when the agent reads stdin to completion (stdin is closed)", async () => {
+    const out = await runTextCommand({
+      bin: process.execPath,
+      args: [fakeAgent, "-p", "--", "x"],
+      env: { FAKE_AGENT_READ_STDIN: "1" },
+      timeoutMs: 4000,
+    });
+    expect(out).toContain("STDIN-EOF");
+  });
 });
 
 /**
