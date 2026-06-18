@@ -78,6 +78,7 @@ const stub: StudioApi = {
   listLessons: async () => ["DEMO-1"],
   readScript: async () => SAMPLE_SCRIPT,
   writeScript: async () => {},
+  newLesson: async (id: string) => id,
   status: async () => ({ lessonId: "DEMO-1", title: "Build With AI", totalDuration: null, segments: [] }),
   doctor: async () => ({
     ok: false,
@@ -86,7 +87,7 @@ const stub: StudioApi = {
       { name: "Palmier Pro MCP", ok: false, detail: "not running (browser stub)", fix: "open the desktop app on your Mac" },
     ],
   }),
-  draft: async () => SAMPLE_SCRIPT,
+  draft: async () => ({ script: SAMPLE_SCRIPT, backend: "llm" as const }),
   produce: async () => ({ ok: false, error: "Produce requires the desktop app (Electron)." }),
   correct: async () => ({ ok: false, error: "Revise requires the desktop app (Electron)." }),
   deliverPreview: async () => ({

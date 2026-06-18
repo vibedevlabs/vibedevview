@@ -19,8 +19,10 @@ load/correct are a Mac-only follow-up.
 - **Produce + live status** — runs the engine and streams phase/slide/voice progress (ffmpeg
   backend verified; Palmier backend is the Mac follow-up).
 - **Doctor** — preflight checks before producing.
+- **+ New lesson** — scaffold a production folder (seeded with the example script) right from the
+  toolbar; no need to drop to `palmier init` in a terminal first.
 - **Draft with AI** and **Revise** — generate or surgically correct a script; both show a diff and
-  require approval before anything is written (Hard Rule #5).
+  require approval before anything is written (Hard Rule #5). See **AI drafting backends** below.
 - **Deliver** — runs the deliver chain (export → publish → attach + moments) as a **dry-run-only**
   preview: the ffprobe export verdict, the Mux publish dry-run, and the LMS moments + SQL it *would*
   write. It uploads nothing and writes no database; a real publish/attach (`--apply`) stays a
@@ -54,6 +56,42 @@ To exercise just the renderer (editor + preview + validation) in a browser, with
 ```bash
 npm run preview:web  # vite dev server; engine actions are disabled in browser mode
 ```
+
+## AI drafting backends
+
+"Draft with AI" needs a brain. It's pluggable via `PALMIER_DRAFT_BACKEND` (default `auto`):
+
+| `PALMIER_DRAFT_BACKEND` | What it does |
+| --- | --- |
+| `auto` (default) | Use a local agent CLI on PATH — prefer **`devin`**, then **`claude`** — else fall back to `llm`. |
+| `devin` | Shell out to `devin -p` (Devin headless single-turn). Uses your Devin login; **no API key**. |
+| `claude` | Shell out to `claude -p` (Claude Code print mode). Uses your Claude subscription; **no API key**. |
+| `llm` | The engine's API-key drafter (`PALMIER_LLM_API_KEY`). |
+
+So if you're logged into the `devin` or `claude` CLI, drafting works key-free out of the box. The
+agent is run from the engine repo root so it can read the `hgdw-video-production` skill and the
+`HGDW-DESIGN` frame types; the app strips any ```` ```markdown ```` fence and feeds the result into
+the same diff-and-approve flow (Hard Rule #5) — nothing is written until you approve.
+
+**API-key path (`llm`).** Set a provider + key, then launch the app *from that same terminal* (it
+inherits the shell env):
+
+```bash
+export PALMIER_LLM_PROVIDER=moonshot                 # or anthropic | openai | deepseek
+export PALMIER_LLM_API_KEY=sk-...                    # the whole key, no quotes, no "..."
+export PALMIER_LLM_MODEL=kimi-k2.6                   # see note below
+npm run dev
+```
+
+> **Model gotcha (Moonshot/Kimi):** the engine's default model name can lag behind what your
+> account actually serves (you'll see `LLM 404: Not found the model … or Permission denied`). List
+> what your key can use and pick one:
+> ```bash
+> curl -s https://api.moonshot.ai/v1/models -H "Authorization: Bearer $PALMIER_LLM_API_KEY" | grep -o '"id":"[^"]*"'
+> ```
+> then `export PALMIER_LLM_MODEL=<an id from that list>` (e.g. `kimi-k2.6`). A `401` instead means
+> the key was rejected — usually a paste-corrupted value; set it via `read "k?key: "; export
+> PALMIER_LLM_API_KEY="$k"` in a fresh terminal to avoid bracketed-paste mangling.
 
 ## Troubleshooting
 

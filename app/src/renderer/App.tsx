@@ -51,6 +51,19 @@ export function App(): React.JSX.Element {
     setActiveSeg(v.manifest?.segments[0]?.id ?? null);
   }, []);
 
+  const newLesson = useCallback(async () => {
+    const id = window.prompt("New lesson id (e.g. B-DEMO1):")?.trim();
+    if (!id) return;
+    try {
+      await studio.newLesson(id);
+      const ids = await studio.listLessons();
+      setLessons(ids);
+      await openLesson(id);
+    } catch (e) {
+      window.alert(`Could not create lesson: ${(e as Error).message}`);
+    }
+  }, [openLesson]);
+
   const { manifest, error } = useMemo(() => validateScript(script), [script]);
   const deck: PreviewDeck | null = useMemo(() => {
     try {
@@ -104,6 +117,9 @@ export function App(): React.JSX.Element {
             </option>
           ))}
         </select>
+        <button onClick={newLesson} title="Create a new lesson folder seeded with the example script">
+          + New lesson
+        </button>
         <select className="lesson-select" value={backend} onChange={(e) => setBackend(e.target.value as BackendName)}>
           <option value="ffmpeg">ffmpeg (preview)</option>
           <option value="palmier">palmier (Mac)</option>

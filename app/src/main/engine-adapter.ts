@@ -9,7 +9,9 @@ import type {
   DeliverOutcome,
   DeliverPreview,
   DoctorResult,
+  DraftBackend,
   DraftRequest,
+  DraftResult,
   EngineEvent,
   ExportResult,
   ProduceRequest,
@@ -130,6 +132,20 @@ export function runJsonCommand<T>(opts: Omit<SpawnOpts, "onEvent">): Promise<T> 
   });
 }
 
+/** Run an engine command with no machine-readable output (e.g. `init`); resolve on exit 0. */
+export function runEngineCommand(opts: Omit<SpawnOpts, "onEvent">): Promise<void> {
+  const cliPath = opts.cliPath ?? resolveEngine().cliPath;
+  return new Promise<void>((resolve, reject) => {
+    const child = spawn(opts.nodeBin, [cliPath, ...opts.args], { env: { ...process.env, ...opts.env } });
+    let err = "";
+    child.stderr.on("data", (c) => (err += c));
+    child.on("error", reject);
+    child.on("close", (code) =>
+      code === 0 ? resolve() : reject(new Error(err.trim().split("\n").slice(-1)[0] || `engine exited ${code}`)),
+    );
+  });
+}
+
 /**
  * Run a command that prints a single (possibly pretty-printed, multi-line) JSON
  * object and parse the WHOLE stdout. The deliver commands (export/publish/
@@ -157,6 +173,112 @@ export function runJsonObjectCommand<T>(opts: Omit<SpawnOpts, "onEvent">): Promi
         reject(new Error(`bad JSON from engine: ${(e as Error).message}; stderr: ${err.slice(-200)}`));
       }
     });
+  });
+}
+
+// ── AI drafting: pluggable local-agent-CLI backends ─────────────────────────
+//
+// "Draft with AI" can be powered by a local agent CLI the operator is already
+// logged into — Devin (`devin -p`) or Claude Code (`claude -p`) — so no API key
+// is hardcoded into the app. Falls back to the engine's `PALMIER_LLM_API_KEY`
+// drafter (Kimi/Anthropic/OpenAI) when no agent CLI is on PATH.
+
+/**
+ * Pick the drafting backend. Pure + total so the selection logic is unit-tested
+ * without spawning anything. `explicit` is `PALMIER_DRAFT_BACKEND`; when it's
+ * unset/`auto`/unrecognized we prefer a local agent CLI (devin → claude), else
+ * the API-key path.
+ */
+export function resolveDraftBackend(
+  explicit: string | undefined,
+  available: { devin: boolean; claude: boolean },
+): DraftBackend {
+  const choice = (explicit ?? "").trim().toLowerCase();
+  if (choice === "devin" || choice === "claude" || choice === "llm") return choice;
+  if (available.devin) return "devin";
+  if (available.claude) return "claude";
+  return "llm";
+}
+
+/** argv for an agent CLI's headless single-turn mode. */
+export function agentDraftArgv(backend: "devin" | "claude", prompt: string): { bin: string; args: string[] } {
+  // `devin -p -- <prompt>`: the `--` keeps the prompt from being read as a subcommand.
+  if (backend === "devin") return { bin: "devin", args: ["-p", "--", prompt] };
+  // `claude -p <prompt>`: print mode, prints the response to stdout and exits.
+  return { bin: "claude", args: ["-p", prompt] };
+}
+
+/**
+ * The instruction handed to the agent CLI. Pure so the contract is testable.
+ * Run from the engine repo root so the agent can read the hgdw-video-production
+ * skill + HGDW-DESIGN frame types.
+ */
+export function buildAgentDraftPrompt(lessonId: string, brief: string): string {
+  return [
+    `You are drafting a vibedevview HGDW lesson script for lesson id "${lessonId}".`,
+    `Topic brief: ${brief}`,
+    ``,
+    `Write a complete, valid HGDW script.md following this repo's`,
+    `.devin/skills/hgdw-video-production skill and the frame types in docs/HGDW-DESIGN.md`,
+    `(SLIDE: blocks with a frame code, SAY: narration, optional DO: directions).`,
+    `Output ONLY the script.md content — no preamble, no explanation, no commentary.`,
+    `If you wrap it in a code fence, use \`\`\`markdown.`,
+  ].join("\n");
+}
+
+/**
+ * Extract the script.md from an agent's stdout: prefer the first fenced code
+ * block (agents often wrap output in ```markdown), else use the whole text;
+ * strip any stray fences and normalize to a single trailing newline.
+ */
+export function cleanScriptMarkdown(raw: string): string {
+  const fence = raw.match(/```(?:markdown|md)?\s*\n([\s\S]*?)\n```/i);
+  const body = fence ? fence[1] : raw;
+  return body.replace(/^```(?:markdown|md)?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim() + "\n";
+}
+
+export interface TextCommandOpts {
+  bin: string;
+  args: string[];
+  cwd?: string;
+  env?: Record<string, string>;
+  timeoutMs?: number;
+}
+
+/** Spawn an arbitrary binary (an agent CLI) and capture stdout; reject on failure. */
+export function runTextCommand(opts: TextCommandOpts): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const child = spawn(opts.bin, opts.args, { cwd: opts.cwd, env: { ...process.env, ...opts.env } });
+    let out = "";
+    let err = "";
+    const timer = opts.timeoutMs
+      ? setTimeout(() => {
+          child.kill("SIGKILL");
+          reject(new Error(`${opts.bin} timed out after ${opts.timeoutMs}ms`));
+        }, opts.timeoutMs)
+      : null;
+    child.stdout.on("data", (c) => (out += c));
+    child.stderr.on("data", (c) => (err += c));
+    child.on("error", (e) => {
+      if (timer) clearTimeout(timer);
+      const enoent = (e as NodeJS.ErrnoException).code === "ENOENT";
+      reject(new Error(enoent ? `${opts.bin} not found on PATH` : e.message));
+    });
+    child.on("close", (code) => {
+      if (timer) clearTimeout(timer);
+      if (code === 0) resolve(out);
+      else reject(new Error(`${opts.bin} exited ${code}: ${err.trim().split("\n").slice(-1)[0] || out.slice(-200)}`));
+    });
+  });
+}
+
+/** Whether a command resolves on PATH (drives `auto` backend selection). */
+export function commandExists(bin: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const probe = process.platform === "win32" ? "where" : "which";
+    const child = spawn(probe, [bin], { stdio: "ignore" });
+    child.on("error", () => resolve(false));
+    child.on("close", (code) => resolve(code === 0));
   });
 }
 
@@ -198,6 +320,14 @@ export class EngineAdapter {
     return lessons.sort();
   }
 
+  /** Scaffold a new lesson folder seeded with the example script (`palmier init`). */
+  async newLesson(lessonId: string): Promise<string> {
+    const id = lessonId.trim();
+    if (!id) throw new Error("a lesson id is required");
+    await runEngineCommand({ nodeBin: this.nodeBin, env: this.baseEnv, args: ["init", id] });
+    return id;
+  }
+
   async readScript(lessonId: string): Promise<string | null> {
     return fs.readFile(path.join(lessonDir(lessonId), "script.md"), "utf8").catch(() => null);
   }
@@ -216,13 +346,37 @@ export class EngineAdapter {
     return runJsonCommand<DoctorResult>({ nodeBin: this.nodeBin, env: this.baseEnv, args: ["doctor"] });
   }
 
-  async draft(req: DraftRequest): Promise<string> {
-    const res = await runJsonCommand<{ script: string }>({
-      nodeBin: this.nodeBin,
-      env: this.baseEnv,
-      args: ["script", req.lessonId, "--force", "--brief", req.brief],
-    });
-    return res.script;
+  /**
+   * Draft a script.md from a brief. Prefers a local agent CLI (Devin/Claude) the
+   * operator is already logged into — no API key needed — and falls back to the
+   * engine's `PALMIER_LLM_API_KEY` drafter. The result feeds the diff-and-approve
+   * flow (Hard Rule #5): the agent path returns markdown without writing to disk;
+   * the user applies + saves explicitly.
+   */
+  async draft(req: DraftRequest): Promise<DraftResult> {
+    const explicit = (process.env.PALMIER_DRAFT_BACKEND ?? "").trim().toLowerCase();
+    const backend: DraftBackend =
+      explicit === "devin" || explicit === "claude" || explicit === "llm"
+        ? explicit
+        : resolveDraftBackend(explicit, {
+            devin: await commandExists("devin"),
+            claude: await commandExists("claude"),
+          });
+
+    if (backend === "llm") {
+      const res = await runJsonCommand<{ script: string }>({
+        nodeBin: this.nodeBin,
+        env: this.baseEnv,
+        args: ["script", req.lessonId, "--force", "--brief", req.brief],
+      });
+      return { script: res.script, backend };
+    }
+
+    const { bin, args } = agentDraftArgv(backend, buildAgentDraftPrompt(req.lessonId, req.brief));
+    const raw = await runTextCommand({ bin, args, cwd: resolveEngine().root, env: this.baseEnv, timeoutMs: 300_000 });
+    const script = cleanScriptMarkdown(raw);
+    if (!script.trim()) throw new Error(`${bin} returned no script content`);
+    return { script, backend };
   }
 
   produce(req: ProduceRequest, onEvent: (e: EngineEvent) => void): Promise<RunResult> {

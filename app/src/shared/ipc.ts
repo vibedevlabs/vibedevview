@@ -57,6 +57,22 @@ export interface DraftRequest {
   brief: string;
 }
 
+/**
+ * Which "brain" drafts the script. `devin`/`claude` shell out to the local
+ * agent CLI in headless single-turn mode (no API key needed — uses whatever
+ * you're already logged into); `llm` is the engine's `PALMIER_LLM_API_KEY`
+ * path (Kimi/Anthropic/OpenAI). Selected via `PALMIER_DRAFT_BACKEND`
+ * (`auto` by default: prefer `devin`, then `claude`, else `llm`).
+ */
+export type DraftBackend = "devin" | "claude" | "llm";
+
+export interface DraftResult {
+  /** The drafted script.md markdown (fences stripped). */
+  script: string;
+  /** Which backend produced it, so the UI can show "Drafted via Devin". */
+  backend: DraftBackend;
+}
+
 /** `palmier export <id>` result (ffprobe-verified single MP4). */
 export interface ExportResult {
   lessonId: string;
@@ -129,12 +145,18 @@ export interface RunResult {
  */
 export interface StudioApi {
   listLessons(): Promise<string[]>;
+  /** Scaffold a new lesson folder (seeded with the example script). Returns the id. */
+  newLesson(lessonId: string): Promise<string>;
   readScript(lessonId: string): Promise<string | null>;
   writeScript(lessonId: string, text: string): Promise<void>;
   status(lessonId: string): Promise<StatusResult>;
   doctor(): Promise<DoctorResult>;
-  /** Draft a script.md from a topic brief via the engine's LLM drafter. Returns the markdown. */
-  draft(req: DraftRequest): Promise<string>;
+  /**
+   * Draft a script.md from a topic brief. Uses a local agent CLI (Devin/Claude)
+   * when available, else the engine's `PALMIER_LLM_API_KEY` drafter. Returns the
+   * markdown plus which backend produced it.
+   */
+  draft(req: DraftRequest): Promise<DraftResult>;
   /** Run a full produce; progress events stream via onEvent. */
   produce(req: ProduceRequest): Promise<RunResult>;
   /** Surgical single-segment correction; progress events stream via onEvent. */

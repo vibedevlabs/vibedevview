@@ -19,6 +19,7 @@ function registerIpc(): void {
   ipcMain.handle("studio:listLessons", () => adapter.listLessons());
   ipcMain.handle("studio:readScript", (_e, id: string) => adapter.readScript(id));
   ipcMain.handle("studio:writeScript", (_e, id: string, text: string) => adapter.writeScript(id, text));
+  ipcMain.handle("studio:newLesson", (_e, id: string) => adapter.newLesson(id));
   ipcMain.handle("studio:status", (_e, id: string) => adapter.status(id));
   ipcMain.handle("studio:doctor", () => adapter.doctor());
   ipcMain.handle("studio:draft", (_e, req: DraftRequest) => adapter.draft(req));
@@ -41,6 +42,12 @@ function createWindow(): void {
       preload: path.join(__dirname, "../preload/index.mjs"),
       contextIsolation: true,
       nodeIntegration: false,
+      // The preload is an ESM module (index.mjs). Sandboxed renderers can only
+      // load CommonJS preloads, so a sandboxed renderer would silently skip it
+      // and `window.studio` would never be exposed (the app then falls back to
+      // the browser stub — "engine actions disabled"). Disable the sandbox so
+      // the ESM preload runs; contextIsolation still keeps the bridge isolated.
+      sandbox: false,
     },
   });
 
