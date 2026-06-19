@@ -87,6 +87,23 @@ export function App(): React.JSX.Element {
     if (lessonId) await studio.writeScript(lessonId, script);
   }
 
+  async function exportSlides() {
+    if (!lessonId) return;
+    setRun({ ...initialRunState, running: true, lastMessage: "Exporting slides…" });
+    try {
+      const res = await studio.exportSlides(lessonId);
+      const miss = res.missing.length > 0 ? ` · ${res.missing.length} not rendered yet (run Produce)` : "";
+      setRun((prev) => ({
+        ...prev,
+        running: false,
+        ok: res.missing.length === 0,
+        lastMessage: `Exported ${res.files.length}/${res.slideCount} slide(s) → ${res.dir}${miss}`,
+      }));
+    } catch (e) {
+      setRun((prev) => ({ ...prev, running: false, ok: false, lastMessage: `Export slides failed: ${(e as Error).message}` }));
+    }
+  }
+
   async function produce() {
     if (!lessonId) return;
     await save();
@@ -130,6 +147,9 @@ export function App(): React.JSX.Element {
           Revise segment
         </button>
         <button onClick={() => setModal("doctor")}>Doctor</button>
+        <button onClick={exportSlides} disabled={!lessonId || run.running} title="Copy rendered slide PNGs (+ deck.html) into a slides-export/ folder next to script.md, in segment order">
+          Export slides
+        </button>
         <button onClick={() => setModal("deliver")} disabled={!lessonId}>
           Deliver
         </button>

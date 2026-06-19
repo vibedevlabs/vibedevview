@@ -14,6 +14,7 @@ import type {
   DraftResult,
   EngineEvent,
   ExportResult,
+  ExportSlidesResult,
   ProduceRequest,
   PublishResult,
   RunResult,
@@ -577,6 +578,15 @@ export class EngineAdapter {
       nodeBin: this.nodeBin,
       env: this.baseEnv,
       args: deliverArgs("attach", lessonId),
+    });
+  }
+
+  /** `palmier export-slides <id>` — copy rendered slide PNGs next to script.md in segment order. */
+  exportSlides(lessonId: string): Promise<ExportSlidesResult> {
+    return runJsonObjectCommand<ExportSlidesResult>({
+      nodeBin: this.nodeBin,
+      env: this.baseEnv,
+      args: ["export-slides", lessonId],
     });
   }
 

@@ -520,6 +520,7 @@ Run any command with `--help` for its options. Live-timeline commands need
 | `palmier clear` | Reset the Palmier timeline + media bin between takes/lessons. `--keep-bin` = timeline only. |
 | `palmier status <id>` | List every segment with its id, timestamp span, and which assets exist. |
 | `palmier export <id>` | Render one finished MP4 (ffmpeg flatten + ffprobe verify). `-o <path>`, `--tolerance <seconds>`. |
+| `palmier export-slides <id>` | Copy rendered slide PNGs (+ `deck.html`) into `slides-export/` next to `script.md`, named in segment order (`<seg>-<frame>.png`). `-o <dir>`, `--no-deck`. |
 | `palmier publish <id>` | Upload the MP4 to Mux → `playback_id`. **Dry run by default**; `--target mux` to upload; `-f <path>`. |
 | `palmier moments <id>` | Compile `moments.yaml` → `moments.json` + idempotent `moments.sql`. Never writes a DB. `--playback-id <id>`. |
 | `palmier attach <id>` | Land the lesson + moments in the LMS. **Safe by default**; needs `--target api\|supabase` **and** `--apply` to write. `--playback-id <id>`. |
