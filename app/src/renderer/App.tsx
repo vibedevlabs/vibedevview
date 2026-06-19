@@ -10,6 +10,7 @@ import { SegmentForm } from "./components/SegmentForm";
 import { Doctor } from "./components/Doctor";
 import { ReviseDialog } from "./components/ReviseDialog";
 import { DraftWithAI } from "./components/DraftWithAI";
+import { NewLessonDialog } from "./components/NewLessonDialog";
 import { DeliverDialog } from "./components/DeliverDialog";
 import { StatusPanel, initialRunState, type RunState } from "./components/StatusPanel";
 import type { Segment } from "vibedevview/types";
@@ -25,7 +26,7 @@ export function App(): React.JSX.Element {
   const [mode, setMode] = useState<EditorMode>("structured");
   const [backend, setBackend] = useState<BackendName>("ffmpeg");
   const [run, setRun] = useState<RunState>(initialRunState);
-  const [modal, setModal] = useState<"doctor" | "revise" | "draft" | "deliver" | null>(null);
+  const [modal, setModal] = useState<"doctor" | "revise" | "draft" | "deliver" | "new" | null>(null);
 
   // Load lesson list + first lesson on mount.
   useEffect(() => {
@@ -51,18 +52,14 @@ export function App(): React.JSX.Element {
     setActiveSeg(v.manifest?.segments[0]?.id ?? null);
   }, []);
 
-  const newLesson = useCallback(async () => {
-    const id = window.prompt("New lesson id (e.g. B-DEMO1):")?.trim();
-    if (!id) return;
-    try {
-      await studio.newLesson(id);
+  const onLessonCreated = useCallback(
+    async (id: string) => {
       const ids = await studio.listLessons();
       setLessons(ids);
       await openLesson(id);
-    } catch (e) {
-      window.alert(`Could not create lesson: ${(e as Error).message}`);
-    }
-  }, [openLesson]);
+    },
+    [openLesson],
+  );
 
   const { manifest, error } = useMemo(() => validateScript(script), [script]);
   const deck: PreviewDeck | null = useMemo(() => {
@@ -117,7 +114,7 @@ export function App(): React.JSX.Element {
             </option>
           ))}
         </select>
-        <button onClick={newLesson} title="Create a new lesson folder seeded with the example script">
+        <button onClick={() => setModal("new")} title="Create a new lesson folder seeded with the example script">
           + New lesson
         </button>
         <select className="lesson-select" value={backend} onChange={(e) => setBackend(e.target.value as BackendName)}>
@@ -202,11 +199,18 @@ export function App(): React.JSX.Element {
           lessonId={lessonId}
           currentScript={script}
           onClose={() => setModal(null)}
-          onApply={(s) => {
-            setScript(s);
+          onApply={async (s) => {
+            // Persist immediately so Produce can't run against a stale on-disk
+            // script (the "applied but never saved" footgun). Re-open from disk
+            // so the editor + outline reflect exactly what was written.
+            await studio.writeScript(lessonId, s);
+            await openLesson(lessonId);
             setModal(null);
           }}
         />
+      )}
+      {modal === "new" && (
+        <NewLessonDialog existing={lessons} onClose={() => setModal(null)} onCreated={onLessonCreated} />
       )}
     </div>
   );
