@@ -12,19 +12,19 @@ By the end, you'll have a running system that checks your email, follows your ru
 
 ## The Problem This Solves
 
-You've used ChatGPT. You've used Claude. You've had great conversations. Then you closed the tab, and the AI forgot everything. Next session: back to zero.
+You've used ChatGPT. You've used Claude. They've gotten good — memory features, project workspaces, even tool use. But here's what they still can't do: run a task at 3am while you're asleep. Hold your Gmail OAuth tokens and check your inbox on a schedule. Deploy a website. Execute a shell command. Persist a growing filing cabinet of client notes that every future conversation can draw from.
 
-That's the gap. Today's AI chatbots are brilliant, stateless tools. They can think — but they can't *do*. They can draft — but they can't send. They can plan — but they can't execute while you sleep.
+The gap isn't intelligence anymore — it's *infrastructure*. Today's chatbots can think, draft, and plan. But they can't act autonomously, maintain credentials, run background jobs, or host things. They live in a browser tab. When you close it, the compute stops.
 
 ## What Makes an Agent Different from a Chatbot
 
-| | Chatbot | Agent |
+| | Chatbot (even with memory) | Agent on its own computer |
 |---|---|---|
-| **Memory** | Forgets after each conversation | Remembers you — Bio, files, preferences |
-| **Tools** | Can only read/write text | Can send email, check calendar, browse web, run code |
-| **Schedule** | Only responds when you ask | Runs tasks on its own schedule |
-| **Persistence** | Lives in a browser tab | Has its own computer, always on |
-| **Growth** | Static | Learns — files grow, skills improve, context deepens |
+| **Memory** | Conversation history + basic recall | Structured Bio, 100GB filesystem, growing knowledge base |
+| **Tools** | Limited plugins, browser-sandboxed | 100+ tools — Gmail, Calendar, shell, Stripe, web browse, code execution |
+| **Schedule** | Only responds when you ask | Runs tasks autonomously on any cadence |
+| **Persistence** | Session-based — compute stops when you close the tab | Always-on server with persistent storage and credentials |
+| **Growth** | Resets between projects | Compounds — files grow, skills improve, context deepens across every interaction |
 
 The difference is infrastructure. An agent is a chatbot *plus* a harness — the system around the model that gives it memory, tools, scheduling, and guardrails.
 

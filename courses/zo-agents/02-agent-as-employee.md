@@ -142,7 +142,7 @@ One thing most people don't realize about today's AI agents:
 | Context saturation | Break long tasks into focused subtasks. Use skills to keep instructions tight. |
 | Execution drift | Write skills with explicit step sequences. Include definitions of done. |
 | Hallucination | Ground the agent in files and tool results. Rules like "always cite your source" help. |
-| No true persistence | This is exactly what Bio, Files, and Skills solve. But you must set them up. |
+| Shallow persistence | Chatbots now have memory, but it's conversation-level recall — not a structured filesystem with credentials, templates, and growing knowledge. Bio, Files, and Skills give you that deeper layer. |
 
 ## Key Takeaways
 
