@@ -184,6 +184,45 @@ export interface SupabaseAttachConfig {
   fetchLike?: FetchLike;
 }
 
+/**
+ * Derive the Supabase project URL from a service-role JWT. The token's payload
+ * carries the project `ref`, and PostgREST lives at `https://<ref>.supabase.co`.
+ * Lets operators provide only the service key (the URL is implied). Returns
+ * null when the token isn't a decodable JWT with a `ref`.
+ */
+export function supabaseUrlFromServiceKey(key: string): string | null {
+  const parts = key.split(".");
+  if (parts.length < 2 || !parts[1]) return null;
+  try {
+    const json = Buffer.from(parts[1].replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8");
+    const payload = JSON.parse(json) as { ref?: unknown };
+    return typeof payload.ref === "string" && payload.ref ? `https://${payload.ref}.supabase.co` : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Resolve which Supabase project URL to write to. Precedence is chosen so a
+ * stray generic `SUPABASE_URL` (often present for an unrelated project in a
+ * shared environment) can never be paired with the HGDW service key:
+ *   1. `HGDW_SUPABASE_URL` — explicit, HGDW-specific (allows a custom domain).
+ *   2. URL derived from the HGDW service key itself — cryptographically tied to
+ *      the key's own project, so it's always consistent with the credential.
+ *   3. generic `SUPABASE_URL` — last-resort fallback only when no HGDW key.
+ */
+export function resolveSupabaseUrl(env: {
+  HGDW_SUPABASE_URL?: string;
+  SUPABASE_URL?: string;
+  HGDW_SUPABASE_SERVICE_KEY?: string;
+}): string {
+  const explicit = env.HGDW_SUPABASE_URL?.trim();
+  if (explicit) return explicit;
+  const derived = env.HGDW_SUPABASE_SERVICE_KEY ? supabaseUrlFromServiceKey(env.HGDW_SUPABASE_SERVICE_KEY) : null;
+  if (derived) return derived;
+  return env.SUPABASE_URL?.trim() ?? "";
+}
+
 export function restHeaders(serviceKey: string, prefer?: string): Record<string, string> {
   const h: Record<string, string> = {
     apikey: serviceKey,
@@ -315,10 +354,8 @@ function makeAttachTarget(name: "api" | "supabase"): AttachTarget {
       token: process.env.HGDW_LMS_API_TOKEN ?? "",
     });
   }
-  return new SupabaseAttachTarget({
-    url: process.env.HGDW_SUPABASE_URL ?? process.env.SUPABASE_URL ?? "",
-    serviceKey: process.env.HGDW_SUPABASE_SERVICE_KEY ?? "",
-  });
+  const serviceKey = process.env.HGDW_SUPABASE_SERVICE_KEY ?? "";
+  return new SupabaseAttachTarget({ url: resolveSupabaseUrl(process.env), serviceKey });
 }
 
 /**
