@@ -336,6 +336,7 @@ All commands take a `<LESSON_ID>` (except `clear`/`doctor`). Add `-b palmier` or
 | `palmier correct <id>` | **Surgically** revise one segment (the revision loop). | `--kind narration\|slide\|recording\|retime` · `--seg <id>` · `--at <m:ss>` |
 | `palmier clear` | Reset the Palmier timeline + media bin between takes/lessons. | `--keep-bin` (timeline only) · `-b` |
 | `palmier status <id>` | Print every segment with id, timestamp span, and which assets exist. | — |
+| `palmier recordings <id>` | List the screen recordings **you** must capture (every `DO:` segment) with the exact steps, timestamp + target length, and status. Also surfaced as a banner at the end of `produce`. | `--json` |
 | `palmier export <id>` | Render one finished MP4 (ffmpeg flatten + ffprobe verify). Backend-independent. | `-o <path>` · `--tolerance <seconds>` |
 | `palmier publish <id>` | Upload the MP4 to Mux → `playback_id`. **Dry run unless `--target mux`.** | `-t mux` · `-f <path>` |
 | `palmier moments <id>` | Compile `moments.yaml` → `moments.json` + idempotent `moments.sql`. Never writes a DB. | `--playback-id <id>` |
