@@ -272,6 +272,48 @@ program
   });
 
 program
+  .command("course")
+  .description("Show the course tree from course.yaml (modules → lessons in order, with LMS slugs + sort order)")
+  .argument("[lessonId]", "show just this lesson's placement")
+  .action(async (lessonId) => {
+    const { loadCourse, flattenCourse, resolveLessonPlacement, courseFilePath } = await import("./course/course.js");
+    const course = await loadCourse();
+    if (!course) {
+      process.stderr.write(`no course.yaml at ${courseFilePath()} — author one to declare the course tree\n`);
+      process.exitCode = 1;
+      return;
+    }
+    if (lessonId) {
+      const p = resolveLessonPlacement(course, lessonId);
+      if (!p) {
+        process.stderr.write(`lesson "${lessonId}" not found in course.yaml\n`);
+        process.exitCode = 1;
+        return;
+      }
+      if (jsonMode()) {
+        process.stdout.write(JSON.stringify(p) + "\n");
+        return;
+      }
+      process.stdout.write(`${p.sortOrder}. ${p.lessonId} → ${p.course}/${p.slug}  (module ${p.moduleIndex}: ${p.module}, #${p.orderInModule})\n`);
+      return;
+    }
+    const flat = flattenCourse(course);
+    if (jsonMode()) {
+      process.stdout.write(JSON.stringify({ course: course.course, title: course.title, lessons: flat }) + "\n");
+      return;
+    }
+    process.stdout.write(`${course.title} (${course.course}) — ${flat.length} lesson(s)\n`);
+    let lastModule = "";
+    for (const p of flat) {
+      if (p.module !== lastModule) {
+        process.stdout.write(`\n${p.module}\n`);
+        lastModule = p.module;
+      }
+      process.stdout.write(`  ${String(p.sortOrder).padStart(2)}. ${p.lessonId.padEnd(10)} → ${p.course}/${p.slug}\n`);
+    }
+  });
+
+program
   .command("doctor")
   .description("Preflight: check Node, ffmpeg, Chromium, ElevenLabs + Palmier MCP")
   .action(async () => {
