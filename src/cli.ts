@@ -234,6 +234,34 @@ program
   });
 
 program
+  .command("attach-course")
+  .description("Walk course.yaml and attach every lesson in order. SAFE: needs --target api|supabase AND --apply to write.")
+  .option("-t, --target <name>", "attach target: sql | api | supabase (default: sql, or PALMIER_ATTACH_TARGET)")
+  .option("--apply", "actually write to the platform (api/supabase only); without it this dry-runs")
+  .action(async (o) => {
+    const { attachCourse } = await import("./deliver/batch.js");
+    const res = await attachCourse({
+      target: o.target as "sql" | "api" | "supabase" | undefined,
+      apply: o.apply === true,
+    });
+    if (jsonMode()) {
+      process.stdout.write(JSON.stringify(res) + "\n");
+    } else {
+      const verb = o.apply === true ? "attached" : "dry-ran";
+      process.stdout.write(`${res.title} (${res.course}) — ${verb} ${res.total} lesson(s): ${res.applied} applied, ${res.dryrun} dry-run, ${res.errors} error(s)\n`);
+      for (const r of res.results) {
+        const where = r.course && r.slug ? `${r.course}/${r.slug}` : r.lessonId;
+        const detail =
+          r.status === "error"
+            ? `ERROR — ${r.error}`
+            : `${r.status} (${r.sectionCount} sections, ${r.momentCount} moments)`;
+        process.stdout.write(`  ${String(r.sortOrder).padStart(2)}. ${r.lessonId.padEnd(10)} → ${where.padEnd(28)} ${detail}\n`);
+      }
+    }
+    if (res.errors > 0) process.exitCode = 1;
+  });
+
+program
   .command("status")
   .description("Show the production timeline (segments, timings, asset status)")
   .argument("<lessonId>")
