@@ -2,9 +2,11 @@ import { promises as fs } from "node:fs";
 import YAML from "yaml";
 import { z } from "zod";
 import { computeAlignment, parseTimestamp } from "../alignment.js";
+import { loadCourse, resolveLessonPlacement } from "../course/course.js";
 import type { Alignment } from "../types.js";
 import { log } from "../util/log.js";
 import { Workspace } from "../workspace.js";
+import { buildAutoMomentsDoc } from "./auto-moments.js";
 
 // ── Authoring format (moments.yaml, sits beside the script) ──────────────────
 
@@ -399,6 +401,8 @@ export interface PreparedMoments {
   bundle: MomentsBundle;
   sql: string;
   playbackId: string | null;
+  /** Where the moments came from: a hand-authored file or the script + course.yaml. */
+  source: "authored" | "auto";
 }
 
 /**
@@ -408,17 +412,29 @@ export interface PreparedMoments {
  */
 export async function prepareLessonMoments(lessonId: string, opts: MomentsOptions = {}): Promise<PreparedMoments> {
   const ws = Workspace.for(lessonId);
-  if (!(await ws.exists(ws.momentsAuthorPath))) {
-    throw new Error(
-      `no moments file at ${ws.momentsAuthorPath} — author one (sections + pause/prompt/snippet/link/file/note) to add interactivity`,
-    );
-  }
   const manifest = await ws.readManifest();
   const timeline = await ws.readTimeline();
   const alignment = computeAlignment(manifest, timeline);
 
-  const raw = await fs.readFile(ws.momentsAuthorPath, "utf8");
-  const doc = MomentsDocSchema.parse(YAML.parse(raw) ?? {});
+  let doc: MomentsDoc;
+  let source: "authored" | "auto";
+  if (await ws.exists(ws.momentsAuthorPath)) {
+    const raw = await fs.readFile(ws.momentsAuthorPath, "utf8");
+    doc = MomentsDocSchema.parse(YAML.parse(raw) ?? {});
+    source = "authored";
+  } else {
+    // No hand-authored moments.yaml — derive them from the script's phases +
+    // DO segments, using course.yaml for the lesson's LMS course/slug.
+    const course = await loadCourse();
+    const placement = course ? resolveLessonPlacement(course, lessonId) : undefined;
+    if (!placement) {
+      throw new Error(
+        `no moments for "${lessonId}": author ${ws.momentsAuthorPath}, or declare the lesson in course.yaml so moments can be auto-generated from the script`,
+      );
+    }
+    doc = buildAutoMomentsDoc(manifest, { course: placement.course, slug: placement.slug, title: manifest.title });
+    source = "auto";
+  }
   const compiled = compileMoments(doc, alignment);
 
   let playbackId = opts.playbackId ?? null;
@@ -429,7 +445,7 @@ export async function prepareLessonMoments(lessonId: string, opts: MomentsOption
 
   const bundle = buildMomentsBundle(compiled, playbackId);
   const sql = emitMomentsSql(compiled, { playbackId });
-  return { lessonId, ws, compiled, bundle, sql, playbackId };
+  return { lessonId, ws, compiled, bundle, sql, playbackId, source };
 }
 
 /**
@@ -439,16 +455,17 @@ export async function prepareLessonMoments(lessonId: string, opts: MomentsOption
  * (review the SQL, or run `palmier attach --target api|supabase --apply`).
  */
 export async function compileLessonMoments(lessonId: string, opts: MomentsOptions = {}): Promise<MomentsResult> {
-  const { ws, compiled, bundle, sql, playbackId } = await prepareLessonMoments(lessonId, opts);
+  const { ws, compiled, bundle, sql, playbackId, source } = await prepareLessonMoments(lessonId, opts);
 
   await fs.mkdir(ws.lmsDir, { recursive: true });
   await fs.writeFile(ws.momentsJsonPath, JSON.stringify(bundle, null, 2) + "\n", "utf8");
   await fs.writeFile(ws.momentsSqlPath, sql, "utf8");
 
   const checkpointCount = compiled.moments.filter((m) => m.isCheckpoint).length;
+  const origin = source === "auto" ? "auto-generated from script + course.yaml" : "from moments.yaml";
   log.ok(
     "moments",
-    `compiled ${compiled.sections.length} sections + ${compiled.moments.length} moments → ${ws.momentsSqlPath} (dry run, no DB writes)`,
+    `compiled ${compiled.sections.length} sections + ${compiled.moments.length} moments (${origin}) → ${ws.momentsSqlPath} (dry run, no DB writes)`,
   );
   if (!playbackId) {
     log.warn("moments", `no Mux playback id — SQL has a ${PLAYBACK_PLACEHOLDER} placeholder. Run \`palmier publish\` first.`);

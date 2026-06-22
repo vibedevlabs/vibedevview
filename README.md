@@ -522,7 +522,7 @@ Run any command with `--help` for its options. Live-timeline commands need
 | `palmier course [id]` | Show the course tree from `course.yaml` (modules → lessons in order, with their LMS course/lesson slugs + sort order). Pass a lesson id to print just its placement. `--json`. |
 | `palmier export <id>` | Render one finished MP4 (ffmpeg flatten + ffprobe verify). `-o <path>`, `--tolerance <seconds>`. |
 | `palmier publish <id>` | Upload the MP4 to Mux → `playback_id`. **Dry run by default**; `--target mux` to upload; `-f <path>`. |
-| `palmier moments <id>` | Compile `moments.yaml` → `moments.json` + idempotent `moments.sql`. Never writes a DB. `--playback-id <id>`. |
+| `palmier moments <id>` | Compile moments → `moments.json` + idempotent `moments.sql`. Never writes a DB. Uses `moments.yaml` if present; otherwise **auto-generates** them from the script (phases → sections, `DO:` segments → checkpoints) using `course.yaml` for the lesson's LMS course/slug. `--playback-id <id>`. |
 | `palmier attach <id>` | Land the lesson + moments in the LMS. **Safe by default**; needs `--target api\|supabase` **and** `--apply` to write. `--playback-id <id>`. |
 
 Pick the backend per run with `-b ffmpeg` (preview MP4) or `-b palmier` (live timeline), or set
