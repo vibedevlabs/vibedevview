@@ -339,8 +339,9 @@ All commands take a `<LESSON_ID>` (except `clear`/`doctor`). Add `-b palmier` or
 | `palmier course [id]` | Print the course tree from `course.yaml` (modules → lessons in order with LMS slugs + sort order). With a lesson id, prints just that lesson's placement. Reads only. | `--json` |
 | `palmier export <id>` | Render one finished MP4 (ffmpeg flatten + ffprobe verify). Backend-independent. | `-o <path>` · `--tolerance <seconds>` |
 | `palmier publish <id>` | Upload the MP4 to Mux → `playback_id`. **Dry run unless `--target mux`.** | `-t mux` · `-f <path>` |
-| `palmier moments <id>` | Compile `moments.yaml` → `moments.json` + idempotent `moments.sql`. Never writes a DB. | `--playback-id <id>` |
+| `palmier moments <id>` | Compile moments → `moments.json` + idempotent `moments.sql`. Never writes a DB. Uses `moments.yaml` if present; else auto-generates from the script (phases → sections, `DO:` → checkpoints) via `course.yaml`. | `--playback-id <id>` |
 | `palmier attach <id>` | Land the lesson + moments in the LMS. **Needs `--target api\|supabase` AND `--apply` to write.** | `-t sql\|api\|supabase` · `--apply` · `--playback-id <id>` |
+| `palmier attach-course` | Walk `course.yaml` and attach every lesson in sort order. Same gates as `attach`; one lesson failing doesn't stop the rest (exit 1 if any failed). | `-t sql\|api\|supabase` · `--apply` |
 
 **Typical sequences:**
 
@@ -363,6 +364,7 @@ palmier export DEMO-1                                  # one MP4, ffprobe-verifi
 palmier publish DEMO-1 --target mux                    # → playback_id (real upload)
 palmier moments DEMO-1                                 # → moments.json + moments.sql (no writes)
 palmier attach DEMO-1 --target api --apply             # real LMS write (both gates + creds)
+palmier attach-course --target supabase --apply       # attach the whole course.yaml, in order
 ```
 
 ---
