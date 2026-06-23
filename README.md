@@ -235,8 +235,8 @@ subtitle: A 90-second tour
 ```
 ```
 
-There are **16 slide frame types** (title cards, bullet lists, quotes, comparisons, code, big
-stats, callouts, an outro, and more). The full field-by-field reference and worked examples are
+There are **19 slide frame types** (title cards, bullet lists, quotes, comparisons, code, big
+stats, callouts, **infographics** — stat-card grids, emoji/icon feature grids, and process flows — an outro, and more). The full field-by-field reference and worked examples are
 in **[`docs/OPERATOR-GUIDE.md`](docs/OPERATOR-GUIDE.md)** (authoring) and
 **[`HGDW-DESIGN.md`](HGDW-DESIGN.md)** (the brand + frames). You have three ways to produce a script:
 
@@ -248,7 +248,7 @@ shows it to you for approval, and (on your go-ahead) produces and loads it. Exam
 > *"Draft a script for an HGDW lesson titled 'Prompting Basics' — about 2 minutes, slides only,
 > Ja'dan voice. Walk me through the segments before producing."*
 
-This is the recommended path because Devin already knows the segment format and the 16 frames
+This is the recommended path because Devin already knows the segment format and the frames
 (from the repo's skill file), and it keeps you in plain English. You stay in control: **Devin
 never finalizes script content without your approval.**
 
@@ -588,8 +588,8 @@ For more edge cases and the reasoning behind the defaults, see the
 
 | Doc | What's in it |
 | --- | --- |
-| [`docs/OPERATOR-GUIDE.md`](docs/OPERATOR-GUIDE.md) | Full authoring reference (all 16 frames + examples), the complete CLI walkthrough, **Devin's role / agent topology**, reset behavior, and production gotchas. |
-| [`HGDW-DESIGN.md`](HGDW-DESIGN.md) | The brand system — wordmark, palette, typography, video spec, and the 16 frame types. |
+| [`docs/OPERATOR-GUIDE.md`](docs/OPERATOR-GUIDE.md) | Full authoring reference (all frames + examples), the complete CLI walkthrough, **Devin's role / agent topology**, reset behavior, and production gotchas. |
+| [`HGDW-DESIGN.md`](HGDW-DESIGN.md) | The brand system — wordmark, palette, typography, video spec, and the frame types. |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | How the Orchestrator + agents work (they coordinate only through files). |
 | [`app/`](app) — **vibedevview Studio** | The desktop app that wraps the engine: structured script editor + live slide preview + produce/revise + deliver, no terminal needed. MVP (E0–E3, plus the Deliver panel) is built; see [`app/README.md`](app/README.md) to run it. |
 | [`docs/ELECTRON-APP.md`](docs/ELECTRON-APP.md) | Design & build spec + as-built notes for the desktop app: UI wireframes, the engine integration contract (`--json` event stream + IPC), the Deliver chain, the Palmier AI ("Claude") integration, the Revise→`correct` contract, and a per-team [SEQ]/[PAR] plan with milestones. |

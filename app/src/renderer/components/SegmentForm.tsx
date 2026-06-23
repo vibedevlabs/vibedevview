@@ -19,6 +19,9 @@ const FIELDS_BY_FRAME: Record<string, Array<keyof SlideSpec>> = {
   "C6-code": ["title", "code", "lang"],
   "C7-stat": ["stat", "statLabel", "title"],
   "C8-figure": ["title", "image", "caption"],
+  "C9-grid": ["eyebrow", "title", "cards"],
+  "C10-flow": ["eyebrow", "title", "body"],
+  "C11-icons": ["eyebrow", "title", "cards"],
   "D1-placeholder": ["eyebrow", "title"],
   "D2-lowerthird": ["title", "subtitle"],
   "O1-outro": ["title", "subtitle"],
@@ -132,6 +135,58 @@ export function SegmentForm(props: { segment: Segment | null; onChange: (next: S
             <div className="field">
               <label>Code</label>
               <textarea className="mono" value={slide.code ?? ""} onChange={(e) => patchSlide({ code: e.target.value || undefined })} />
+            </div>
+          )}
+          {shown.includes("cards") && (
+            <div className="field">
+              <label>Cards (stat optional)</label>
+              {(slide.cards ?? []).map((card, i) => (
+                <div className="field" key={i}>
+                  <input
+                    placeholder="Icon / emoji (optional, e.g. ⚡)"
+                    value={card.icon ?? ""}
+                    onChange={(e) => {
+                      const cards = [...(slide.cards ?? [])];
+                      cards[i] = { ...card, icon: e.target.value || undefined };
+                      patchSlide({ cards });
+                    }}
+                  />
+                  <input
+                    placeholder="Stat (optional, e.g. 80%)"
+                    value={card.stat ?? ""}
+                    onChange={(e) => {
+                      const cards = [...(slide.cards ?? [])];
+                      cards[i] = { ...card, stat: e.target.value || undefined };
+                      patchSlide({ cards });
+                    }}
+                  />
+                  <input
+                    placeholder="Title"
+                    value={card.title}
+                    onChange={(e) => {
+                      const cards = [...(slide.cards ?? [])];
+                      cards[i] = { ...card, title: e.target.value };
+                      patchSlide({ cards });
+                    }}
+                  />
+                  <input
+                    placeholder="Detail line (optional)"
+                    value={card.body ?? ""}
+                    onChange={(e) => {
+                      const cards = [...(slide.cards ?? [])];
+                      cards[i] = { ...card, body: e.target.value || undefined };
+                      patchSlide({ cards });
+                    }}
+                  />
+                </div>
+              ))}
+              <button
+                type="button"
+                className="ghost"
+                onClick={() => patchSlide({ cards: [...(slide.cards ?? []), { title: "" }] })}
+              >
+                + Add card
+              </button>
             </div>
           )}
           {shown.includes("columns") && (
