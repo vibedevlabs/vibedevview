@@ -327,12 +327,13 @@ All commands take a `<LESSON_ID>` (except `clear`/`doctor`). Add `-b palmier` or
 | Command | Purpose | Key options |
 | --- | --- | --- |
 | `palmier doctor` | Preflight every dependency before you produce. Exits non-zero if anything fails. | — |
+| `palmier preflight <id>` | **One readiness gate before a fan-out run:** `script.md` exists **+** committed **and pushed** (so another machine can `git pull` it) **+** `doctor` green. Exits non-zero if not ready. | `--no-require-pushed` (committed-only) · `--json` |
 | `palmier init <id>` | Create `~/hgdw-productions/<id>/` seeded with a starter `script.md`. Skips if one exists. | — |
 | `palmier script <id>` | Validate `script.md` → `segments.json`. Drafts it via LLM if absent (see above). | — |
 | `palmier slides <id>` | Render + verify slide PNGs only. | `--only 03,07` · `--renderer launch\|cdp` |
 | `palmier voice <id>` | Generate voiceover + measure real per-segment timing only. | `--only 03,07` |
 | `palmier assemble <id>` | Place already-produced assets on the timeline. | `--no-clean` · `--keep-bin` · `-b` |
-| `palmier produce <id>` | The full pipeline: script → slides → voice → recording → assemble. | `--no-review` · `--no-placeholders` · `--no-clean` · `--keep-bin` · `-b` |
+| `palmier produce <id>` | The full pipeline: script → slides → voice → recording → assemble. On the live `palmier` backend it **refuses an uncommitted `script.md`** (so a fan-out can't drift from the repo). | `--no-review` · `--no-placeholders` · `--no-clean` · `--keep-bin` · `-b` · `--allow-uncommitted` · `--require-committed` · `--require-pushed` |
 | `palmier correct <id>` | **Surgically** revise one segment (the revision loop). | `--kind narration\|slide\|recording\|retime` · `--seg <id>` · `--at <m:ss>` |
 | `palmier clear` | Reset the Palmier timeline + media bin between takes/lessons. | `--keep-bin` (timeline only) · `-b` |
 | `palmier status <id>` | Print every segment with id, timestamp span, and which assets exist. | — |
@@ -565,6 +566,106 @@ fastest path but **bypasses app logic and RLS** and couples the tool to the live
 - Slides: every entry in the render report is `verified: true` (investigate any `false`).
 - Live timeline: read it back (`get_timeline`) and confirm the clip/track counts and the bin
   size match the lesson (e.g. C1 = 24 clips / 2 tracks / 24 bin assets).
+
+---
+
+# Part 5 — Phase production & multi-machine fan-out
+
+A single lesson runs on one Mac (Parts 2–4). A **phase** is a batch of lessons produced in
+parallel across **several** Macs — e.g. one operator (or agent) per machine, each producing its
+assigned lessons onto its own local Palmier. This is where things broke in early runs: scripts
+that only existed on one machine, ambiguous "use this Mac not that one" instructions, and Macs
+that were offline the moment work started. The fix is to make the handoff **deterministic** and
+enforce it in the CLI, so the same procedure works for a human operator, a local Devin agent, or
+any other orchestrator — **inside or outside Devin.**
+
+```
+   ┌── orchestrator (any machine) ──┐        ┌── worker: atomics-mini ──┐
+   │ 1. write every script.md       │        │ git pull → scripts here  │
+   │ 2. git commit + push  ────────────────▶ │ palmier preflight <id>   │
+   │ 3. palmier preflight each Mac  │   git   │ palmier produce <id> -b  │
+   │ 4. hand each worker: repo +    │        │      palmier             │
+   │    branch + lesson ids + Mac   │        └──────────────────────────┘
+   └────────────────────────────────┘        ┌── worker: jadan-mbp ─────┐
+                                              │ (same, its own lessons)  │
+                                              └──────────────────────────┘
+```
+
+## 5.1 The deterministic handoff (do these in order)
+
+1. **Scripts go in git FIRST — the only handoff.** Before any worker starts, every lesson's
+   `script.md` (and `course.yaml`) must be **committed and pushed** to a named branch. No
+   `file:///` paths, no `scp`, no "ask the orchestrator for the script" — a worker on another
+   machine can't resolve any of those. The worker's whole inbound contract is: *clone the repo,
+   `git checkout <branch>`, the scripts are under `hgdw-productions/`.* Point the engine at that
+   checkout with `PALMIER_PRODUCTIONS_DIR` (see below).
+2. **One canonical Mac assignment per worker.** Resolve which lesson goes to which Mac up front
+   and hand each worker exactly one machine — host + the SSH secret names — with **no** references
+   to other Macs and no "use X not Y" phrasing. (See the registry template below.)
+3. **Pre-warm every Mac before handing out work.** Run `palmier preflight <id>` for each lesson
+   on its target Mac. It is the single gate: it fails unless the script exists, is committed
+   **and pushed**, and `doctor` is green (Node/ffmpeg/Chromium/ElevenLabs/Palmier MCP). If a Mac
+   is offline or not ready, you find out **now** instead of starting a worker that immediately
+   blocks.
+4. **Produce.** Each worker runs `palmier produce <id> -b palmier`. The produce git gate is a
+   second backstop: on the live backend it refuses to run an uncommitted script, so a worker
+   can't accidentally produce local edits that aren't in the repo.
+
+## 5.2 Why this is enforced in code (not just docs)
+
+Two of the steps above are **CLI guardrails**, so the procedure holds even when no one is
+following a checklist:
+
+| Guardrail | Enforced by | Effect |
+| --- | --- | --- |
+| Script must be committed before a live build | `palmier produce -b palmier` (auto) | A fan-out run can't diverge from the repo. Override: `--allow-uncommitted`. |
+| Script + deps ready before fan-out | `palmier preflight <id>` (exit code) | An orchestrator scripts `preflight && spawn-worker` — a red preflight stops the spawn. |
+
+Both are plain `palmier` subcommands with exit codes and `--json`, so any orchestrator (a shell
+script, CI, a Devin parent session, or another agent runtime) can gate on them identically.
+
+## 5.3 Mac registry — hand each worker exactly this block
+
+Resolve the assignment first, then embed **one** fully-resolved block per worker (no placeholders,
+no alternatives). The known production Macs:
+
+```
+# Worker A
+YOUR MAC: atomics-mini  (Tailscale 100.106.238.16)
+SSH_USER: ${MAC_MINI_SSH_USER}
+SSH_PASS: ${MAC_MINI_SSH_PASSWORD}
+SSH_HOST: ${MAC_MINI_SSH_HOST}
+
+# Worker B
+YOUR MAC: jadan-mbp  (jadanjohnson-hj5q6xwykv / Tailscale 100.88.227.97)
+SSH_USER: jadanjohnson
+SSH_PASS: ${JADAN_MAC_SSH_PASSWORD}
+```
+
+Secrets are passed by **name**, never inlined. If workers reach the Mac over Tailscale, prefer a
+**reusable** auth key (`TAILSCALE_AUTHKEY`) so each worker self-authenticates instead of the
+operator clicking a per-device approval link.
+
+## 5.4 Worker bootstrap (runnable anywhere)
+
+```bash
+# On the target Mac (or over SSH — see the appendix for PATH/TCC notes):
+export PATH="/opt/homebrew/bin:$PATH"
+git clone https://github.com/vibedevlabs/vibedevview && cd vibedevview
+git checkout <BRANCH>
+npm install && npm run build
+export ELEVENLABS_API_KEY=sk_...
+export PALMIER_PRODUCTIONS_DIR="$PWD/hgdw-productions"   # scripts came in via git, under the repo
+
+palmier preflight <LESSON_ID> --no-require-pushed       # already on this checkout → committed is enough
+PALMIER_TIMELINE=palmier palmier produce <LESSON_ID>    # live build; git gate is satisfied
+```
+
+> **Devin orchestration.** When the orchestrator is a Devin parent session fanning lessons out to
+> cloud child sessions, the same four steps apply — they're codified in the **HGDW Phase
+> Production** playbook (`!hgdw_phase`). The playbook is the Devin-specific wrapper (spawning
+> children, relaying Tailscale auth); the `palmier preflight` / produce git gate it relies on are
+> these portable CLI commands, so the workflow is identical when run by hand.
 
 ---
 

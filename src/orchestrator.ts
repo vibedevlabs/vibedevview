@@ -13,6 +13,7 @@ import type { RendererOptions } from "./slides/renderer.js";
 import { log } from "./util/log.js";
 import { noopSink, type EngineEventSink } from "./events.js";
 import { Workspace } from "./workspace.js";
+import { checkScriptGit, type GitGateLevel } from "./util/git.js";
 
 export type BackendName = "ffmpeg" | "palmier";
 
@@ -24,6 +25,13 @@ export interface ProduceOptions {
   clean?: boolean; // clear the timeline before assembling (palmier; default true — stays idempotent)
   keepBin?: boolean; // when cleaning, keep existing media-bin assets (default false — bin is reset to this import)
   onEvent?: EngineEventSink; // structured progress sink (for the app); defaults to no-op
+  /**
+   * Git gate for script.md before assembling. "off" disables it; "committed" requires
+   * a tracked, clean script; "pushed" also requires it be on the upstream. When omitted,
+   * the gate auto-enables at "committed" for the live `palmier` backend and is off for
+   * the `ffmpeg` preview backend (so local authoring stays frictionless).
+   */
+  gitGate?: GitGateLevel | "off";
 }
 
 export interface ProductionResult {
@@ -69,6 +77,21 @@ export async function produce(lessonId: string, opts: ProduceOptions = {}): Prom
       onEvent({ type: "result", result });
       return result;
     }
+  }
+
+  // 1b. Git gate: a script driven onto the LIVE timeline must be committed (so a
+  //     fan-out child on another machine can fetch the exact same script). Auto-on
+  //     for the palmier backend; opt in for ffmpeg via gitGate.
+  const gateLevel = resolveGitGate(opts);
+  if (gateLevel !== "off") {
+    const { gate } = await checkScriptGit(ws.scriptPath, gateLevel);
+    if (!gate.ok) {
+      throw new Error(
+        `git gate failed (${gate.reason}): ${gate.detail}. ` +
+          `Commit/push ${ws.scriptPath}, or re-run with --allow-uncommitted to override.`,
+      );
+    }
+    log.info("orchestrator", `git gate ok — ${gate.detail}`);
   }
 
   // 2. Parse script → segments.json (source of truth for all agents).
@@ -133,6 +156,12 @@ export async function produce(lessonId: string, opts: ProduceOptions = {}): Prom
   };
   onEvent({ type: "result", result });
   return result;
+}
+
+/** Resolve the effective git-gate level: explicit option wins; else on@committed for live, off for preview. */
+export function resolveGitGate(opts: ProduceOptions): GitGateLevel | "off" {
+  if (opts.gitGate) return opts.gitGate;
+  return chooseBackendName(opts.backend) === "palmier" ? "committed" : "off";
 }
 
 export type FeedbackKind = "narration" | "slide" | "recording" | "retime";

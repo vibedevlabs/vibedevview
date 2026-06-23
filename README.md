@@ -510,11 +510,12 @@ Run any command with `--help` for its options. Live-timeline commands need
 | Command | What it does |
 | --- | --- |
 | `palmier doctor` | Preflight: Node, ffmpeg, ffprobe, Chromium, ElevenLabs key + voice, Palmier reachable. |
+| `palmier preflight <id>` | One gate before a (fan-out) run: `script.md` exists **+** is committed **and pushed** (so another machine can `git pull` it) **+** `doctor` is green. Exits non-zero if not ready — so an orchestrator can refuse to start a run that would immediately block. `--no-require-pushed` to only require it committed locally; `--json`. |
 | `palmier init <id>` | Create the lesson folder seeded with a starter `script.md`. |
 | `palmier script <id>` | Validate `script.md` → `segments.json` (or draft it via LLM if none exists). |
 | `palmier slides <id>` | Render + verify the slide PNGs only. `--only 03,07` for specific segments. |
 | `palmier voice <id>` | Generate the voiceover + measure per-segment timing only. |
-| `palmier produce <id>` | The full pipeline. `--no-review` to skip the review pause; `--no-placeholders` to skip recording placeholders; `--no-clean` / `--keep-bin` (see Part 4). |
+| `palmier produce <id>` | The full pipeline. `--no-review` to skip the review pause; `--no-placeholders` to skip recording placeholders; `--no-clean` / `--keep-bin` (see Part 4). **Git gate:** on the live `palmier` backend it refuses unless `script.md` is committed (so a fan-out run can't drift from the repo) — override with `--allow-uncommitted`, tighten with `--require-pushed`, or force it on the preview backend with `--require-committed`. |
 | `palmier assemble <id>` | (Re)place already-produced assets on the timeline. `--no-clean` / `--keep-bin`. |
 | `palmier correct <id>` | Surgically revise one segment. `--kind narration\|slide\|recording\|retime` + `--seg <id>` or `--at <m:ss>`. |
 | `palmier clear` | Reset the Palmier timeline + media bin between takes/lessons. `--keep-bin` = timeline only. |
