@@ -10,212 +10,232 @@ phase: ABSORB
 duration: 8
 
 SAY:
-One sentence changes how you think about AI agents. Agent equals model plus harness. The model is the brain. The harness is everything else.
+Every agent you've ever used — Siri, Alexa, ChatGPT, Claude — runs on the same basic equation. A model that thinks, and a harness that gives it structure. The model is the intelligence. The harness is everything else — the rules, the tools, the memory, the schedule, the interface. Change the model, the agent thinks differently. Change the harness, the agent behaves differently. This lesson is about the harness. Because that's the part you control.
 
 SLIDE:
 ```yaml
 frame: N1-title
-  footer: "ZO AGENTS"
+footer: "ZO AGENTS"
 eyebrow: ZO AGENTS · ABSORB 1
 title: Agent = Model + Harness
-subtitle: The core equation
+subtitle: The equation behind every AI agent
 ```
 
-## 02 · The 98 percent
+## 02 · The equation
 phase: ABSORB
 duration: 10
 
 SAY:
-When researchers analyzed Claude Code — Anthropic's production coding agent — they found that 1.6 percent of the codebase is AI decision logic. 98.4 percent is harness infrastructure. Permissions, context management, safety layers, recovery logic, tool routing. The agent loop itself is a simple while-loop. The real engineering lives in the systems around it.
-
-SLIDE:
-```yaml
-frame: C7-stat
-  footer: "ZO AGENTS"
-stat: 98.4%
-statLabel: of a production agent is harness — not model reasoning
-```
-
-## 03 · What the harness actually does
-phase: ABSORB
-duration: 10
-
-SAY:
-Every serious agent harness has four elements. An agent loop — reason, act, observe, repeat. A tool interface — the AI can perceive and change the real world. Context management — the system decides what enters and leaves working memory. And control mechanisms — limits and guardrails that don't depend on the model obeying.
-
-SLIDE:
-```yaml
-frame: C4-steps
-  footer: "ZO AGENTS"
-eyebrow: THE FOUR ELEMENTS
-title: Every harness has these
-body:
-  - Agent Loop — reason, act, observe, repeat
-  - Tool Interface — read files, send emails, run code
-  - Context Management — what enters and leaves working memory
-  - Control Mechanisms — guardrails that don't depend on the model
-```
-
-## 04 · The six primitives
-phase: ABSORB
-duration: 6
-
-SAY:
-Zo Computer implements the harness through six native primitives — the building blocks you configure when setting up any agent. Bio, Rules, Personas, Skills, Automations, and Files.
-
-SLIDE:
-```yaml
-frame: N2-section
-  footer: "ZO AGENTS"
-eyebrow: ZO'S IMPLEMENTATION
-title: The Six Primitives
-subtitle: Bio · Rules · Personas · Skills · Automations · Files
-```
-
-## 05 · Bio — your permanent profile
-phase: ABSORB
-duration: 9
-
-SAY:
-Bio is your permanent profile. 2,048 characters. Loaded every conversation. Think of it as the "about the boss" card taped to the employee's desk. Include who you are, your clients, communication preferences, current priorities, and timezone. This one piece of context makes everything else work better.
-
-SLIDE:
-```yaml
-frame: C1-bullets
-  footer: "ZO AGENTS"
-eyebrow: PRIMITIVE 1
-title: Bio — Who You Are
-body:
-  - Permanent context, loaded every conversation
-  - 2,048 character limit — be precise
-  - "Include: identity, clients, preferences, priorities, timezone"
-  - The single highest-leverage edit you can make
-```
-
-## 06 · Rules — the employee handbook
-phase: ABSORB
-duration: 9
-
-SAY:
-Rules are behavioral constraints — things the agent must always or never do. Two types: always-on rules like "never send external email without my approval," and conditional rules like "when I reply lgtm, treat it as approval and proceed." Rules are guardrails, not suggestions. They fire before the model can decide otherwise.
-
-SLIDE:
-```yaml
-frame: C3-compare
-  footer: "ZO AGENTS"
-eyebrow: PRIMITIVE 2
-title: Rules — What's Allowed
-columns:
-  - heading: Always-On
-    items:
-      - Never send email without approval
-      - Default to concise — short sentences
-      - Always cite your source
-  - heading: Conditional
-    items:
-      - "When reply is 'lgtm' → treat as approval"
-      - "When urgent → send SMS immediately"
-      - "On Sundays → do not text unless critical"
-```
-
-## 07 · Personas — same agent, different hats
-phase: ABSORB
-duration: 7
-
-SAY:
-Personas are switchable AI profiles — voice, expertise, behavior. Think of it as a dress code per occasion. Suit for client emails, casual for text messages. Each messaging channel can have a different active persona. Same agent, different hats.
+Agent equals model plus harness. That's it. The model is the AI brain — Claude, GPT, Gemini, whatever you choose. It handles reasoning, language, decision-making. You don't build the model. You pick one. The harness is everything you wrap around that model to make it useful for your specific life. Your context. Your rules. Your tools. Your schedule. Your voice. Without a harness, a model is just a smart stranger. With a harness, it's your Chief of Staff.
 
 SLIDE:
 ```yaml
 frame: C5-callout
-  footer: "ZO AGENTS"
-eyebrow: PRIMITIVE 3
-title: Personas — How to Behave
+footer: "ZO AGENTS"
+eyebrow: THE EQUATION
+title: "Agent = Model + Harness"
 body:
-  - Switchable voice, expertise, and behavior
-  - Each channel gets its own active persona
-  - "Example: 'Business Operations' for email, 'Quick & Casual' for SMS"
+  - "Model = the AI brain (Claude, GPT, Gemini)"
+  - "Harness = everything you wrap around it"
+  - "Your context, rules, tools, schedule, voice"
+  - "You don't build the model. You build the harness."
+  - "The harness is what makes it YOURS"
 ```
 
-## 08 · Skills — the SOPs
-phase: ABSORB
-duration: 10
-
-SAY:
-Skills are repeatable AI workflows, packaged as SKILL dot MD files. Think of them as Standard Operating Procedures pinned to the cubicle wall. They load on demand — only activated when relevant, so they don't bloat every conversation. And the key feature: they're portable. The same SKILL dot MD works across Claude, ChatGPT, Copilot, and Zo.
-
-SLIDE:
-```yaml
-frame: C1-bullets
-  footer: "ZO AGENTS"
-eyebrow: PRIMITIVE 4
-title: Skills — How to Do Things
-body:
-  - Repeatable workflows as SKILL.md files
-  - Loaded on demand — only when relevant
-  - "Portable: works across Claude, ChatGPT, Copilot, Zo"
-  - "80+ community skills: morning-briefing, handoff, journal"
-```
-
-## 09 · Automations — daily routines
-phase: ABSORB
-duration: 9
-
-SAY:
-Automations are scheduled AI tasks — daily briefings, weekly reports, recurring checks. Each automation runs as a fresh agent instance — same tools, same rules, same persona, but no conversation history. That's important: write instructions as if briefing a colleague who's never seen your inbox. All context must be in the instruction.
-
-SLIDE:
-```yaml
-frame: C1-bullets
-  footer: "ZO AGENTS"
-eyebrow: PRIMITIVE 5
-title: Automations — When to Act
-body:
-  - Scheduled tasks — any cadence, any channel
-  - Each run is a fresh instance — no conversation history
-  - All context must be in the instruction
-  - "Example: 7:30 AM weekdays → check email → SMS digest"
-```
-
-## 10 · Files — the filing cabinet
-phase: ABSORB
-duration: 7
-
-SAY:
-Files are your agent's knowledge base — any file on the server is potential context. 100 gigs of storage. Client notes, templates, past reports. The agent can read and write files. The more it works, the more it knows. Think of it as a growing filing cabinet.
-
-SLIDE:
-```yaml
-frame: C1-bullets
-  footer: "ZO AGENTS"
-eyebrow: PRIMITIVE 6
-title: Files — What to Know
-body:
-  - 100GB persistent storage
-  - Any file is potential context
-  - Agent reads AND writes — knowledge grows
-  - "Client notes, templates, reports, history"
-```
-
-## 11 · The decision tree
+## 03 · The model side
 phase: ABSORB
 duration: 8
 
 SAY:
-When you're configuring your agent, use this decision tree. Is it a fact about you? Bio. A behavioral constraint? Rule. About how the AI should sound? Persona. A procedure? Skill. Should it run on a schedule? Automation. Reference material? Files. Every piece of context maps to exactly one primitive.
+The model handles the thinking. Given a prompt, it reasons, generates, decides. You've already experienced this. You ask Claude a question, it gives you a thoughtful answer. You give GPT a task, it produces a draft. That's the model doing its job. On Zo, you can switch models anytime. Claude Sonnet for everyday work. Claude Opus for complex reasoning. GPT for a different perspective. Gemini for another. The model is interchangeable. The harness is what stays.
+
+SLIDE:
+```yaml
+frame: C1-bullets
+footer: "ZO AGENTS"
+eyebrow: THE MODEL
+title: The brain — interchangeable
+body:
+  - "Handles reasoning, language, decisions"
+  - "Claude, GPT, Gemini — your choice"
+  - "Switch anytime on Zo"
+  - "The model is the intelligence"
+  - "You don't build it. You pick it."
+```
+
+## 04 · The harness side — six primitives
+phase: ABSORB
+duration: 12
+
+SAY:
+The harness is where you spend your time. On Zo, the harness has exactly six building blocks — six primitives. Bio — who you are, your context, your preferences. Rules — what the agent should and shouldn't do. Personas — how it sounds, its voice and expertise. Skills — specific jobs it knows how to do, written as step-by-step instructions. Automations — scheduled tasks that run without you. Files — any document on the server that gives the agent context. These six primitives are the entire configuration surface. Every agent you build on Zo is some combination of these six things. That's it.
 
 SLIDE:
 ```yaml
 frame: C4-steps
-  footer: "ZO AGENTS"
-title: Which primitive, when?
+footer: "ZO AGENTS"
+eyebrow: THE HARNESS
+title: Six primitives — that's the whole surface
 body:
-  - "Fact about you or your context → Bio"
-  - "Behavioral constraint (always/never) → Rule"
-  - "How the AI should sound or behave → Persona"
-  - "A procedure (do X, then Y, then Z) → Skill"
-  - "Runs on a schedule without you asking → Automation"
-  - "Reference material, templates, knowledge → Files"
+  - "Bio — who you are, your context"
+  - "Rules — boundaries and shortcuts"
+  - "Personas — voice, expertise, behavior"
+  - "Skills — jobs with steps and definitions of done"
+  - "Automations — scheduled tasks that run on their own"
+  - "Files — any document as context"
+```
+
+## 05 · Bio — your context card
+phase: ABSORB
+duration: 8
+
+SAY:
+Bio is the simplest primitive. It's a block of text — up to two thousand characters — that tells the agent who you are. Your name. What you do. Your timezone. Your clients. Your kids' ages. Your communication preferences. It loads every single conversation. The agent always knows this context. Think of it as the "about the boss" card you'd give a new hire on day one. Short, dense, specific. Not a resume — a working context card.
+
+SLIDE:
+```yaml
+frame: C1-bullets
+footer: "ZO AGENTS"
+eyebrow: "PRIMITIVE 1 · BIO"
+title: "Your context card — always loaded"
+body:
+  - "2,048 characters max"
+  - "Who you are, what you do, timezone"
+  - "Clients, collaborators, family logistics"
+  - "Communication preferences"
+  - "Loaded every conversation — the agent always knows"
+```
+
+## 06 · Rules — the guardrails
+phase: ABSORB
+duration: 9
+
+SAY:
+Rules are behavioral constraints. They come in two types. Always-on rules fire every conversation — "never send email without my approval," "default to concise." Conditional rules fire when a condition matches — "when I say lgtm, treat it as approval and proceed," "when it's Sunday, no proactive messages." Rules are the difference between an agent that does whatever it thinks is best and one that respects your boundaries. They're the employee handbook. Short, clear, non-negotiable.
+
+SLIDE:
+```yaml
+frame: C3-compare
+footer: "ZO AGENTS"
+eyebrow: "PRIMITIVE 2 · RULES"
+title: Guardrails — always-on and conditional
+columns:
+  - heading: Always-on
+    items:
+      - Never send email without approval
+      - Default to concise
+      - Always cite sources in research
+  - heading: Conditional
+    items:
+      - "When 'lgtm' → treat as approval"
+      - "When Sunday → no proactive SMS"
+      - "When 3+ urgent items → alert immediately"
+```
+
+## 07 · Personas — the voice
+phase: ABSORB
+duration: 8
+
+SAY:
+Personas control how the agent sounds and behaves. A persona has a name, a prompt, and optionally a model override. You might have a Chief of Staff persona that's direct, warm, and concise. A Technical Writer persona that's precise and detailed. A Creative Director persona that's bold and opinionated. You can set different personas per channel — one voice for SMS, another for Slack. The persona is the dress code. Same employee, different presentation for different contexts.
+
+SLIDE:
+```yaml
+frame: C1-bullets
+footer: "ZO AGENTS"
+eyebrow: "PRIMITIVE 3 · PERSONAS"
+title: "How your agent sounds — switchable"
+body:
+  - "Name + prompt + optional model override"
+  - "Different personas for different contexts"
+  - "Set per-channel — SMS voice vs Slack voice"
+  - "Chief of Staff, Technical Writer, Creative Director"
+  - "Same agent, different presentation"
+```
+
+## 08 · Skills — the job descriptions
+phase: ABSORB
+duration: 10
+
+SAY:
+Skills are the most important primitive. A skill is a repeatable job written as a SKILL dot MD file with step-by-step instructions. It has a trigger — when does this job run. Steps — what does doing this job look like. And a definition of done — how do we know it's complete. The agent reads the skill file and follows the instructions like a checklist. No code required. Just clear, plain-language steps. You'll build nine skills for your Chief of Staff — three for household, three for personal, three for business. Each one a real job with a real definition of done. That's what separates an agent from a chatbot. The chatbot answers questions. The agent finishes jobs.
+
+SLIDE:
+```yaml
+frame: C5-callout
+footer: "ZO AGENTS"
+eyebrow: "PRIMITIVE 4 · SKILLS"
+title: "Jobs with definitions of done"
+body:
+  - "SKILL.md — plain markdown, no code"
+  - "Trigger — when does this job start?"
+  - "Steps — 3 to 6 concrete actions"
+  - "Definition of Done — specific, measurable output"
+  - "The agent follows the checklist until the job is finished"
+```
+
+## 09 · Automations — the schedule
+phase: ABSORB
+duration: 9
+
+SAY:
+Automations are skills on a schedule. They use RRULE — the same standard your calendar uses for recurring events. A morning briefing at seven thirty every weekday. A follow-up tracker at five PM. A weekly reflection every Sunday at seven. Each automation has a schedule, an instruction, and a delivery channel — SMS, email, or just save to file. When the automation fires, it runs as another instance of your agent — same tools, same persona, same rules. It just runs without you asking. That's the "works while you sleep" part.
+
+SLIDE:
+```yaml
+frame: C1-bullets
+footer: "ZO AGENTS"
+eyebrow: "PRIMITIVE 5 · AUTOMATIONS"
+title: "Skills on a schedule — no prompting needed"
+body:
+  - "RRULE schedule — same as calendar recurrence"
+  - "Instruction — what to do when triggered"
+  - "Delivery — SMS, email, or file"
+  - "Runs as your agent — same tools, persona, rules"
+  - "Morning briefing, evening wind-down, weekly reset"
+```
+
+## 10 · Files — the context library
+phase: ABSORB
+duration: 7
+
+SAY:
+Files are the simplest primitive and the most flexible. Any file on your Zo server can be context for the AI. Open a file and it's in the conversation. Mention it with an at-sign and the agent reads it. Your voice examples. Your client list. Your project notes. Your household preferences. Files don't load automatically like Bio does — they load on demand. That's by design. Bio is always relevant. Files are relevant when you need them. Think of files as the filing cabinet. The agent knows where things are and pulls them when a job requires it.
+
+SLIDE:
+```yaml
+frame: C1-bullets
+footer: "ZO AGENTS"
+eyebrow: "PRIMITIVE 6 · FILES"
+title: "Any file is context — on demand"
+body:
+  - "Open a file → in the conversation"
+  - "Mention with @ → agent reads it"
+  - "Voice examples, client lists, project notes"
+  - "Load on demand — not every conversation"
+  - "The filing cabinet your agent pulls from"
+```
+
+## 11 · How they work together
+phase: ABSORB
+duration: 9
+
+SAY:
+Here's how the six primitives combine. Your Bio loads — the agent knows who you are. Your Rules activate — it knows the boundaries. Your Persona sets the voice. Now a morning briefing Automation fires at seven thirty AM. The agent reads the morning-briefing Skill — it knows the steps. It opens your Calendar and Gmail Files as context. It follows the checklist: check calendar, scan email, review yesterday's notes, compile brief, send SMS. Definition of done: SMS delivered, digest saved. One system. Six primitives working together. Each one simple on its own. Powerful in combination.
+
+SLIDE:
+```yaml
+frame: C4-steps
+footer: "ZO AGENTS"
+eyebrow: ALL SIX TOGETHER
+title: One system — six primitives in action
+body:
+  - "Bio loads → agent knows who you are"
+  - "Rules activate → boundaries enforced"
+  - "Persona sets → voice established"
+  - "Automation fires → morning briefing triggered"
+  - "Skill reads → follows the checklist step by step"
+  - "Files provide context → calendar, email, notes"
 ```
 
 ## 12 · Outro
@@ -223,13 +243,13 @@ phase: ABSORB
 duration: 5
 
 SAY:
-That's the equation. Six primitives, one harness. Next up: the mental model that ties it all together — treating your agent like a new employee.
+Agent equals model plus harness. The harness is six primitives. Bio, Rules, Personas, Skills, Automations, Files. Next — we'll learn the mental model that makes these primitives intuitive. Your agent is a new employee. And you're about to write their entire job description.
 
 SLIDE:
 ```yaml
 frame: O1-outro
-  footer: "ZO AGENTS"
+footer: "ZO AGENTS"
 eyebrow: NEXT
-title: Agent as Employee
-subtitle: The mental model that makes everything click
+title: Your agent is a new employee
+subtitle: The mental model that makes it all click
 ```

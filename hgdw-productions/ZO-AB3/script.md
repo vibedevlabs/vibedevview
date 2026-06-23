@@ -10,190 +10,163 @@ phase: ABSORB
 duration: 7
 
 SAY:
-Time to see the platform. When you log into Zo, you're looking at your personal cloud computer — a real Linux server with an AI brain, 100-plus tools, and hosting built in. Let me walk you through every layer.
+You know the equation. You know the six primitives. You know the employee mental model. Now let's see where everything lives. This is a quick tour of Zo Computer — the interface, the settings, the tools. By the end, you'll know exactly where to find and edit every primitive before you start building your Chief of Staff.
 
 SLIDE:
 ```yaml
 frame: N1-title
-  footer: "ZO AGENTS"
+footer: "ZO AGENTS"
 eyebrow: ZO AGENTS · ABSORB 3
 title: Platform Tour
-subtitle: Every feature, every primitive — where to find it all
+subtitle: Where every primitive lives
 ```
 
-## 02 · The six layers
+## 02 · The five layers
 phase: ABSORB
-duration: 8
+duration: 10
 
 SAY:
-Zo is six layers. At the core: a real Linux computer with persistent storage. Around it: the AI brain — multi-model, bring your own key. Then: identity — your Bio, Rules, and Personas. Tools — over 100 built-in. Hosting — Space, Sites, Services. And surfaces — web, SMS, email, Telegram, Slack, desktop app, API.
+Zo is built in five layers, from the bottom up. Layer one — compute. A real Linux server, always on, persistent storage. You can SSH in if you want. Layer two — the AI brain. Multi-model, tool-calling, streaming. Layer three — personalization. This is where the six primitives live — Bio, Rules, Personas, Skills, Automations, Files. Layer four — hosting. Sites, services, APIs, public file sharing. Layer five — surfaces. The web app, desktop app, SMS, email, Telegram, Discord, Slack, API. Same agent, every channel. You interact mostly with layers three and five. Personalization and surfaces. The rest is infrastructure that just works.
 
 SLIDE:
 ```yaml
 frame: C4-steps
-  footer: "ZO AGENTS"
-eyebrow: THE SIX LAYERS
-title: From compute to surface
+footer: "ZO AGENTS"
+eyebrow: ARCHITECTURE
+title: Five layers — bottom to top
 body:
-  - "1. Compute — real Linux server, 100GB storage, always on"
-  - "2. AI Brain — Claude, GPT, Gemini, open models, BYOK"
-  - "3. Identity — Bio, Rules, Personas (the six primitives)"
-  - "4. Tools — 100+ built-in (Gmail, Calendar, shell, Stripe, web)"
-  - "5. Hosting — Space, Sites, Services, zo.pub"
-  - "6. Surfaces — web, SMS, email, Telegram, Slack, desktop, API"
+  - "Compute — Linux server, always on, persistent storage"
+  - "AI Brain — multi-model, 100+ tools, streaming"
+  - "Personalization — Bio, Rules, Personas, Skills, Automations, Files"
+  - "Hosting — sites, services, APIs, public sharing"
+  - "Surfaces — web, desktop, SMS, email, Telegram, Slack, API"
 ```
 
-## 03 · Layer 1 and 2: Compute and AI
+## 03 · The web app
 phase: ABSORB
 duration: 9
 
 SAY:
-The compute layer is a real Linux server in a data center. Files persist forever — between conversations, restarts, updates. You get root SSH access and 100 gigs of storage. The AI brain sits on top — switch between Claude, GPT, Gemini, and open-source models with one click. Bring your own API keys in Settings. The AI uses tool-calling to invoke over 100 tools in a single turn.
-
-SLIDE:
-```yaml
-frame: C3-compare
-  footer: "ZO AGENTS"
-title: The foundation
-columns:
-  - heading: Compute
-    items:
-      - Real Linux server, always on
-      - 100GB persistent storage
-      - Root SSH access
-      - Desktop app with file sync
-  - heading: AI Brain
-    items:
-      - Multi-model — switch anytime
-      - Claude, GPT, Gemini, open models
-      - Bring your own API keys
-      - 100+ tool-calling capabilities
-```
-
-## 04 · Layer 3: Identity — the primitives
-phase: ABSORB
-duration: 10
-
-SAY:
-The identity layer is where you configure your agent. Bio in Settings — your permanent profile, 2,048 characters. Rules in Settings — add always-on or conditional constraints. Personas in Settings — switchable AI profiles per channel. Skills in the sidebar — browse the Skills Hub, 80-plus community skills you install with one click. Automations in the sidebar — create scheduled tasks with any cadence and delivery channel. Files in the left sidebar — your growing knowledge base.
+The web app at zo.computer is where you'll spend most of your time during setup. When you log in, you see the chat interface — talk to your Zo just like any AI chat. But the left sidebar is where the real power lives. Files — browse everything on your server. Terminal — run shell commands directly in the browser. Sites — manage hosted websites and services. And Settings — this is where the six primitives are configured. Let's go through Settings.
 
 SLIDE:
 ```yaml
 frame: C1-bullets
-  footer: "ZO AGENTS"
-eyebrow: LAYER 3 — IDENTITY
-title: Where to find each primitive
+footer: "ZO AGENTS"
+eyebrow: WEB APP
+title: zo.computer — your command center
 body:
-  - "Bio → Settings > Bio (2,048 chars, loaded every conversation)"
+  - "Chat — talk to your Zo"
+  - "Files — browse your server's filesystem"
+  - "Terminal — shell commands in the browser"
+  - "Sites — manage hosted projects"
+  - "Settings — where the 6 primitives live"
+```
+
+## 04 · Settings — where primitives live
+phase: ABSORB
+duration: 12
+
+SAY:
+In Settings, you'll find each primitive as its own section. Bio — a text field, two thousand character limit. Type your context and save. Rules — a list. Add always-on rules or conditional rules with triggers. Personas — create named personas with prompts, set one as active, assign per channel. Skills — these live as SKILL dot MD files in your filesystem at home workspace Skills. You can also browse community skills from the Skills tab and install them with one click. Automations — create scheduled tasks with RRULE, instruction, model, and delivery channel. Files — your entire filesystem. Anything in home workspace is accessible to the AI.
+
+SLIDE:
+```yaml
+frame: C4-steps
+footer: "ZO AGENTS"
+eyebrow: SETTINGS
+title: Each primitive has a home
+body:
+  - "Bio → Settings > Bio (2,048 char text field)"
   - "Rules → Settings > Rules (always-on + conditional)"
-  - "Personas → Settings > Personas (per-channel switching)"
-  - "Skills → Sidebar > Skills (80+ in the Hub)"
-  - "Automations → Sidebar > Automations (any schedule)"
-  - "Files → Left sidebar file browser (/home/workspace/)"
+  - "Personas → Settings > Personas (create, set active, per-channel)"
+  - "Skills → /home/workspace/Skills/ (SKILL.md files)"
+  - "Automations → Automations tab (RRULE + instruction + delivery)"
+  - "Files → Files tab (entire filesystem)"
 ```
 
-## 05 · Layer 4: Tools
-phase: ABSORB
-duration: 9
-
-SAY:
-Over 100 tools organized by category. Files — create, edit, read, search, transcribe, generate images and diagrams. Web — search, read pages, browse with AI, save articles. Computer — shell commands, create sites and services. Integrations — Gmail, Calendar, Drive, Sheets, Notion, Linear, Airtable, Slack, Discord, Telegram, SMS. Commerce — Stripe products, prices, payment links. The AI uses them automatically, or you can invoke them by name.
-
-SLIDE:
-```yaml
-frame: C1-bullets
-  footer: "ZO AGENTS"
-eyebrow: LAYER 4 — TOOLS
-title: "100+ tools by category"
-body:
-  - "Files — create, edit, search, transcribe, generate (12)"
-  - "Web — search, read pages, browse, save articles (11)"
-  - "Computer — shell, sites, services, proxy (14)"
-  - "Integrations — Gmail, Calendar, Notion, Slack, SMS (20+)"
-  - "Commerce — Stripe products, prices, payment links (7)"
-  - "Personalization — CRUD personas, rules, settings (12)"
-```
-
-## 06 · Layer 5 and 6: Hosting and Surfaces
+## 05 · Tools — what your agent can do
 phase: ABSORB
 duration: 10
 
 SAY:
-Hosting gives you four ways to put things online. Space — your handle dot zo dot space for landing pages. Sites — full web app projects. Services — long-running programs like bots and APIs. And zo.pub — share any file with a link. Surfaces are how you talk to Zo from anywhere. Web app, SMS, email at your handle at zo dot computer, Telegram, Discord, Slack, desktop app, API, and MCP. That last one — MCP — means external tools like Claude Code and Cursor can use your Zo's capabilities.
+Your agent has access to over a hundred tools, organized into categories. Files — create, read, edit, search, transcribe audio and video, generate images and diagrams. Web — search, read pages, browse with an AI agent, save articles. Computer — run shell commands, create sites and services, proxy local ports publicly. Integrations — Gmail, Google Calendar, Drive, Sheets, Notion, Linear, Airtable, Slack, Discord, Telegram, Spotify, Twitter. Commerce — Stripe products, payment links, orders. You don't need to know all of them. Your agent discovers the right tool for the job based on your Skill instructions.
 
 SLIDE:
 ```yaml
 frame: C3-compare
-  footer: "ZO AGENTS"
-title: Hosting and surfaces
+footer: "ZO AGENTS"
+eyebrow: 100+ TOOLS
+title: What your agent can actually do
 columns:
-  - heading: Hosting (put things online)
+  - heading: Core tools
     items:
-      - "Space — yourhandle.zo.space"
-      - "Sites — name.zocomputer.io"
-      - "Services — long-running bots/APIs"
-      - "zo.pub — share files with a link"
-  - heading: Surfaces (talk to Zo)
+      - Files — CRUD, search, transcribe, generate
+      - Web — search, read pages, browse
+      - Computer — shell, sites, services
+  - heading: Integrations
     items:
-      - "Web app, SMS, Email"
-      - "Telegram, Discord, Slack"
-      - "Desktop app, API"
-      - "MCP — connect Claude Code, Cursor"
+      - Gmail, Calendar, Drive, Sheets
+      - Notion, Linear, Airtable
+      - Slack, Discord, Telegram
+      - Stripe commerce
 ```
 
-## 07 · The MCP connection
+## 06 · Surfaces — where you talk to your agent
+phase: ABSORB
+duration: 9
+
+SAY:
+Zo meets you where you already are. The web app for setup and long conversations. The desktop app for file sync and quick access. SMS — text your Zo from your phone. Email — send to your handle at zo.computer. Telegram — DM or group chat. Discord — DM or mention in a server. Slack — DM or at-mention. And the API for programmatic access. Same agent, same memory, same tools, every channel. Start a conversation on your phone via SMS, continue it on the web app from your laptop. The context follows you. For your Chief of Staff, SMS is the primary delivery channel — that's where your morning briefings, follow-up alerts, and evening summaries arrive.
+
+SLIDE:
+```yaml
+frame: C1-bullets
+footer: "ZO AGENTS"
+eyebrow: SURFACES
+title: Same agent, every channel
+body:
+  - "Web app — setup, long conversations"
+  - "Desktop app — file sync, quick access"
+  - "SMS — text from your phone"
+  - "Email — send to yourhandle@zo.computer"
+  - "Telegram, Discord, Slack — messaging platforms"
+  - "API — programmatic access"
+```
+
+## 07 · MCP — your agent as infrastructure
 phase: ABSORB
 duration: 8
 
 SAY:
-Zo also works as an MCP Server. That means external AI tools can use Zo's capabilities. Connect Claude Code to your Zo with one command — now Claude Code can read your Zo files, send emails through your Zo integrations, use your Zo tools, all from your terminal. Your Zo becomes a shared capability layer.
+One more thing worth knowing. Zo exposes itself as an MCP server. That means you can connect Zo's tools to Claude Code, Cursor, Gemini CLI, or any MCP-compatible tool. Your agent becomes infrastructure for other AI tools. You're not locked into one interface. Your Zo's tools — the files, the web search, the integrations — become available to whatever AI tool you prefer working with. This is how Zo becomes the backbone of your AI stack, not just another app in it.
 
 SLIDE:
 ```yaml
-frame: C6-code
-  footer: "ZO AGENTS"
-eyebrow: MCP CONNECTION
-title: Connect Claude Code to your Zo
-code: |
-  claude mcp add --transport http zo \
-    https://api.zo.computer/mcp \
-    --header "Authorization: Bearer zo_sk_..."
+frame: C5-callout
+footer: "ZO AGENTS"
+eyebrow: MCP SERVER
+title: Your agent as infrastructure
+body:
+  - "Zo exposes its tools via MCP protocol"
+  - "Connect to Claude Code, Cursor, Gemini CLI"
+  - "Your files, search, integrations — available everywhere"
+  - "Not locked to one interface"
+  - "Zo becomes the backbone of your AI stack"
 ```
 
-## 08 · Orientation checklist
+## 08 · Quick recap
 phase: ABSORB
-duration: 5
-silent: true
-
-SLIDE:
-```yaml
-frame: N4-vocab
-  footer: "ZO AGENTS"
-eyebrow: BEFORE YOU BUILD
-title: Can you find these?
-tags:
-  - Chat interface
-  - Model picker
-  - Settings > Bio
-  - Settings > Rules
-  - Skills tab
-  - Automations tab
-  - File browser
-  - Terminal
-```
-
-## 09 · Outro
-phase: ABSORB
-duration: 5
+duration: 7
 
 SAY:
-You've seen every layer. Now it's time to build. Next module: we use Claude to design your agent, then watch Zo build it from a single config file.
+That's the platform. Five layers — compute, AI brain, personalization, hosting, surfaces. Six primitives in Settings — Bio, Rules, Personas, Skills, Automations, Files. Over a hundred tools organized by category. Seven messaging channels, all sharing the same agent. And MCP so your Zo works with other AI tools too. You now know the theory and the interface. Next — we build.
 
 SLIDE:
 ```yaml
 frame: O1-outro
-  footer: "ZO AGENTS"
-eyebrow: NEXT
-title: Zo Builds Itself
-subtitle: Claude designs it. Zo creates all six pieces.
+footer: "ZO AGENTS"
+eyebrow: ABSORB COMPLETE
+title: You know the building blocks.
+subtitle: Next — build your Chief of Staff.
 ```
