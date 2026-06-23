@@ -103,7 +103,7 @@ Click "Add Rule." You'll see two fields:
 Start with these three:
 1. "Never send external email without my explicit approval."
 2. "Default to concise. Short sentences. One idea per sentence."
-3. When reply is "lgtm" > "Treat as approval. Proceed. Log the decision."
+3. When reply is "looks good" > "Treat as approval. Proceed. Log the decision."
 
 ### Personas
 

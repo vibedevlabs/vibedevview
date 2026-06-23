@@ -120,7 +120,7 @@ Here's the scenario that shows it all:
 >
 > Your **automation** fires. Zo wakes up, reads your **Bio** (knows you, your clients, your priorities). Follows your **Rules** (only text if something important). Activates the morning-briefing **Skill** (checks calendar, scans email, reads client **files**). Writes the brief in your **Persona's** voice (concise, direct). Texts it to you.
 >
-> You read it in 30 seconds. Reply "lgtm" — your **shortcut rule** kicks in: "treat as approval, proceed." Zo drafts the follow-up emails and saves them to your drafts folder.
+> You read it in 30 seconds. Reply "looks good" — your **shortcut rule** kicks in: "treat as approval, proceed." Zo drafts the follow-up emails and saves them to your drafts folder.
 >
 > **That's all six pieces. Working together. Without you building anything technical.**
 

@@ -22,7 +22,7 @@ Ask me:
 Ask me:
 1. What should your agent NEVER do without your explicit approval? (send emails? spend money? contact clients?)
 2. Are there times of day or days of the week it should stay quiet?
-3. Do you have any shorthand you'd like to use? (e.g., "lgtm" = approved, "hold" = pause)
+3. Do you have any shorthand you'd like to use? (e.g., "looks good" = approved, "hold" = pause)
 4. Any people or topics that are off-limits or require special handling?
 
 ## Round 3 — How It Should Sound (→ Persona)

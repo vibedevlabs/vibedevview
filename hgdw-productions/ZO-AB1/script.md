@@ -111,7 +111,7 @@ phase: ABSORB
 duration: 9
 
 SAY:
-Rules are behavioral constraints. They come in two types. Always-on rules fire every conversation — "never send email without my approval," "default to concise." Conditional rules fire when a condition matches — "when I say lgtm, treat it as approval and proceed," "when it's Sunday, no proactive messages." Rules are the difference between an agent that does whatever it thinks is best and one that respects your boundaries. They're the employee handbook. Short, clear, non-negotiable.
+Rules are behavioral constraints. They come in two types. Always-on rules fire every conversation — "never send email without my approval," "default to concise." Conditional rules fire when a condition matches — "when I say looks good, treat it as approval and proceed," "when it's Sunday, no proactive messages." Rules are the difference between an agent that does whatever it thinks is best and one that respects your boundaries. They're the employee handbook. Short, clear, non-negotiable.
 
 SLIDE:
 ```yaml
@@ -127,7 +127,7 @@ columns:
       - Always cite sources in research
   - heading: Conditional
     items:
-      - "When 'lgtm' → treat as approval"
+      - "When 'looks good' → treat as approval"
       - "When Sunday → no proactive SMS"
       - "When 3+ urgent items → alert immediately"
 ```

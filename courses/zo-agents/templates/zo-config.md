@@ -51,7 +51,7 @@ Voice: [describe your tone — e.g., "Direct, warm, concise. Short sentences."]
 ### Conditional Rules
 
 ```
-1. When reply is "lgtm" -> Treat as approval. Proceed. Log the decision.
+1. When reply is "looks good" -> Treat as approval. Proceed. Log the decision.
 2. When [day/time condition] -> [instruction]
 3. When [context condition] -> [instruction]
 ```

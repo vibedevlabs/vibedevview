@@ -71,7 +71,7 @@ List 5-7 rules the agent must always follow. Focus on:
 - Forbidden actions (what it must never do without permission)
 - Voice/tone constraints
 - Communication cadence boundaries
-- Decision shortcuts (e.g., "lgtm" = approval)
+- Decision shortcuts (e.g., "looks good" = approval)
 
 ### Conditional Rules
 List 3-5 rules triggered by specific conditions.

@@ -107,7 +107,7 @@ phase: MIRROR
 duration: 12
 
 SAY:
-Round 2: what should your agent never do? Claude asks about boundaries. I say: never send email without my approval. Never contact clients directly. No messages on Sundays unless it's critical. And I set up my shortcuts — "lgtm" means approved, "hold" means pause. Each answer becomes a Rule — a guardrail that fires before the model can decide otherwise. Round 3: how should it sound? I describe the voice. Direct. Warm. Short sentences. No corporate speak. Claude asks me to show an example — I paste a text I actually sent. That voice becomes my Persona. Same agent, my tone.
+Round 2: what should your agent never do? Claude asks about boundaries. I say: never send email without my approval. Never contact clients directly. No messages on Sundays unless it's critical. And I set up my shortcuts — "looks good" means approved, "hold" means pause. Each answer becomes a Rule — a guardrail that fires before the model can decide otherwise. Round 3: how should it sound? I describe the voice. Direct. Warm. Short sentences. No corporate speak. Claude asks me to show an example — I paste a text I actually sent. That voice becomes my Persona. Same agent, my tone.
 
 DO:
 - action: Show answering Round 2 — type out boundary answers (never send email, no Sundays, shortcuts)
@@ -125,7 +125,7 @@ columns:
     items:
       - Never send email without approval
       - No messages on Sundays
-      - "'lgtm' = approved, proceed"
+      - "'looks good' = approved, proceed"
       - "'hold' = pause, don't act"
   - heading: "Round 3 → Persona"
     items:

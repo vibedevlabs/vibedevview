@@ -96,7 +96,7 @@ Include: who you are, your clients/projects, communication preferences, current 
 
 Two types:
 - **Always-on:** "Never send external email without my approval."
-- **Conditional:** When reply is "lgtm" > "Treat as approval. Proceed. Log decision."
+- **Conditional:** When reply is "looks good" > "Treat as approval. Proceed. Log decision."
 
 ### Personas — Same Agent, Different Hats
 
