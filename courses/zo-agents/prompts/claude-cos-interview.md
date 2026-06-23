@@ -1,81 +1,101 @@
-# Claude Chief of Staff Setup Prompt
+# Claude Chief of Staff Interview — Zo Computer
 
-> Paste this into Claude along with your AI Command Center and the Chief of Staff config. Claude reads your context, maps it to the config, and confirms before outputting the final personalized setup prompt.
+> Give this prompt to Claude along with your AI Command Center. Claude interviews you across the 6 Zo primitives, confirms what it found, and outputs a complete Zo setup prompt you paste in one shot.
 
 ---
 
-You are helping me set up an AI Chief of Staff on Zo Computer. I want an agent that handles real jobs across three areas of my life: **household**, **personal**, and **business/work**.
+You are helping me set up my AI Chief of Staff on **Zo Computer**.
 
-I've pasted two things:
+I've pasted my **AI Command Center** above — it has everything about me: who I am, what I do, how I work, my clients, my tools, my schedule, and my communication style.
 
-1. **My AI Command Center** — this has my personal context: who I am, what I do, my clients, tools, communication style, schedule, and preferences.
-2. **The Chief of Staff config** — this has 9 pre-defined skills, 5 automations, rules, a persona template, and file structure with placeholder values.
+## Your job: Interview me to build a complete Zo config
 
-## What to do:
+Zo has 6 primitives. You're going to read my Command Center, then walk me through each one — confirming what you found and asking what's missing.
 
-### Step 1 — Read and Map
-Read my AI Command Center thoroughly. Map everything you find to the config:
+### Round 1 — Bio (who I am)
+Read my Command Center and draft my Zo Bio. This is the persistent context Zo reads on every interaction. It should include:
+- Name, role, timezone
+- Family/household details (kids, partner, pets — whatever shapes my schedule)
+- Key clients or collaborators
+- Daily tools (Gmail, Calendar, Slack, Notion, etc.)
+- Communication preference (SMS for alerts, email for long-form, etc.)
 
-- **Bio**: Pull my name, role, timezone, family details, clients, tools, and preferences
-- **Rules**: Identify any boundaries, communication preferences, or workflow patterns
-- **Persona**: Determine my voice from how I write — casual vs professional, direct vs warm, short vs long
-- **Skills**: Personalize the 9 jobs with my real client names, project names, and specific details
-- **Automations**: Set schedule times based on my daily routine (or use the defaults if my schedule isn't clear)
-- **File structure**: Keep as-is unless my context suggests a different organization
+Show me what you drafted. Ask: "Anything wrong or missing?"
 
-### Step 2 — Show Me the Mapping
-Present a quick summary of what you found and how you mapped it:
+### Round 2 — Rules (what it's allowed to do)
+Based on my Command Center, propose my rules. These are always-on guardrails and conditional shortcuts:
+- Always-on: boundaries (never send without approval, always cite sources, etc.)
+- Conditional: shortcuts ("looks good" = approved, "hold" = pause everything)
+- Conditional: context-aware (Sunday = no proactive SMS, 3+ urgent items = alert immediately)
 
-- "Here's what I found in your Command Center..."
-- "Here's how I filled in each section..."
-- "Does this look right? Anything to adjust?"
+Show me the list. Ask: "Any rules to add, remove, or change?"
 
-Ask specifically:
-- Any of the 9 jobs you want to remove?
-- Any schedule times to change?
-- Anything I got wrong or missed?
+### Round 3 — Persona (how it sounds)
+Based on how I write in my Command Center, define my Chief of Staff persona:
+- Voice style (direct? warm? casual? professional?)
+- Sentence length and vocabulary
+- What it should never sound like (corporate, fake enthusiasm, etc.)
+- Operating mode (proactive partner, not reactive chatbot)
 
-### Step 3 — Output the Final Config
-After I confirm (or after applying my adjustments), output the COMPLETE Zo setup prompt:
+Show me the persona prompt. Ask: "Does this sound like someone you'd want running your operations?"
 
-```
-Here is my complete Chief of Staff configuration. Please set up my Zo by creating each piece:
+### Round 4 — Skills (what jobs it does)
+I want 9 jobs across three life areas:
 
-## BIO
-[2048 chars max — real context from my Command Center]
+**Household (3):**
+- Morning Briefing — calendar + priorities + family logistics
+- Household Planner — weekly meals + errands + appointments  
+- Family Calendar Sync — who needs to be where today
 
-## RULES
-[Always-on rules + conditional rules with my actual preferences]
+**Personal (3):**
+- Morning Intention — the one thing that matters today
+- Brain Dump → Clarity — messy thoughts into organized actions
+- Weekly Reflection — what I accomplished, patterns, next week's priorities
 
-## PERSONA
-Name: Chief of Staff
-Prompt: [Full persona prompt reflecting my voice and style]
+**Business (3):**
+- Follow-up Tracker — surface stale promises before they're embarrassing
+- Content Draft — write in my voice, not generic AI voice
+- Evening Wind-down — capture the day, plan tomorrow, be done
 
-## SKILLS
-[For each job:]
-### Skill: [name]
-- Trigger: [when]
-- Steps:
-  1. [step]
-  2. [step]
-  ...
-- Definition of Done: [specific output]
-- Delivery: [SMS/email/file]
+For each job, define:
+- **Trigger**: when it runs (schedule + manual phrases)
+- **Steps**: the exact checklist (1-6 steps max)
+- **Definition of Done**: the specific output that means "job complete"
+- **Delivery**: how it reaches me (SMS, email, or saved to file)
 
-## AUTOMATIONS
-[For each scheduled job:]
-### Automation: [name]
-- Schedule: [RRULE string]
-- Delivery: [sms/email]
-- Instruction: [full instruction text]
+Show me all 9. Ask: "Any jobs to remove? Any to add? Schedule times to adjust?"
 
-## FILE STRUCTURE
-[Folder structure to create]
-```
+### Round 5 — Automations (when it acts on its own)
+Based on the skills and my schedule, propose 5 automations:
+1. Family Calendar Sync — early morning weekdays
+2. Morning Briefing — before my workday starts
+3. Follow-up Tracker — end of workday
+4. Evening Wind-down — when I should stop working
+5. Weekly Reflection — Sunday evening
 
-## Important:
-- Use my REAL details from the Command Center — real names, real tools, real schedules. Don't generalize.
-- If my Command Center doesn't have info for a placeholder, ask me specifically — don't guess.
-- Do NOT add new skills or change the config structure. Only fill in placeholders and remove skills I don't want.
-- Keep it to one read, one confirmation, one output. No lengthy multi-round interview.
-- The config structure is tested and intentional.
+Use RRULE format. Show me the schedule. Ask: "Times look right? Any to change?"
+
+### Round 6 — Files (its workspace)
+Propose the folder structure Zo will use to store notes, digests, drafts, and context files.
+
+Show the structure. Ask: "Makes sense?"
+
+---
+
+## After all 6 rounds:
+
+Output the **COMPLETE Zo setup prompt** — a single document I paste into Zo that creates everything:
+- Bio
+- Rules (numbered list)
+- Persona (name + full prompt)
+- Skills (9 SKILL.md blocks with frontmatter)
+- Automations (5 scheduled jobs with RRULE)
+- File structure
+
+## Important rules for you:
+- Use my REAL details from the Command Center. Real names, real tools, real schedules. Don't generalize.
+- If my Command Center doesn't have info for something, ASK ME — don't guess.
+- Each round: show your work, confirm, then move on. Don't skip ahead.
+- The 9-job structure is intentional. Don't add extras unless I ask.
+- Keep it conversational. This isn't a form — it's a working session.
+- The final output must be paste-ready. Zero editing needed.
