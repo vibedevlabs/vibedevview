@@ -2,7 +2,7 @@
 lesson: ZO-MI5
 title: Your Chief of Staff — Personalize and Install
 track: ZO / MIRROR 2
-voice: Ja'dan
+voice: LVkRatteKcSRhfqnycJG
 ---
 
 ## 01 · Cold open — your turn
@@ -15,6 +15,7 @@ You watched me build mine. Now let's get yours running. Here's the good news —
 SLIDE:
 ```yaml
 frame: N1-title
+  footer: "ZO AGENTS"
 eyebrow: ZO AGENTS · MIRROR 2
 title: Your Chief of Staff
 subtitle: Personalize the config → paste into Zo → done
@@ -30,6 +31,7 @@ We're giving you a ready-made Chief of Staff config. It already has nine skills 
 SLIDE:
 ```yaml
 frame: C1-bullets
+  footer: "ZO AGENTS"
 eyebrow: THE CONFIG YOU'RE GETTING
 title: Already built — just needs your details
 body:
@@ -51,6 +53,7 @@ Open Claude. Paste two things. First: the Chief of Staff config file we provided
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 eyebrow: STEP 1
 title: Paste into Claude
 body:
@@ -70,6 +73,7 @@ Claude will ask you quick questions in five areas. Who you are — name, what yo
 SLIDE:
 ```yaml
 frame: C3-compare
+  footer: "ZO AGENTS"
 title: Claude personalizes five areas
 columns:
   - heading: Your Life
@@ -94,6 +98,7 @@ After the interview, Claude gives you the updated config. Same structure, your d
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 eyebrow: STEP 2
 title: Review and adjust
 body:
@@ -114,6 +119,7 @@ Copy the entire output from Claude. Go to Zo. Paste it. That's the install. Watc
 SLIDE:
 ```yaml
 frame: C5-callout
+  footer: "ZO AGENTS"
 eyebrow: ONE PASTE · ALL SIX PRIMITIVES
 title: "Zo builds your entire Chief of Staff"
 body:
@@ -135,6 +141,7 @@ Before you trust it, verify it. Ask Zo: "show me my Bio." Does it have your real
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 eyebrow: VERIFY
 title: Check every piece
 body:
@@ -156,6 +163,7 @@ Pick a job. Any job. Tell Zo: "run morning-briefing right now." Watch it check y
 SLIDE:
 ```yaml
 frame: C5-callout
+  footer: "ZO AGENTS"
 eyebrow: TEST IT
 title: Run a job right now
 body:
@@ -176,6 +184,7 @@ You don't have to keep all nine. Some won't fit your life right now. Maybe you d
 SLIDE:
 ```yaml
 frame: C1-bullets
+  footer: "ZO AGENTS"
 eyebrow: MAKE IT YOURS
 title: Add, remove, adjust
 body:
@@ -196,6 +205,7 @@ Take a breath. Look at what you have. A Chief of Staff that knows who you are, r
 SLIDE:
 ```yaml
 frame: C2-statement
+  footer: "ZO AGENTS"
 title: Your Chief of Staff is live.
 subtitle: 9 jobs. 5 on autopilot. Running while you sleep.
 ```
@@ -210,6 +220,7 @@ This is version one. Use it for a week. Notice what's working and what's not. Th
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 eyebrow: UPGRADE PATH
 title: Start here, grow from here
 body:
@@ -230,6 +241,7 @@ You built it. Now let's own it. Next module — export your entire Chief of Staf
 SLIDE:
 ```yaml
 frame: O1-outro
+  footer: "ZO AGENTS"
 eyebrow: NEXT
 title: Export and Own It
 subtitle: Bootstrap prompt → GitHub → portable forever

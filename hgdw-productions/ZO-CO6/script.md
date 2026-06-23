@@ -2,7 +2,7 @@
 lesson: ZO-CO6
 title: Export, Bootstrap, Own It Forever
 track: ZO / COMMAND
-voice: Ja'dan
+voice: LVkRatteKcSRhfqnycJG
 ---
 
 ## 01 · Cold open — the power move
@@ -15,6 +15,7 @@ You have a working Chief of Staff. Nine jobs. Five automations. Running on your 
 SLIDE:
 ```yaml
 frame: N1-title
+  footer: "ZO AGENTS"
 eyebrow: ZO AGENTS · COMMAND
 title: Export, Bootstrap, Own It
 subtitle: One prompt rebuilds everything. Push to GitHub. Done.
@@ -30,6 +31,7 @@ Export means pulling every primitive out of Zo into a portable format. Your Bio 
 SLIDE:
 ```yaml
 frame: C1-bullets
+  footer: "ZO AGENTS"
 eyebrow: EXPORT
 title: Every primitive, portable
 body:
@@ -51,6 +53,7 @@ Let's do it. Go to Zo and ask: "Export my full configuration. Include my Bio, al
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 eyebrow: STEP 1
 title: Export from Zo
 body:
@@ -71,6 +74,7 @@ Now turn that export into a bootstrap. A bootstrap is a single prompt you can pa
 SLIDE:
 ```yaml
 frame: C5-callout
+  footer: "ZO AGENTS"
 eyebrow: THE BOOTSTRAP
 title: One prompt recreates everything
 body:
@@ -93,6 +97,7 @@ Now make it permanent. Create a GitHub repository. Call it something like "my-zo
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 eyebrow: STEP 2
 title: Push to GitHub
 body:
@@ -113,6 +118,7 @@ Here's something powerful. Your Chief of Staff config is written in plain markdo
 SLIDE:
 ```yaml
 frame: C3-compare
+  footer: "ZO AGENTS"
 title: What's portable, what's Zo-native
 columns:
   - heading: Works anywhere
@@ -140,6 +146,7 @@ Step back and see the loop you now own. When you want a new capability, you don'
 SLIDE:
 ```yaml
 frame: C5-callout
+  footer: "ZO AGENTS"
 eyebrow: THE LOOP
 title: Claude designs → Zo builds → You improve
 body:
@@ -161,6 +168,7 @@ Let's zoom out. In Absorb, you learned the core equation — a model plus a harn
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 eyebrow: THE FULL ARC
 title: What you built
 body:
@@ -181,6 +189,7 @@ Here's your path forward. Days one through three: just use it. Let the automatio
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 eyebrow: 14-DAY PATH
 title: From installed to indispensable
 body:
@@ -201,6 +210,7 @@ You started this course asking what an agent is. Now you have one running. You k
 SLIDE:
 ```yaml
 frame: O1-outro
+  footer: "ZO AGENTS"
 eyebrow: ZO AGENTS
 title: Go make it yours.
 subtitle: Claude designs. Zo builds. You improve. Repeat.

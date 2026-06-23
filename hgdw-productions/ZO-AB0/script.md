@@ -2,7 +2,7 @@
 lesson: ZO-AB0
 title: Orientation — Why Your AI Needs Its Own Computer
 track: ZO / SOURCE
-voice: Ja'dan
+voice: LVkRatteKcSRhfqnycJG
 ---
 
 ## 01 · Cold open
@@ -15,6 +15,7 @@ By the end of this course you'll build a real AI agent that checks your email, f
 SLIDE:
 ```yaml
 frame: N1-title
+  footer: "ZO AGENTS"
 eyebrow: ZO AGENTS · SOURCE
 title: Why Your AI Needs Its Own Computer
 subtitle: From chatbot to agent — the infrastructure gap
@@ -30,6 +31,7 @@ Here's the arc. Source: understand the landscape. Absorb: learn the building blo
 SLIDE:
 ```yaml
 frame: N5-agenda
+  footer: "ZO AGENTS"
 eyebrow: COURSE ARC
 title: Four phases
 body:
@@ -49,6 +51,7 @@ You've used Claude. You've used ChatGPT. They've gotten good — memory features
 SLIDE:
 ```yaml
 frame: C3-compare
+  footer: "ZO AGENTS"
 title: The real gap
 columns:
   - heading: Chatbots (even with memory)
@@ -75,6 +78,7 @@ Here's the thesis. Your AI needs its own computer. Not a chat window. Not an API
 SLIDE:
 ```yaml
 frame: C2-statement
+  footer: "ZO AGENTS"
 title: Your AI needs its own computer.
 subtitle: Persistent. Always-on. Stateful. Acting on your behalf while you sleep.
 ```
@@ -89,6 +93,7 @@ By module six, you'll have a complete agent config — bio, rules, persona, skil
 SLIDE:
 ```yaml
 frame: C1-bullets
+  footer: "ZO AGENTS"
 title: What you'll build
 body:
   - A complete agent config — all six primitives
@@ -107,6 +112,7 @@ Throughout this course, you'll see one pattern over and over. Your mess goes to 
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 eyebrow: THE CORE LOOP
 title: How every agent gets built
 body:
@@ -127,6 +133,7 @@ That's the landscape. Now let's learn the building blocks.
 SLIDE:
 ```yaml
 frame: O1-outro
+  footer: "ZO AGENTS"
 eyebrow: NEXT
 title: The Core Equation
 subtitle: Agent = Model + Harness — the six primitives

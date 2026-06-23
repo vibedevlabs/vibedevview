@@ -2,7 +2,7 @@
 lesson: ZO-AB2
 title: Agent as Employee — Mental Model & Task Loops
 track: ZO / ABSORB 2
-voice: Ja'dan
+voice: LVkRatteKcSRhfqnycJG
 ---
 
 ## 01 · Cold open
@@ -15,6 +15,7 @@ Imagine you just hired a brilliant employee. It's their first day. They're talen
 SLIDE:
 ```yaml
 frame: N1-title
+  footer: "ZO AGENTS"
 eyebrow: ZO AGENTS · ABSORB 2
 title: Agent as Employee
 subtitle: The mental model & task loops
@@ -30,6 +31,7 @@ Every new hire needs six things: an about-the-boss card on their desk, that's Bi
 SLIDE:
 ```yaml
 frame: C3-compare
+  footer: "ZO AGENTS"
 title: New hire needs → Zo primitives
 columns:
   - heading: What They Need
@@ -60,6 +62,7 @@ An agent isn't useful because it exists. It's useful because it has work to do. 
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 eyebrow: THREE TYPES OF WORK
 title: Defining the workload
 body:
@@ -78,6 +81,7 @@ Every task — on-demand, triggered, or scheduled — follows the same loop. Rec
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 eyebrow: THE TASK LOOP
 title: Receive → Plan → Execute → Verify
 body:
@@ -97,6 +101,7 @@ For the task loop to work, you must provide three things. All the right informat
 SLIDE:
 ```yaml
 frame: C1-bullets
+  footer: "ZO AGENTS"
 title: Your three responsibilities
 body:
   - "All the right information — don't make the agent guess"
@@ -114,6 +119,7 @@ Here's a decision tree for turning your daily work into agent primitives. Does i
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 title: Turn your work into primitives
 body:
   - "Happens on a schedule? → Automation"
@@ -133,6 +139,7 @@ Every repeating decision in your day is an if-then. "If a client emails, then I 
 SLIDE:
 ```yaml
 frame: C1-bullets
+  footer: "ZO AGENTS"
 eyebrow: THE IF/THEN FRAMEWORK
 title: Map your decisions to primitives
 body:
@@ -152,6 +159,7 @@ Seven-thirty AM, Monday. You're still in bed. Your automation fires. Zo wakes up
 SLIDE:
 ```yaml
 frame: C5-callout
+  footer: "ZO AGENTS"
 eyebrow: ALL SIX PIECES
 title: "7:30 AM Monday — you're still in bed"
 body:
@@ -173,6 +181,7 @@ One thing most people don't realize. AI tools know their environment well — wh
 SLIDE:
 ```yaml
 frame: C3-compare
+  footer: "ZO AGENTS"
 eyebrow: THE PERCEPTION GAP
 title: This is the gap you fill
 columns:
@@ -198,6 +207,7 @@ You've got the mental model. Agent as employee, workload as task loops, decision
 SLIDE:
 ```yaml
 frame: O1-outro
+  footer: "ZO AGENTS"
 eyebrow: NEXT
 title: Platform Tour
 subtitle: Every Zo feature and where to find it

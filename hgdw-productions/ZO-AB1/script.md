@@ -2,7 +2,7 @@
 lesson: ZO-AB1
 title: The Core Equation — Agent = Model + Harness
 track: ZO / ABSORB 1
-voice: Ja'dan
+voice: LVkRatteKcSRhfqnycJG
 ---
 
 ## 01 · Cold open
@@ -15,6 +15,7 @@ One sentence changes how you think about AI agents. Agent equals model plus harn
 SLIDE:
 ```yaml
 frame: N1-title
+  footer: "ZO AGENTS"
 eyebrow: ZO AGENTS · ABSORB 1
 title: Agent = Model + Harness
 subtitle: The core equation
@@ -30,6 +31,7 @@ When researchers analyzed Claude Code — Anthropic's production coding agent �
 SLIDE:
 ```yaml
 frame: C7-stat
+  footer: "ZO AGENTS"
 stat: 98.4%
 statLabel: of a production agent is harness — not model reasoning
 ```
@@ -44,6 +46,7 @@ Every serious agent harness has four elements. An agent loop — reason, act, ob
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 eyebrow: THE FOUR ELEMENTS
 title: Every harness has these
 body:
@@ -63,6 +66,7 @@ Zo Computer implements the harness through six native primitives — the buildin
 SLIDE:
 ```yaml
 frame: N2-section
+  footer: "ZO AGENTS"
 eyebrow: ZO'S IMPLEMENTATION
 title: The Six Primitives
 subtitle: Bio · Rules · Personas · Skills · Automations · Files
@@ -78,6 +82,7 @@ Bio is your permanent profile. 2,048 characters. Loaded every conversation. Thin
 SLIDE:
 ```yaml
 frame: C1-bullets
+  footer: "ZO AGENTS"
 eyebrow: PRIMITIVE 1
 title: Bio — Who You Are
 body:
@@ -97,6 +102,7 @@ Rules are behavioral constraints — things the agent must always or never do. T
 SLIDE:
 ```yaml
 frame: C3-compare
+  footer: "ZO AGENTS"
 eyebrow: PRIMITIVE 2
 title: Rules — What's Allowed
 columns:
@@ -122,6 +128,7 @@ Personas are switchable AI profiles — voice, expertise, behavior. Think of it 
 SLIDE:
 ```yaml
 frame: C5-callout
+  footer: "ZO AGENTS"
 eyebrow: PRIMITIVE 3
 title: Personas — How to Behave
 body:
@@ -140,6 +147,7 @@ Skills are repeatable AI workflows, packaged as SKILL dot MD files. Think of the
 SLIDE:
 ```yaml
 frame: C1-bullets
+  footer: "ZO AGENTS"
 eyebrow: PRIMITIVE 4
 title: Skills — How to Do Things
 body:
@@ -159,6 +167,7 @@ Automations are scheduled AI tasks — daily briefings, weekly reports, recurrin
 SLIDE:
 ```yaml
 frame: C1-bullets
+  footer: "ZO AGENTS"
 eyebrow: PRIMITIVE 5
 title: Automations — When to Act
 body:
@@ -178,6 +187,7 @@ Files are your agent's knowledge base — any file on the server is potential co
 SLIDE:
 ```yaml
 frame: C1-bullets
+  footer: "ZO AGENTS"
 eyebrow: PRIMITIVE 6
 title: Files — What to Know
 body:
@@ -197,6 +207,7 @@ When you're configuring your agent, use this decision tree. Is it a fact about y
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 title: Which primitive, when?
 body:
   - "Fact about you or your context → Bio"
@@ -217,6 +228,7 @@ That's the equation. Six primitives, one harness. Next up: the mental model that
 SLIDE:
 ```yaml
 frame: O1-outro
+  footer: "ZO AGENTS"
 eyebrow: NEXT
 title: Agent as Employee
 subtitle: The mental model that makes everything click

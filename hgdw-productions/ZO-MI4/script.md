@@ -2,7 +2,7 @@
 lesson: ZO-MI4
 title: Build Your Chief of Staff — The Interview
 track: ZO / MIRROR 1
-voice: Ja'dan
+voice: LVkRatteKcSRhfqnycJG
 ---
 
 ## 01 · Cold open — the shift
@@ -15,6 +15,7 @@ You know the building blocks. Bio, Rules, Persona, Skills, Automations, Files. B
 SLIDE:
 ```yaml
 frame: N1-title
+  footer: "ZO AGENTS"
 eyebrow: ZO AGENTS · MIRROR 1
 title: Build Your Chief of Staff
 subtitle: Claude interviews you → Zo sets it all up
@@ -30,6 +31,7 @@ When I say Chief of Staff, I mean something specific. Not an assistant that wait
 SLIDE:
 ```yaml
 frame: C3-compare
+  footer: "ZO AGENTS"
 eyebrow: THREE AREAS · NINE JOBS
 title: Your Chief of Staff handles all three
 columns:
@@ -58,6 +60,7 @@ Here's the thing. I could hand you a template and say fill in the blanks. But th
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 eyebrow: THE PROCESS
 title: Interview → Configure → Build
 body:
@@ -78,6 +81,7 @@ I open Claude. I paste my context files from earlier in the course — my bio, m
 SLIDE:
 ```yaml
 frame: C1-bullets
+  footer: "ZO AGENTS"
 eyebrow: ROUND 1 — WHO YOU ARE
 title: "Everything here becomes your Bio"
 body:
@@ -98,6 +102,7 @@ Round 2: what should your agent never do? Claude asks about boundaries. I say: n
 SLIDE:
 ```yaml
 frame: C3-compare
+  footer: "ZO AGENTS"
 title: Boundaries and voice
 columns:
   - heading: "Round 2 → Rules"
@@ -124,6 +129,7 @@ Round 4 is where it gets real. Claude walks through each area of my life. Househ
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 eyebrow: ROUND 4 — YOUR NINE JOBS
 title: Each job has structure
 body:
@@ -144,6 +150,7 @@ Round 5: when should each job run? Some are on-demand — brain dumps, content d
 SLIDE:
 ```yaml
 frame: C1-bullets
+  footer: "ZO AGENTS"
 eyebrow: ROUND 5 — THE SCHEDULE
 title: Five automations running on autopilot
 body:
@@ -164,6 +171,7 @@ After five rounds, Claude gives me the output. One complete Zo setup prompt. My 
 SLIDE:
 ```yaml
 frame: C1-bullets
+  footer: "ZO AGENTS"
 title: Claude's output — one complete config
 body:
   - "Bio — 2,048 chars of real context"
@@ -184,6 +192,7 @@ I go to Zo. I paste the entire setup prompt. And I watch. Zo reads the Bio — n
 SLIDE:
 ```yaml
 frame: C5-callout
+  footer: "ZO AGENTS"
 eyebrow: ALL SIX PRIMITIVES
 title: "Paste → Build → Your Chief of Staff is live"
 body:
@@ -205,6 +214,7 @@ Don't wait for the automations to fire. Test it right now. Tell Zo: "run morning
 SLIDE:
 ```yaml
 frame: C5-callout
+  footer: "ZO AGENTS"
 eyebrow: TEST IT
 title: Run a job right now
 body:
@@ -225,6 +235,7 @@ You just watched me build a complete Chief of Staff through a conversation with 
 SLIDE:
 ```yaml
 frame: O1-outro
+  footer: "ZO AGENTS"
 eyebrow: NEXT
 title: Build Your Chief of Staff
 subtitle: Same interview. Your answers. Your agent.

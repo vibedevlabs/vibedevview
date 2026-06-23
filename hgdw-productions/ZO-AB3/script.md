@@ -2,7 +2,7 @@
 lesson: ZO-AB3
 title: Platform Tour — Every Feature, Every Primitive
 track: ZO / ABSORB 3
-voice: Ja'dan
+voice: LVkRatteKcSRhfqnycJG
 ---
 
 ## 01 · Cold open
@@ -15,6 +15,7 @@ Time to see the platform. When you log into Zo, you're looking at your personal 
 SLIDE:
 ```yaml
 frame: N1-title
+  footer: "ZO AGENTS"
 eyebrow: ZO AGENTS · ABSORB 3
 title: Platform Tour
 subtitle: Every feature, every primitive — where to find it all
@@ -30,6 +31,7 @@ Zo is six layers. At the core: a real Linux computer with persistent storage. Ar
 SLIDE:
 ```yaml
 frame: C4-steps
+  footer: "ZO AGENTS"
 eyebrow: THE SIX LAYERS
 title: From compute to surface
 body:
@@ -51,6 +53,7 @@ The compute layer is a real Linux server in a data center. Files persist forever
 SLIDE:
 ```yaml
 frame: C3-compare
+  footer: "ZO AGENTS"
 title: The foundation
 columns:
   - heading: Compute
@@ -77,6 +80,7 @@ The identity layer is where you configure your agent. Bio in Settings — your p
 SLIDE:
 ```yaml
 frame: C1-bullets
+  footer: "ZO AGENTS"
 eyebrow: LAYER 3 — IDENTITY
 title: Where to find each primitive
 body:
@@ -98,6 +102,7 @@ Over 100 tools organized by category. Files — create, edit, read, search, tran
 SLIDE:
 ```yaml
 frame: C1-bullets
+  footer: "ZO AGENTS"
 eyebrow: LAYER 4 — TOOLS
 title: "100+ tools by category"
 body:
@@ -119,6 +124,7 @@ Hosting gives you four ways to put things online. Space — your handle dot zo d
 SLIDE:
 ```yaml
 frame: C3-compare
+  footer: "ZO AGENTS"
 title: Hosting and surfaces
 columns:
   - heading: Hosting (put things online)
@@ -145,6 +151,7 @@ Zo also works as an MCP Server. That means external AI tools can use Zo's capabi
 SLIDE:
 ```yaml
 frame: C6-code
+  footer: "ZO AGENTS"
 eyebrow: MCP CONNECTION
 title: Connect Claude Code to your Zo
 code: |
@@ -161,6 +168,7 @@ silent: true
 SLIDE:
 ```yaml
 frame: N4-vocab
+  footer: "ZO AGENTS"
 eyebrow: BEFORE YOU BUILD
 title: Can you find these?
 tags:
@@ -184,6 +192,7 @@ You've seen every layer. Now it's time to build. Next module: we use Claude to d
 SLIDE:
 ```yaml
 frame: O1-outro
+  footer: "ZO AGENTS"
 eyebrow: NEXT
 title: Zo Builds Itself
 subtitle: Claude designs it. Zo creates all six pieces.
