@@ -191,6 +191,21 @@ program
   });
 
 program
+  .command("export-slides")
+  .description("Copy rendered slide PNGs (+ deck.html) into a slides-export/ folder next to script.md, in segment order")
+  .argument("<lessonId>")
+  .option("-o, --out <dir>", "output directory (default: workspace slides-export/)")
+  .option("--no-deck", "skip copying deck.html")
+  .action(async (lessonId, o) => {
+    const { exportSlides } = await import("./deliver/export-slides.js");
+    const res = await exportSlides(lessonId, {
+      outDir: o.out,
+      includeDeck: o.deck !== false,
+    });
+    process.stdout.write(JSON.stringify(res, null, 2) + "\n");
+  });
+
+program
   .command("publish")
   .description("Upload the exported MP4 to a hosting target (Mux) → playback id. Dry run by default.")
   .argument("<lessonId>")
