@@ -337,8 +337,10 @@ All commands take a `<LESSON_ID>` (except `clear`/`doctor`). Add `-b palmier` or
 | `palmier correct <id>` | **Surgically** revise one segment (the revision loop). | `--kind narration\|slide\|recording\|retime` · `--seg <id>` · `--at <m:ss>` |
 | `palmier clear` | Reset the Palmier timeline + media bin between takes/lessons. | `--keep-bin` (timeline only) · `-b` |
 | `palmier status <id>` | Print every segment with id, timestamp span, and which assets exist. | — |
+| `palmier recordings <id>` | List the screen recordings **you** must capture (every `DO:` segment) with the exact steps, timestamp + target length, and status. Also surfaced as a banner at the end of `produce`. | `--json` |
 | `palmier course [id]` | Print the course tree from `course.yaml` (modules → lessons in order with LMS slugs + sort order). With a lesson id, prints just that lesson's placement. Reads only. | `--json` |
 | `palmier export <id>` | Render one finished MP4 (ffmpeg flatten + ffprobe verify). Backend-independent. | `-o <path>` · `--tolerance <seconds>` |
+| `palmier export-slides <id>` | Copy rendered slide PNGs (+ `deck.html`) into `slides-export/` next to `script.md`, in segment order. Reads/copies only. | `-o <dir>` · `--no-deck` |
 | `palmier publish <id>` | Upload the MP4 to Mux → `playback_id`. **Dry run unless `--target mux`.** | `-t mux` · `-f <path>` |
 | `palmier moments <id>` | Compile moments → `moments.json` + idempotent `moments.sql`. Never writes a DB. Uses `moments.yaml` if present; else auto-generates from the script (phases → sections, `DO:` → checkpoints) via `course.yaml`. | `--playback-id <id>` |
 | `palmier attach <id>` | Land the lesson + moments in the LMS. **Needs `--target api\|supabase` AND `--apply` to write.** | `-t sql\|api\|supabase` · `--apply` · `--playback-id <id>` |

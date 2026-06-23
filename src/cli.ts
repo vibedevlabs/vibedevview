@@ -195,6 +195,21 @@ program
   });
 
 program
+  .command("export-slides")
+  .description("Copy rendered slide PNGs (+ deck.html) into a slides-export/ folder next to script.md, in segment order")
+  .argument("<lessonId>")
+  .option("-o, --out <dir>", "output directory (default: workspace slides-export/)")
+  .option("--no-deck", "skip copying deck.html")
+  .action(async (lessonId, o) => {
+    const { exportSlides } = await import("./deliver/export-slides.js");
+    const res = await exportSlides(lessonId, {
+      outDir: o.out,
+      includeDeck: o.deck !== false,
+    });
+    process.stdout.write(JSON.stringify(res, null, 2) + "\n");
+  });
+
+program
   .command("publish")
   .description("Upload the exported MP4 to a hosting target (Mux) → playback id. Dry run by default.")
   .argument("<lessonId>")
@@ -301,6 +316,26 @@ program
       process.stdout.write(`${seg.id.padEnd(4)} ${stamp.padEnd(13)} ${kinds.padEnd(14)} ${seg.label ?? ""}\n`);
     }
     if (alignment) process.stdout.write(`\ntotal: ${formatTimestamp(alignment.totalDuration)}\n`);
+  });
+
+program
+  .command("recordings")
+  .description("List the screen recordings you need to capture (DO segments) + the exact steps for each")
+  .argument("<lessonId>")
+  .action(async (lessonId) => {
+    const { computeAlignment } = await import("./alignment.js");
+    const { buildRecordingPlan, formatRecordingReport } = await import("./recordings.js");
+    const ws = Workspace.for(lessonId);
+    const manifest = await ws.readManifest();
+    const timeline = (await ws.exists(ws.timelinePath)) ? await ws.readTimeline() : undefined;
+    const alignment = timeline ? computeAlignment(manifest, timeline) : undefined;
+    const recording = (await ws.exists(ws.recordingManifestPath)) ? await ws.readRecordingManifest() : undefined;
+    const needs = buildRecordingPlan(manifest, recording, alignment);
+    if (jsonMode()) {
+      process.stdout.write(JSON.stringify({ lessonId: manifest.lessonId, needs }) + "\n");
+      return;
+    }
+    process.stdout.write(formatRecordingReport(manifest.lessonId, needs).join("\n") + "\n");
   });
 
 program

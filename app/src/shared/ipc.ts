@@ -89,6 +89,20 @@ export interface ExportResult {
   notes: string[];
 }
 
+/** `palmier export-slides <id>` result — rendered slide PNGs copied next to the script. */
+export interface ExportSlidesResult {
+  lessonId: string;
+  /** Directory the slides were written to (the `slides-export/` folder). */
+  dir: string;
+  /** Dest filenames written, in segment order (`<segId>-<frameId>.png`). */
+  files: string[];
+  /** Frame ids that have a SLIDE in the script but no rendered PNG yet. */
+  missing: string[];
+  deckCopied: boolean;
+  /** Total slide segments in the script (written + missing). */
+  slideCount: number;
+}
+
 /** `palmier publish <id>` result. The GUI always runs this dry-run. */
 export interface PublishResult {
   lessonId: string;
@@ -168,6 +182,12 @@ export interface StudioApi {
    * prerequisite (produced assets / `moments.yaml`) is missing.
    */
   deliverPreview(lessonId: string): Promise<DeliverPreview>;
+  /**
+   * Copy the lesson's rendered slide PNGs (+ `deck.html`) into a `slides-export/`
+   * folder next to its `script.md`, named in segment order. Reads + copies only;
+   * never renders or publishes. Un-rendered slides are reported, not fatal.
+   */
+  exportSlides(lessonId: string): Promise<ExportSlidesResult>;
   /** Subscribe to engine progress events. Returns an unsubscribe fn. */
   onEvent(handler: (event: EngineEvent) => void): () => void;
   /** PNG path -> file:// URL the renderer can show, when a produce has rendered slides. */
