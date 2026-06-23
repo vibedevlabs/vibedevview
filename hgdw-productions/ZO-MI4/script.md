@@ -1,6 +1,6 @@
 ---
 lesson: ZO-MI4
-title: Build Your Chief of Staff — The Interview
+title: Build Your Chief of Staff — One Prompt
 track: ZO / MIRROR 1
 voice: LVkRatteKcSRhfqnycJG
 ---
@@ -10,15 +10,15 @@ phase: MIRROR
 duration: 10
 
 SAY:
-You know the building blocks. Bio, Rules, Persona, Skills, Automations, Files. But knowing them and using them are different things. So here's what we're going to do. I'm going to sit down with Claude — right now, in real time — and build my AI Chief of Staff from scratch. Not a chatbot. Not a to-do list. A system that runs my household logistics, keeps my personal life on track, and handles the operational grind of my business. Three areas. Nine jobs. All running on a schedule while I sleep.
+You know the building blocks. Bio, Rules, Persona, Skills, Automations, Files. But knowing them and using them are different things. So here's what we're going to do. I'm going to sit down with Claude — right now, in real time — and build my AI Chief of Staff. Not a chatbot. Not a to-do list. A system that runs my household logistics, keeps my personal life on track, and handles the operational grind of my business. Three areas. Nine jobs. All running on a schedule while I sleep. And the best part — I already have most of the context Claude needs. My AI Command Center from earlier in the course has it all.
 
 SLIDE:
 ```yaml
 frame: N1-title
-  footer: "ZO AGENTS"
+footer: "ZO AGENTS"
 eyebrow: ZO AGENTS · MIRROR 1
 title: Build Your Chief of Staff
-subtitle: Claude interviews you → Zo sets it all up
+subtitle: Your AI Command Center + one prompt → Zo sets it all up
 ```
 
 ## 02 · What a Chief of Staff actually does
@@ -31,7 +31,7 @@ When I say Chief of Staff, I mean something specific. Not an assistant that wait
 SLIDE:
 ```yaml
 frame: C3-compare
-  footer: "ZO AGENTS"
+footer: "ZO AGENTS"
 eyebrow: THREE AREAS · NINE JOBS
 title: Your Chief of Staff handles all three
 columns:
@@ -50,181 +50,128 @@ columns:
       - Evening Wind-down
 ```
 
-## 03 · Why Claude interviews you first
+## 03 · You already have the context
 phase: MIRROR
 duration: 9
 
 SAY:
-Here's the thing. I could hand you a template and say fill in the blanks. But the best agent configs come from a conversation, not a form. Claude asks you questions about your actual life — your schedule, your kids' activities, your clients, your communication style. Then it generates a complete Zo configuration based on your real answers. Real names, real tools, real schedules. Not generic. Yours.
+Here's why this is fast. You already built your AI Command Center earlier in the course. It has your bio, your projects, your clients, your communication style, your daily tools. Claude doesn't need to interview you from scratch — it already has the raw material. What we're going to do is give Claude two things: your AI Command Center, and the Chief of Staff config with all nine jobs pre-defined. Claude reads your context, maps it to the config, and confirms what it found. You verify, adjust a few things, and it outputs a complete Zo setup prompt. One prompt. One pass.
 
 SLIDE:
 ```yaml
 frame: C4-steps
-  footer: "ZO AGENTS"
+footer: "ZO AGENTS"
 eyebrow: THE PROCESS
-title: Interview → Configure → Build
+title: "Your context already exists — Claude just maps it"
 body:
-  - "Claude interviews you across 5 rounds"
-  - "Your answers map directly to Zo primitives"
-  - "Claude generates a complete setup prompt"
-  - "Paste into Zo → all 6 primitives created"
-  - "Test it, adjust it, make it yours"
+  - "You already have your AI Command Center"
+  - "We provide the Chief of Staff config (9 jobs pre-defined)"
+  - "Claude reads your context → maps it to the config"
+  - "You confirm what's accurate, adjust what's not"
+  - "Claude outputs the complete Zo setup prompt"
 ```
 
-## 04 · Round 1 — Who you are
+## 04 · Paste and let Claude read
 phase: MIRROR
 duration: 10
 
 SAY:
-I open Claude. I paste my context files from earlier in the course — my bio, my projects, my voice examples. Then I add the Chief of Staff Interview Prompt. Claude starts with Round 1. Who are you? What do you do? Who do you work with? What timezone? Do you have kids — ages, logistics? What tools do you use daily? Everything I answer here becomes my Bio — that permanent context card loaded every conversation. I'm specific. Real names. Real schedules. Real preferences.
+I open Claude. I paste three things. First — my AI Command Center. Everything Claude needs to know about me is already there. Second — the Chief of Staff config. All nine jobs, all five automations, the persona template, the rules, the file structure. Third — a simple instruction: "Read my AI Command Center. Use what you find to personalize this Chief of Staff config. Show me what you mapped to each section so I can confirm it's right." Claude reads through everything and comes back with a summary. Here's what I found — your name, your timezone, your clients, your kids' schedules. Here's how I filled in each section. Let me know what to adjust.
 
 DO:
 - action: Open Claude and start a new conversation
   target: Browser — claude.ai
-- action: Paste context files (bio, projects, voice examples)
+- action: Paste the AI Command Center
   target: Claude chat input
-- action: Paste the Chief of Staff Interview Prompt
+- action: Paste the Chief of Staff config
   target: Claude chat input
-- action: Show Claude asking Round 1 questions (Who are you?)
-  target: Claude response
-
-SLIDE:
-```yaml
-frame: C1-bullets
-  footer: "ZO AGENTS"
-eyebrow: ROUND 1 — WHO YOU ARE
-title: "Everything here becomes your Bio"
-body:
-  - "Name, role, what you do"
-  - "Clients and collaborators — real names"
-  - "Timezone and typical weekday shape"
-  - "Family logistics — kids, school, activities"
-  - "Daily tools — Gmail, Calendar, Slack, Notion"
-```
-
-## 05 · Round 2 and 3 — Rules and Persona
-phase: MIRROR
-duration: 12
-
-SAY:
-Round 2: what should your agent never do? Claude asks about boundaries. I say: never send email without my approval. Never contact clients directly. No messages on Sundays unless it's critical. And I set up my shortcuts — "looks good" means approved, "hold" means pause. Each answer becomes a Rule — a guardrail that fires before the model can decide otherwise. Round 3: how should it sound? I describe the voice. Direct. Warm. Short sentences. No corporate speak. Claude asks me to show an example — I paste a text I actually sent. That voice becomes my Persona. Same agent, my tone.
-
-DO:
-- action: Show answering Round 2 — type out boundary answers (never send email, no Sundays, shortcuts)
-  target: Claude chat
-- action: Show answering Round 3 — describe voice, paste example text message
-  target: Claude chat
-
-SLIDE:
-```yaml
-frame: C3-compare
-  footer: "ZO AGENTS"
-title: Boundaries and voice
-columns:
-  - heading: "Round 2 → Rules"
-    items:
-      - Never send email without approval
-      - No messages on Sundays
-      - "'looks good' = approved, proceed"
-      - "'hold' = pause, don't act"
-  - heading: "Round 3 → Persona"
-    items:
-      - Direct, warm, concise
-      - Short sentences, no corporate fluff
-      - Matches YOUR actual texting style
-      - Different energy per context
-```
-
-## 06 · Round 4 — The nine jobs
-phase: MIRROR
-duration: 14
-
-SAY:
-Round 4 is where it gets real. Claude walks through each area of my life. Household: what recurring tasks drain your energy? I tell it — meal planning is chaos, I forget school pickup conflicts, errands pile up. Claude proposes three household jobs: Morning Briefing with calendar and logistics, Meal and Household Planner on Sundays, and Family Calendar Sync every morning. Personal: how do I start my day? What falls through the cracks? I say I want an intention before the chaos, I need a way to dump my thoughts when my head is full, and I never reflect on what actually went well. Three more jobs. Business: what's my biggest time sink? Follow-ups I forget to track. Content that takes forever because I stare at a blank page. And I never properly close out the day. Three more. Nine total. For each one, Claude defines the trigger, the steps, and the definition of done.
-
-DO:
-- action: Show Claude proposing Household jobs — Morning Briefing, Meal Planner, Family Calendar
-  target: Claude response
-- action: Show answering Personal questions — intention, brain dump, reflection
-  target: Claude chat
-- action: Show answering Business questions — follow-ups, content, wind-down
-  target: Claude chat
-- action: Show Claude's summary of all 9 jobs with triggers and definitions of done
+- action: Type the instruction — "Read my AI Command Center, personalize this config, show me what you mapped"
+  target: Claude chat input
+- action: Show Claude's response — summary of what it found and how it mapped each section
   target: Claude response
 
 SLIDE:
 ```yaml
 frame: C4-steps
-  footer: "ZO AGENTS"
-eyebrow: ROUND 4 — YOUR NINE JOBS
-title: Each job has structure
+footer: "ZO AGENTS"
+eyebrow: STEP 1 — PASTE
+title: Three things into Claude
 body:
-  - "Trigger — when does this happen?"
-  - "Steps — what does doing this job look like? (3-6 steps)"
-  - "Definition of Done — how do we know it's complete?"
-  - "Delivery — SMS for urgent, email for long-form, file for reference"
-  - "Every job = a Zo Skill with real instructions"
+  - "Your AI Command Center (your context)"
+  - "The Chief of Staff config (9 jobs pre-defined)"
+  - "One instruction: read, personalize, show me the mapping"
+  - "Claude reads everything and shows what it found"
+  - "You confirm — no 5-round interview needed"
 ```
 
-## 07 · Round 5 — The schedule
-phase: MIRROR
-duration: 9
-
-SAY:
-Round 5: when should each job run? Some are on-demand — brain dumps, content drafts, meeting prep. Those are Skills I invoke when I need them. But five of the nine run on autopilot. Family Calendar Sync at six-thirty AM. Morning Briefing at seven-thirty. Follow-up Tracker at five PM. Evening Wind-down at six. Weekly Reflection on Sunday at seven. Each one becomes a Zo Automation with an RRULE schedule and a delivery channel. The agent wakes up, does the job, delivers the result, and goes back to sleep. I don't prompt it. It just runs.
-
-DO:
-- action: Show Claude asking about schedule preferences
-  target: Claude chat
-- action: Show answering with specific times (6:30am, 7:30am, 5pm, 6pm, Sunday 7pm)
-  target: Claude chat
-
-SLIDE:
-```yaml
-frame: C1-bullets
-  footer: "ZO AGENTS"
-eyebrow: ROUND 5 — THE SCHEDULE
-title: Five automations running on autopilot
-body:
-  - "6:30 AM — Family Calendar Sync → SMS"
-  - "7:30 AM — Morning Briefing → SMS"
-  - "5:00 PM — Follow-up Tracker → SMS (only if overdue)"
-  - "6:00 PM — Evening Wind-down → SMS"
-  - "Sunday 7 PM — Weekly Reflection → Email"
-```
-
-## 08 · What Claude generated
+## 05 · Confirm and adjust
 phase: MIRROR
 duration: 10
 
 SAY:
-After five rounds, Claude gives me the output. One complete Zo setup prompt. My Bio — 2,048 characters of real context. Five Rules — boundaries and shortcuts. A Chief of Staff Persona with my voice. Nine Skills — each one a full job description with trigger, steps, and definition of done. Five Automations with RRULE schedules and delivery channels. And a file structure for my workspace. Everything I need, in one prompt. All built from my actual answers, not a template.
+Claude shows me what it pulled from my Command Center. My name, my role, my timezone — mapped to the Bio. My communication preferences and boundaries — mapped to Rules. My writing style — mapped to the Persona. My clients, my projects, my family logistics — used to personalize the nine jobs. I scan it. Most of it's right. A few things need adjusting. I say: "Change the morning briefing to eight AM instead of seven-thirty. Remove the meal planner — I don't need that one. Make the evening wind-down five-thirty, not six." Claude updates instantly. I confirm, and it outputs the final config.
 
 DO:
-- action: Scroll through Claude's full output — show the complete Zo setup prompt
+- action: Show Claude's mapping — Bio, Rules, Persona, Jobs all filled in from Command Center
   target: Claude response
-- action: Highlight Bio section, Rules section, Persona section
+- action: Type adjustments — change a time, remove a job, tweak voice
+  target: Claude chat
+- action: Show Claude's updated output — the final personalized config
+  target: Claude response
+
+SLIDE:
+```yaml
+frame: C3-compare
+footer: "ZO AGENTS"
+eyebrow: STEP 2 — CONFIRM
+title: Claude maps your context → you verify
+columns:
+  - heading: What Claude found
+    items:
+      - Name, role, timezone → Bio
+      - Boundaries, shortcuts → Rules
+      - Writing style → Persona
+      - Clients, projects → Job context
+  - heading: What you adjust
+    items:
+      - Schedule times that don't fit
+      - Jobs you don't need right now
+      - Voice tweaks — more casual, more direct
+      - Any details Claude got wrong
+```
+
+## 06 · The output — one complete config
+phase: MIRROR
+duration: 9
+
+SAY:
+Claude gives me the final output. One complete Zo setup prompt. My Bio — real context from my Command Center. Five Rules — boundaries and shortcuts. A Chief of Staff Persona in my voice. Nine Skills — each one a full job description with trigger, steps, and definition of done. Five Automations with schedules and delivery channels. And a file structure for my workspace. All personalized from context I already had. No forms. No lengthy interview. Just Claude reading what I've already written about myself and mapping it to a system.
+
+DO:
+- action: Scroll through Claude's complete output — the full Zo setup prompt
+  target: Claude response
+- action: Show Bio section, Rules, Persona
   target: Claude response
 - action: Scroll to Skills — show SKILL.md format with steps and definitions of done
   target: Claude response
-- action: Scroll to Automations — show the 5 RRULE schedules
+- action: Scroll to Automations — show the 5 scheduled jobs
   target: Claude response
 
 SLIDE:
 ```yaml
 frame: C1-bullets
-  footer: "ZO AGENTS"
+footer: "ZO AGENTS"
 title: Claude's output — one complete config
 body:
-  - "Bio — 2,048 chars of real context"
+  - "Bio — real context from your AI Command Center"
   - "Rules — 5 boundaries + shortcuts"
-  - "Persona — Chief of Staff in my voice"
+  - "Persona — Chief of Staff in your voice"
   - "Skills — 9 job descriptions with steps + definitions of done"
-  - "Automations — 5 scheduled jobs with RRULE + delivery"
-  - "File structure — workspace layout for notes, drafts, digests"
+  - "Automations — 5 scheduled jobs with delivery channels"
+  - "File structure — workspace layout ready to go"
 ```
 
-## 09 · Paste into Zo — watch it build
+## 07 · Paste into Zo — watch it build
 phase: MIRROR
 duration: 10
 
@@ -248,7 +195,7 @@ DO:
 SLIDE:
 ```yaml
 frame: C5-callout
-  footer: "ZO AGENTS"
+footer: "ZO AGENTS"
 eyebrow: ALL SIX PRIMITIVES
 title: "Paste → Build → Your Chief of Staff is live"
 body:
@@ -260,7 +207,7 @@ body:
   - "Files scaffolded → has a workspace ready"
 ```
 
-## 10 · Test it
+## 08 · Test it
 phase: MIRROR
 duration: 9
 
@@ -280,7 +227,7 @@ DO:
 SLIDE:
 ```yaml
 frame: C5-callout
-  footer: "ZO AGENTS"
+footer: "ZO AGENTS"
 eyebrow: TEST IT
 title: Run a job right now
 body:
@@ -291,18 +238,18 @@ body:
   - "Tomorrow at 7:30am — it does this without you asking"
 ```
 
-## 11 · Outro
+## 09 · Outro
 phase: MIRROR
 duration: 5
 
 SAY:
-You just watched me build a complete Chief of Staff through a conversation with Claude. Nine jobs across household, personal, and business. Five running on autopilot. All built from my real answers. Now it's your turn.
+You just watched me build a complete Chief of Staff in one pass. No lengthy interview. Just my AI Command Center, the config, and one prompt to Claude. Nine jobs across household, personal, and business. Five running on autopilot. Now it's your turn.
 
 SLIDE:
 ```yaml
 frame: O1-outro
-  footer: "ZO AGENTS"
+footer: "ZO AGENTS"
 eyebrow: NEXT
 title: Build Your Chief of Staff
-subtitle: Same interview. Your answers. Your agent.
+subtitle: Your AI Command Center. Same config. Your agent.
 ```
