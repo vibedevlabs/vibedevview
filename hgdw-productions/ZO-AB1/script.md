@@ -2,7 +2,7 @@
 lesson: ZO-AB1
 title: The Core Equation — Agent = Model + Harness
 track: ZO / ABSORB 1
-voice: LVkRatteKcSRhfqnycJG
+voice: Courtney
 ---
 
 ## 01 · Cold open

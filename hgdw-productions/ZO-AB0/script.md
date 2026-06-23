@@ -2,7 +2,7 @@
 lesson: ZO-AB0
 title: Orientation — Why Your AI Needs Its Own Computer
 track: ZO / SOURCE
-voice: LVkRatteKcSRhfqnycJG
+voice: Courtney
 ---
 
 ## 01 · Cold open

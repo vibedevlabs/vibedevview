@@ -2,7 +2,7 @@
 lesson: ZO-AB3
 title: Platform Tour — Every Feature, Every Primitive
 track: ZO / ABSORB 3
-voice: LVkRatteKcSRhfqnycJG
+voice: Courtney
 ---
 
 ## 01 · Cold open

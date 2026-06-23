@@ -2,7 +2,7 @@
 lesson: ZO-MI4
 title: Build Your Chief of Staff — One Prompt
 track: ZO / MIRROR 1
-voice: LVkRatteKcSRhfqnycJG
+voice: Courtney
 ---
 
 ## 01 · Cold open — the shift

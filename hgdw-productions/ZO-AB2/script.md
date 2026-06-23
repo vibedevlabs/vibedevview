@@ -2,7 +2,7 @@
 lesson: ZO-AB2
 title: Agent as Employee — Mental Model & Task Loops
 track: ZO / ABSORB 2
-voice: LVkRatteKcSRhfqnycJG
+voice: Courtney
 ---
 
 ## 01 · Cold open

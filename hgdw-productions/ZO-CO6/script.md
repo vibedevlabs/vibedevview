@@ -2,7 +2,7 @@
 lesson: ZO-CO6
 title: Export, Bootstrap, Own It Forever
 track: ZO / COMMAND
-voice: LVkRatteKcSRhfqnycJG
+voice: Courtney
 ---
 
 ## 01 · Cold open — the power move

@@ -2,7 +2,7 @@
 lesson: ZO-MI5
 title: Your Chief of Staff — Personalize and Install
 track: ZO / MIRROR 2
-voice: LVkRatteKcSRhfqnycJG
+voice: Courtney
 ---
 
 ## 01 · Cold open — your turn
