@@ -13,7 +13,9 @@ import {
   momentRowsFor,
   parseApiResponse,
   parseIdRows,
+  resolveSupabaseUrl,
   restHeaders,
+  supabaseUrlFromServiceKey,
 } from "../src/deliver/attach.js";
 import type { MomentsBundle } from "../src/deliver/moments.js";
 import type { FetchLike, HttpReply } from "../src/deliver/mux.js";
@@ -467,5 +469,67 @@ describe("attachLesson (double-gate safety)", () => {
     else process.env.HGDW_LMS_API_BASE = savedBase;
     if (savedToken === undefined) delete process.env.HGDW_LMS_API_TOKEN;
     else process.env.HGDW_LMS_API_TOKEN = savedToken;
+  });
+});
+
+describe("supabaseUrlFromServiceKey", () => {
+  function jwt(payload: Record<string, unknown>): string {
+    const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
+    const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
+    return `${header}.${body}.sig`;
+  }
+
+  it("derives https://<ref>.supabase.co from a service-role token", () => {
+    const token = jwt({ iss: "supabase", ref: "qvzeehmdqjhrwbxapvqi", role: "service_role" });
+    expect(supabaseUrlFromServiceKey(token)).toBe("https://qvzeehmdqjhrwbxapvqi.supabase.co");
+  });
+
+  it("returns null when the payload has no ref", () => {
+    expect(supabaseUrlFromServiceKey(jwt({ iss: "supabase", role: "service_role" }))).toBeNull();
+  });
+
+  it("returns null for a non-JWT string and for undecodable garbage", () => {
+    expect(supabaseUrlFromServiceKey("not-a-jwt")).toBeNull();
+    expect(supabaseUrlFromServiceKey("aaa.@@@notbase64@@@.bbb")).toBeNull();
+  });
+});
+
+describe("resolveSupabaseUrl precedence", () => {
+  function jwt(ref: string): string {
+    const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
+    const body = Buffer.from(JSON.stringify({ iss: "supabase", ref, role: "service_role" })).toString("base64url");
+    return `${header}.${body}.sig`;
+  }
+  const HGDW = jwt("qvzeehmdqjhrwbxapvqi");
+
+  it("prefers an explicit HGDW_SUPABASE_URL over key derivation and generic SUPABASE_URL", () => {
+    expect(
+      resolveSupabaseUrl({
+        HGDW_SUPABASE_URL: "https://custom.hgdw.dev",
+        HGDW_SUPABASE_SERVICE_KEY: HGDW,
+        SUPABASE_URL: "https://other.supabase.co",
+      }),
+    ).toBe("https://custom.hgdw.dev");
+  });
+
+  it("derives from the HGDW key BEFORE a generic SUPABASE_URL (cross-project guard)", () => {
+    // The exact bug: a stray SUPABASE_URL for an unrelated project must not win.
+    expect(
+      resolveSupabaseUrl({
+        HGDW_SUPABASE_SERVICE_KEY: HGDW,
+        SUPABASE_URL: "https://rxmaxzcmulfcpnprwosm.supabase.co",
+      }),
+    ).toBe("https://qvzeehmdqjhrwbxapvqi.supabase.co");
+  });
+
+  it("falls back to the generic SUPABASE_URL only when there is no HGDW key/url", () => {
+    expect(resolveSupabaseUrl({ SUPABASE_URL: "https://generic.supabase.co" })).toBe(
+      "https://generic.supabase.co",
+    );
+  });
+
+  it("ignores blank/whitespace HGDW_SUPABASE_URL and returns empty when nothing resolvable", () => {
+    expect(resolveSupabaseUrl({ HGDW_SUPABASE_URL: "  ", SUPABASE_URL: "  " })).toBe("");
+    expect(resolveSupabaseUrl({})).toBe("");
   });
 });

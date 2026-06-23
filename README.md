@@ -520,10 +520,12 @@ Run any command with `--help` for its options. Live-timeline commands need
 | `palmier clear` | Reset the Palmier timeline + media bin between takes/lessons. `--keep-bin` = timeline only. |
 | `palmier status <id>` | List every segment with its id, timestamp span, and which assets exist. |
 | `palmier recordings <id>` | List the screen recordings **you** need to capture (every `DO:` segment) with the exact steps, timestamp + target length, and current status (`recorded`/`placeholder`/`todo`/`pending`). |
+| `palmier course [id]` | Show the course tree from `course.yaml` (modules → lessons in order, with their LMS course/lesson slugs + sort order). Pass a lesson id to print just its placement. `--json`. |
 | `palmier export <id>` | Render one finished MP4 (ffmpeg flatten + ffprobe verify). `-o <path>`, `--tolerance <seconds>`. |
 | `palmier publish <id>` | Upload the MP4 to Mux → `playback_id`. **Dry run by default**; `--target mux` to upload; `-f <path>`. |
-| `palmier moments <id>` | Compile `moments.yaml` → `moments.json` + idempotent `moments.sql`. Never writes a DB. `--playback-id <id>`. |
+| `palmier moments <id>` | Compile moments → `moments.json` + idempotent `moments.sql`. Never writes a DB. Uses `moments.yaml` if present; otherwise **auto-generates** them from the script (phases → sections, `DO:` segments → checkpoints) using `course.yaml` for the lesson's LMS course/slug. `--playback-id <id>`. |
 | `palmier attach <id>` | Land the lesson + moments in the LMS. **Safe by default**; needs `--target api\|supabase` **and** `--apply` to write. `--playback-id <id>`. |
+| `palmier attach-course` | Walk `course.yaml` and attach **every** lesson in sort order (one command instead of one-by-one). Same gates as `attach`; a failing lesson doesn't stop the rest. `--json`. |
 
 Pick the backend per run with `-b ffmpeg` (preview MP4) or `-b palmier` (live timeline), or set
 `PALMIER_TIMELINE` once (see below).
