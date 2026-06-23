@@ -95,6 +95,7 @@ const stub: StudioApi = {
     publish: { ok: false, error: "Deliver requires the desktop app (Electron)." },
     attach: { ok: false, error: "Deliver requires the desktop app (Electron)." },
   }),
+  exportSlides: async (id: string) => ({ lessonId: id, dir: "", files: [], missing: [], deckCopied: false, slideCount: 0 }),
   onEvent: (_handler: (e: EngineEvent) => void) => () => {},
   slideUrl: async () => null,
 };

@@ -43,6 +43,9 @@ program
   .option("--no-review", "do not stop for human review after generating a script")
   .option("--no-clean", "place without first clearing the timeline (palmier; default clears to stay idempotent)")
   .option("--keep-bin", "clear the timeline but keep existing media-bin assets (palmier; default resets the bin)")
+  .option("--require-committed", "refuse unless script.md is committed (auto-on for --backend palmier)")
+  .option("--require-pushed", "refuse unless script.md is committed AND pushed to the upstream")
+  .option("--allow-uncommitted", "skip the git gate even on the live backend")
   .action(async (lessonId, o) => {
     const res = await produce(lessonId, {
       backend: o.backend as BackendName | undefined,
@@ -51,6 +54,7 @@ program
       renderer: rendererOpts(o),
       clean: o.clean,
       keepBin: o.keepBin,
+      gitGate: o.allowUncommitted ? "off" : o.requirePushed ? "pushed" : o.requireCommitted ? "committed" : undefined,
       onEvent: reporter(),
     });
     // In --json mode the result is already emitted as a {type:"result"} event.
@@ -191,6 +195,21 @@ program
   });
 
 program
+  .command("export-slides")
+  .description("Copy rendered slide PNGs (+ deck.html) into a slides-export/ folder next to script.md, in segment order")
+  .argument("<lessonId>")
+  .option("-o, --out <dir>", "output directory (default: workspace slides-export/)")
+  .option("--no-deck", "skip copying deck.html")
+  .action(async (lessonId, o) => {
+    const { exportSlides } = await import("./deliver/export-slides.js");
+    const res = await exportSlides(lessonId, {
+      outDir: o.out,
+      includeDeck: o.deck !== false,
+    });
+    process.stdout.write(JSON.stringify(res, null, 2) + "\n");
+  });
+
+program
   .command("publish")
   .description("Upload the exported MP4 to a hosting target (Mux) → playback id. Dry run by default.")
   .argument("<lessonId>")
@@ -300,6 +319,26 @@ program
   });
 
 program
+  .command("recordings")
+  .description("List the screen recordings you need to capture (DO segments) + the exact steps for each")
+  .argument("<lessonId>")
+  .action(async (lessonId) => {
+    const { computeAlignment } = await import("./alignment.js");
+    const { buildRecordingPlan, formatRecordingReport } = await import("./recordings.js");
+    const ws = Workspace.for(lessonId);
+    const manifest = await ws.readManifest();
+    const timeline = (await ws.exists(ws.timelinePath)) ? await ws.readTimeline() : undefined;
+    const alignment = timeline ? computeAlignment(manifest, timeline) : undefined;
+    const recording = (await ws.exists(ws.recordingManifestPath)) ? await ws.readRecordingManifest() : undefined;
+    const needs = buildRecordingPlan(manifest, recording, alignment);
+    if (jsonMode()) {
+      process.stdout.write(JSON.stringify({ lessonId: manifest.lessonId, needs }) + "\n");
+      return;
+    }
+    process.stdout.write(formatRecordingReport(manifest.lessonId, needs).join("\n") + "\n");
+  });
+
+program
   .command("course")
   .description("Show the course tree from course.yaml (modules → lessons in order, with LMS slugs + sort order)")
   .argument("[lessonId]", "show just this lesson's placement")
@@ -359,6 +398,30 @@ program
     }
     process.stdout.write(ok ? "\nAll checks passed.\n" : "\nSome checks failed — see fixes above.\n");
     process.exitCode = ok ? 0 : 1;
+  });
+
+program
+  .command("preflight")
+  .description("Gate before a (fan-out) run: script.md exists + committed/pushed + doctor green. Exits 1 if not ready.")
+  .argument("<lessonId>")
+  .option("--no-require-pushed", "only require the script be committed locally (don't require it pushed)")
+  .action(async (lessonId, o) => {
+    const { preflight } = await import("./preflight.js");
+    const res = await preflight(lessonId, { requirePushed: o.requirePushed });
+    if (jsonMode()) {
+      process.stdout.write(JSON.stringify(res) + "\n");
+      process.exitCode = res.ok ? 0 : 1;
+      return;
+    }
+    const mark = (ok: boolean) => (ok ? "ok  " : "FAIL");
+    process.stdout.write(`[${mark(res.scriptExists)}] script.md              ${res.scriptExists ? res.scriptPath : `missing at ${res.scriptPath}`}\n`);
+    process.stdout.write(`[${mark(res.git.gate.ok)}] git (${res.git.gate.level})${" ".repeat(Math.max(1, 13 - res.git.gate.level.length))}${res.git.gate.detail}\n`);
+    for (const c of res.doctor.checks) {
+      process.stdout.write(`[${mark(c.ok)}] ${c.name.padEnd(22)} ${c.detail}\n`);
+      if (!c.ok && c.fix) process.stdout.write(`        ↳ ${c.fix}\n`);
+    }
+    process.stdout.write(res.ok ? `\nReady to produce ${lessonId}.\n` : `\nNOT ready — fix the FAIL line(s) above.\n`);
+    process.exitCode = res.ok ? 0 : 1;
   });
 
 program

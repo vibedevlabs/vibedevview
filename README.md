@@ -510,17 +510,20 @@ Run any command with `--help` for its options. Live-timeline commands need
 | Command | What it does |
 | --- | --- |
 | `palmier doctor` | Preflight: Node, ffmpeg, ffprobe, Chromium, ElevenLabs key + voice, Palmier reachable. |
+| `palmier preflight <id>` | One gate before a (fan-out) run: `script.md` exists **+** is committed **and pushed** (so another machine can `git pull` it) **+** `doctor` is green. Exits non-zero if not ready — so an orchestrator can refuse to start a run that would immediately block. `--no-require-pushed` to only require it committed locally; `--json`. |
 | `palmier init <id>` | Create the lesson folder seeded with a starter `script.md`. |
 | `palmier script <id>` | Validate `script.md` → `segments.json` (or draft it via LLM if none exists). |
 | `palmier slides <id>` | Render + verify the slide PNGs only. `--only 03,07` for specific segments. |
 | `palmier voice <id>` | Generate the voiceover + measure per-segment timing only. |
-| `palmier produce <id>` | The full pipeline. `--no-review` to skip the review pause; `--no-placeholders` to skip recording placeholders; `--no-clean` / `--keep-bin` (see Part 4). |
+| `palmier produce <id>` | The full pipeline. `--no-review` to skip the review pause; `--no-placeholders` to skip recording placeholders; `--no-clean` / `--keep-bin` (see Part 4). **Git gate:** on the live `palmier` backend it refuses unless `script.md` is committed (so a fan-out run can't drift from the repo) — override with `--allow-uncommitted`, tighten with `--require-pushed`, or force it on the preview backend with `--require-committed`. |
 | `palmier assemble <id>` | (Re)place already-produced assets on the timeline. `--no-clean` / `--keep-bin`. |
 | `palmier correct <id>` | Surgically revise one segment. `--kind narration\|slide\|recording\|retime` + `--seg <id>` or `--at <m:ss>`. |
 | `palmier clear` | Reset the Palmier timeline + media bin between takes/lessons. `--keep-bin` = timeline only. |
 | `palmier status <id>` | List every segment with its id, timestamp span, and which assets exist. |
+| `palmier recordings <id>` | List the screen recordings **you** need to capture (every `DO:` segment) with the exact steps, timestamp + target length, and current status (`recorded`/`placeholder`/`todo`/`pending`). |
 | `palmier course [id]` | Show the course tree from `course.yaml` (modules → lessons in order, with their LMS course/lesson slugs + sort order). Pass a lesson id to print just its placement. `--json`. |
 | `palmier export <id>` | Render one finished MP4 (ffmpeg flatten + ffprobe verify). `-o <path>`, `--tolerance <seconds>`. |
+| `palmier export-slides <id>` | Copy rendered slide PNGs (+ `deck.html`) into `slides-export/` next to `script.md`, named in segment order (`<seg>-<frame>.png`). `-o <dir>`, `--no-deck`. |
 | `palmier publish <id>` | Upload the MP4 to Mux → `playback_id`. **Dry run by default**; `--target mux` to upload; `-f <path>`. |
 | `palmier moments <id>` | Compile moments → `moments.json` + idempotent `moments.sql`. Never writes a DB. Uses `moments.yaml` if present; otherwise **auto-generates** them from the script (phases → sections, `DO:` segments → checkpoints) using `course.yaml` for the lesson's LMS course/slug. `--playback-id <id>`. |
 | `palmier attach <id>` | Land the lesson + moments in the LMS. **Safe by default**; needs `--target api\|supabase` **and** `--apply` to write. `--playback-id <id>`. |

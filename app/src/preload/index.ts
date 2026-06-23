@@ -6,6 +6,7 @@ import type {
   DraftRequest,
   DraftResult,
   EngineEvent,
+  ExportSlidesResult,
   ProduceRequest,
   RunResult,
   StatusResult,
@@ -23,6 +24,7 @@ const api: StudioApi = {
   produce: (req: ProduceRequest): Promise<RunResult> => ipcRenderer.invoke("studio:produce", req),
   correct: (req: CorrectRequest): Promise<RunResult> => ipcRenderer.invoke("studio:correct", req),
   deliverPreview: (id: string): Promise<DeliverPreview> => ipcRenderer.invoke("studio:deliverPreview", id),
+  exportSlides: (id: string): Promise<ExportSlidesResult> => ipcRenderer.invoke("studio:exportSlides", id),
   slideUrl: (id, frameId) => ipcRenderer.invoke("studio:slideUrl", id, frameId),
   onEvent: (handler: (event: EngineEvent) => void) => {
     const listener = (_e: unknown, event: EngineEvent) => handler(event);
