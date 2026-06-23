@@ -50,6 +50,16 @@ duration: 10
 SAY:
 Let's do it. Go to Zo and ask: "Export my full configuration. Include my Bio, all Rules, my active Persona prompt, all Skills with their full SKILL dot MD content, all Automations with their schedules and instructions, and my workspace file structure." Zo will compile everything into one output. Copy it. Paste it into a new file — call it something like "zo-chief-of-staff-config dot MD." That's your export. Every detail of your agent in one document.
 
+DO:
+- action: Open Zo and type the export command
+  target: Zo chat
+- action: Watch Zo compile the full config — Bio, Rules, Persona, Skills, Automations
+  target: Zo chat response
+- action: Select all and copy the output
+  target: Zo chat response
+- action: Open a text editor and paste — save as zo-chief-of-staff-config.md
+  target: Text editor
+
 SLIDE:
 ```yaml
 frame: C4-steps
@@ -70,6 +80,14 @@ duration: 12
 
 SAY:
 Now turn that export into a bootstrap. A bootstrap is a single prompt you can paste into a fresh Zo that recreates everything. The structure is simple. Start with a header: "Set up my Chief of Staff. Create each piece below." Then list each section — Bio, Rules, Persona, Skills, Automations, File Structure — with the exact content from your export. When you paste this into a new Zo, it reads the instructions and creates every primitive. Bio updated. Rules created. Persona set. Skills installed. Automations scheduled. Workspace scaffolded. One prompt. Full install. The same config you spent time customizing — recreated in thirty seconds.
+
+DO:
+- action: Open the exported config file
+  target: Text editor
+- action: Add the bootstrap header: "Set up my Chief of Staff. Create each piece below."
+  target: Text editor
+- action: Show the structure — Bio section, Rules section, Persona, Skills, Automations, Files
+  target: Text editor
 
 SLIDE:
 ```yaml
@@ -93,6 +111,18 @@ duration: 10
 
 SAY:
 Now make it permanent. Create a GitHub repository. Call it something like "my-zo-config" or "chief-of-staff." Add your bootstrap file. Add the individual SKILL dot MD files in a skills folder. Add a README that explains what it does. Push it. Now your agent configuration lives in version control. You can track changes. Roll back. Share it. Fork it. If you ever set up a new Zo — or help a friend set up theirs — clone the repo, paste the bootstrap, done. You can also use Zo itself to do this. Tell Zo: "Create a GitHub repo called my-zo-config and push my Chief of Staff bootstrap file to it."
+
+DO:
+- action: Open GitHub — create a new repository (my-zo-config)
+  target: Browser — github.com
+- action: Add the bootstrap.md file
+  target: GitHub repo
+- action: Create a skills/ folder and add individual SKILL.md files
+  target: GitHub repo
+- action: Add a README explaining what the repo does
+  target: GitHub repo
+- action: Show the final repo structure
+  target: GitHub repo
 
 SLIDE:
 ```yaml

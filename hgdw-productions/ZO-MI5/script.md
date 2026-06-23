@@ -50,6 +50,16 @@ duration: 9
 SAY:
 Open Claude. Paste two things. First: the Chief of Staff config file we provided — the one with all nine jobs. Second: the personalization prompt. This prompt tells Claude to interview you about the specific parts that need your input, then output an updated version of the config with your real details filled in. Don't overthink it. Claude will ask the right questions.
 
+DO:
+- action: Open Claude (claude.ai or desktop app)
+  target: Browser — claude.ai
+- action: Paste the Chief of Staff config file into the conversation
+  target: Claude chat input
+- action: Paste the personalization prompt below the config
+  target: Claude chat input
+- action: Show Claude beginning the interview
+  target: Claude response
+
 SLIDE:
 ```yaml
 frame: C4-steps
@@ -69,6 +79,16 @@ duration: 12
 
 SAY:
 Claude will ask you quick questions in five areas. Who you are — name, what you do, timezone, family details. Your boundaries — what should the agent never do, quiet hours, shortcuts you use. Your voice — how you want it to talk to you, paste an example text you've sent. Your priorities — which of the nine jobs matter most, any you want to skip or adjust. Your schedule — what time for the morning briefing, when does your day end, best day for the weekly reset. Answer with real details. Real client names. Real school pickup times. The more specific, the better it works.
+
+DO:
+- action: Show Claude asking about you — name, role, timezone, family
+  target: Claude chat
+- action: Answer with real details — type actual client names, school pickup times
+  target: Claude chat input
+- action: Show Claude asking about preferences — boundaries, voice, schedule
+  target: Claude chat
+- action: Paste a real text message as voice example
+  target: Claude chat input
 
 SLIDE:
 ```yaml
@@ -95,6 +115,16 @@ duration: 9
 SAY:
 After the interview, Claude gives you the updated config. Same structure, your details. Scan through it. Does the Bio sound right? Do the Rules match your boundaries? Does the Persona sound like you? Check the automations — are the times right for your schedule? If something's off, just tell Claude. "Change the morning briefing to eight AM." "Remove the meal planner, I don't need that one." "Make the voice more casual." Iterate until it feels right. This takes two minutes, not twenty.
 
+DO:
+- action: Scroll through Claude's personalized output
+  target: Claude response
+- action: Check the Bio section — verify your real details are there
+  target: Claude response
+- action: Check the Persona — does the voice description match?
+  target: Claude response
+- action: Ask Claude to adjust something — "change morning briefing to 8am"
+  target: Claude chat
+
 SLIDE:
 ```yaml
 frame: C4-steps
@@ -115,6 +145,16 @@ duration: 10
 
 SAY:
 Copy the entire output from Claude. Go to Zo. Paste it. That's the install. Watch Zo read through it. Bio updated — now it knows who you are. Rules created — now it knows the boundaries. Persona set — now it knows your voice. Nine Skills created as SKILL dot MD files — now it knows how to do each job. Five Automations created — now it has a daily rhythm. File structure scaffolded — notes, drafts, digests, context folders all ready. Remember the employee mental model? You just onboarded your Chief of Staff. About-the-boss card, handbook, dress code, SOPs, daily routine, filing cabinet. One paste. All six primitives. Done.
+
+DO:
+- action: Select all and copy Claude's final output
+  target: Claude response
+- action: Open Zo in a new tab
+  target: Browser — zo.computer
+- action: Paste the full config into Zo chat
+  target: Zo chat input
+- action: Watch Zo creating each primitive — Bio, Rules, Persona, Skills, Automations
+  target: Zo chat response
 
 SLIDE:
 ```yaml
@@ -138,6 +178,18 @@ duration: 8
 SAY:
 Before you trust it, verify it. Ask Zo: "show me my Bio." Does it have your real details? "List my rules." Are your boundaries there? "List my personas." Is Chief of Staff active? "List my skills." All nine jobs? "List my automations." Five running with the right schedules? "Show me the file tree." Workspace structure in place? If anything's missing, just tell Zo. "Add a rule: no messages before seven AM." "Change the evening wind-down to five-thirty." Fixes are instant.
 
+DO:
+- action: Ask Zo "show me my Bio" — verify your details
+  target: Zo chat
+- action: Ask Zo "list my rules" — check boundaries
+  target: Zo chat
+- action: Ask Zo "list my skills" — verify all 9 jobs
+  target: Zo chat
+- action: Open Automations tab — show 5 scheduled jobs with times
+  target: Zo Automations
+- action: Open Files tab — show workspace folder structure
+  target: Zo Files
+
 SLIDE:
 ```yaml
 frame: C4-steps
@@ -159,6 +211,16 @@ duration: 9
 
 SAY:
 Pick a job. Any job. Tell Zo: "run morning-briefing right now." Watch it check your calendar, scan your email, compile the brief, and send you an SMS. Or try: "brain dump — I've got a million things going on. The website needs updating, I forgot to reply to Marcus about the proposal, kids have a field trip Thursday I haven't signed the form for, and I had an idea for a series on time management." Watch it sort the chaos. Urgent — sign the field trip form, reply to Marcus. This week — website update. Content idea — time management series, saved for later. That's not a chatbot organizing a list. That's a Chief of Staff who knows your projects, your clients, and your priorities, applying judgment.
+
+DO:
+- action: Type "run morning-briefing" in Zo
+  target: Zo chat
+- action: Watch the agent run the skill — calendar check, email scan, brief compilation
+  target: Zo chat response
+- action: Show the SMS arriving on phone
+  target: Phone / SMS
+- action: Try a brain dump — type messy thoughts and watch it organize
+  target: Zo chat
 
 SLIDE:
 ```yaml

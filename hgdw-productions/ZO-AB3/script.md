@@ -49,6 +49,14 @@ duration: 9
 SAY:
 The web app at zo.computer is where you'll spend most of your time during setup. When you log in, you see the chat interface — talk to your Zo just like any AI chat. But the left sidebar is where the real power lives. Files — browse everything on your server. Terminal — run shell commands directly in the browser. Sites — manage hosted websites and services. And Settings — this is where the six primitives are configured. Let's go through Settings.
 
+DO:
+- action: Open zo.computer and log in
+  target: Browser — zo.computer
+- action: Show the chat interface — send a quick message
+  target: Zo web app chat
+- action: Click through left sidebar — Files, Terminal, Sites, Settings
+  target: Zo web app sidebar
+
 SLIDE:
 ```yaml
 frame: C1-bullets
@@ -69,6 +77,20 @@ duration: 12
 
 SAY:
 In Settings, you'll find each primitive as its own section. Bio — a text field, two thousand character limit. Type your context and save. Rules — a list. Add always-on rules or conditional rules with triggers. Personas — create named personas with prompts, set one as active, assign per channel. Skills — these live as SKILL dot MD files in your filesystem at home workspace Skills. You can also browse community skills from the Skills tab and install them with one click. Automations — create scheduled tasks with RRULE, instruction, model, and delivery channel. Files — your entire filesystem. Anything in home workspace is accessible to the AI.
+
+DO:
+- action: Open Settings > Bio — show the text field
+  target: Zo Settings
+- action: Open Settings > Rules — show always-on and conditional rule list
+  target: Zo Settings > Rules
+- action: Open Settings > Personas — show persona list and active toggle
+  target: Zo Settings > Personas
+- action: Open Skills tab — show installed skills and community hub
+  target: Zo Skills
+- action: Open Automations tab — show scheduled task list
+  target: Zo Automations
+- action: Open Files tab — show filesystem browser
+  target: Zo Files
 
 SLIDE:
 ```yaml

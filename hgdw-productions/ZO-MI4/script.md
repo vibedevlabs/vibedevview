@@ -78,6 +78,16 @@ duration: 10
 SAY:
 I open Claude. I paste my context files from earlier in the course — my bio, my projects, my voice examples. Then I add the Chief of Staff Interview Prompt. Claude starts with Round 1. Who are you? What do you do? Who do you work with? What timezone? Do you have kids — ages, logistics? What tools do you use daily? Everything I answer here becomes my Bio — that permanent context card loaded every conversation. I'm specific. Real names. Real schedules. Real preferences.
 
+DO:
+- action: Open Claude and start a new conversation
+  target: Browser — claude.ai
+- action: Paste context files (bio, projects, voice examples)
+  target: Claude chat input
+- action: Paste the Chief of Staff Interview Prompt
+  target: Claude chat input
+- action: Show Claude asking Round 1 questions (Who are you?)
+  target: Claude response
+
 SLIDE:
 ```yaml
 frame: C1-bullets
@@ -98,6 +108,12 @@ duration: 12
 
 SAY:
 Round 2: what should your agent never do? Claude asks about boundaries. I say: never send email without my approval. Never contact clients directly. No messages on Sundays unless it's critical. And I set up my shortcuts — "lgtm" means approved, "hold" means pause. Each answer becomes a Rule — a guardrail that fires before the model can decide otherwise. Round 3: how should it sound? I describe the voice. Direct. Warm. Short sentences. No corporate speak. Claude asks me to show an example — I paste a text I actually sent. That voice becomes my Persona. Same agent, my tone.
+
+DO:
+- action: Show answering Round 2 — type out boundary answers (never send email, no Sundays, shortcuts)
+  target: Claude chat
+- action: Show answering Round 3 — describe voice, paste example text message
+  target: Claude chat
 
 SLIDE:
 ```yaml
@@ -126,6 +142,16 @@ duration: 14
 SAY:
 Round 4 is where it gets real. Claude walks through each area of my life. Household: what recurring tasks drain your energy? I tell it — meal planning is chaos, I forget school pickup conflicts, errands pile up. Claude proposes three household jobs: Morning Briefing with calendar and logistics, Meal and Household Planner on Sundays, and Family Calendar Sync every morning. Personal: how do I start my day? What falls through the cracks? I say I want an intention before the chaos, I need a way to dump my thoughts when my head is full, and I never reflect on what actually went well. Three more jobs. Business: what's my biggest time sink? Follow-ups I forget to track. Content that takes forever because I stare at a blank page. And I never properly close out the day. Three more. Nine total. For each one, Claude defines the trigger, the steps, and the definition of done.
 
+DO:
+- action: Show Claude proposing Household jobs — Morning Briefing, Meal Planner, Family Calendar
+  target: Claude response
+- action: Show answering Personal questions — intention, brain dump, reflection
+  target: Claude chat
+- action: Show answering Business questions — follow-ups, content, wind-down
+  target: Claude chat
+- action: Show Claude's summary of all 9 jobs with triggers and definitions of done
+  target: Claude response
+
 SLIDE:
 ```yaml
 frame: C4-steps
@@ -146,6 +172,12 @@ duration: 9
 
 SAY:
 Round 5: when should each job run? Some are on-demand — brain dumps, content drafts, meeting prep. Those are Skills I invoke when I need them. But five of the nine run on autopilot. Family Calendar Sync at six-thirty AM. Morning Briefing at seven-thirty. Follow-up Tracker at five PM. Evening Wind-down at six. Weekly Reflection on Sunday at seven. Each one becomes a Zo Automation with an RRULE schedule and a delivery channel. The agent wakes up, does the job, delivers the result, and goes back to sleep. I don't prompt it. It just runs.
+
+DO:
+- action: Show Claude asking about schedule preferences
+  target: Claude chat
+- action: Show answering with specific times (6:30am, 7:30am, 5pm, 6pm, Sunday 7pm)
+  target: Claude chat
 
 SLIDE:
 ```yaml
@@ -168,6 +200,16 @@ duration: 10
 SAY:
 After five rounds, Claude gives me the output. One complete Zo setup prompt. My Bio — 2,048 characters of real context. Five Rules — boundaries and shortcuts. A Chief of Staff Persona with my voice. Nine Skills — each one a full job description with trigger, steps, and definition of done. Five Automations with RRULE schedules and delivery channels. And a file structure for my workspace. Everything I need, in one prompt. All built from my actual answers, not a template.
 
+DO:
+- action: Scroll through Claude's full output — show the complete Zo setup prompt
+  target: Claude response
+- action: Highlight Bio section, Rules section, Persona section
+  target: Claude response
+- action: Scroll to Skills — show SKILL.md format with steps and definitions of done
+  target: Claude response
+- action: Scroll to Automations — show the 5 RRULE schedules
+  target: Claude response
+
 SLIDE:
 ```yaml
 frame: C1-bullets
@@ -188,6 +230,20 @@ duration: 10
 
 SAY:
 I go to Zo. I paste the entire setup prompt. And I watch. Zo reads the Bio — now it knows who I am, my clients, my kids' school schedule. Creates each Rule — now it knows the boundaries. Sets up the Persona — now it knows how to sound. Creates each Skill as a SKILL dot MD file in the workspace — now it knows how to do nine specific jobs. Creates each Automation — now it has a daily rhythm. Scaffolds the file structure — now it has a workspace. That's onboarding. Remember the employee mental model? Bio is the about-the-boss card. Rules are the handbook. Persona is the dress code. Skills are the SOPs. Automations are the daily routine. Files are the filing cabinet. All six primitives, working as one system.
+
+DO:
+- action: Open Zo — paste the full setup prompt into chat
+  target: Browser — zo.computer
+- action: Watch Zo processing — creating Bio, Rules, Persona
+  target: Zo chat response
+- action: Watch Zo creating Skills and Automations
+  target: Zo chat response
+- action: Open Settings — verify Bio is populated
+  target: Zo Settings > Bio
+- action: Check Rules — show the rules list
+  target: Zo Settings > Rules
+- action: Check Automations tab — show scheduled jobs
+  target: Zo Automations
 
 SLIDE:
 ```yaml
@@ -210,6 +266,16 @@ duration: 9
 
 SAY:
 Don't wait for the automations to fire. Test it right now. Tell Zo: "run morning-briefing." Watch it check your calendar, scan your email, compile the brief, and send you an SMS. Tell it: "brain dump — I need to figure out what's going on with the website project, Sarah hasn't replied about the partnership, and I forgot to send that invoice." Watch it classify everything, pull out the next actions, and organize the chaos. That's your Chief of Staff. Working in real time. And tomorrow morning at seven-thirty, it'll do the briefing on its own.
+
+DO:
+- action: Type "run morning-briefing" in Zo chat
+  target: Zo chat
+- action: Watch the agent check calendar, compile brief, send SMS
+  target: Zo chat response
+- action: Show the SMS notification arriving on phone (or screenshot)
+  target: Phone / SMS
+- action: Try "brain dump" — type messy thoughts and watch it organize
+  target: Zo chat
 
 SLIDE:
 ```yaml
