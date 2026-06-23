@@ -21,6 +21,7 @@ const FIELDS_BY_FRAME: Record<string, Array<keyof SlideSpec>> = {
   "C8-figure": ["title", "image", "caption"],
   "C9-grid": ["eyebrow", "title", "cards"],
   "C10-flow": ["eyebrow", "title", "body"],
+  "C11-icons": ["eyebrow", "title", "cards"],
   "D1-placeholder": ["eyebrow", "title"],
   "D2-lowerthird": ["title", "subtitle"],
   "O1-outro": ["title", "subtitle"],
@@ -141,6 +142,15 @@ export function SegmentForm(props: { segment: Segment | null; onChange: (next: S
               <label>Cards (stat optional)</label>
               {(slide.cards ?? []).map((card, i) => (
                 <div className="field" key={i}>
+                  <input
+                    placeholder="Icon / emoji (optional, e.g. ⚡)"
+                    value={card.icon ?? ""}
+                    onChange={(e) => {
+                      const cards = [...(slide.cards ?? [])];
+                      cards[i] = { ...card, icon: e.target.value || undefined };
+                      patchSlide({ cards });
+                    }}
+                  />
                   <input
                     placeholder="Stat (optional, e.g. 80%)"
                     value={card.stat ?? ""}

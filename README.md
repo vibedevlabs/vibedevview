@@ -235,8 +235,8 @@ subtitle: A 90-second tour
 ```
 ```
 
-There are **18 slide frame types** (title cards, bullet lists, quotes, comparisons, code, big
-stats, callouts, **infographics** — stat-card grids + process flows — an outro, and more). The full field-by-field reference and worked examples are
+There are **19 slide frame types** (title cards, bullet lists, quotes, comparisons, code, big
+stats, callouts, **infographics** — stat-card grids, emoji/icon feature grids, and process flows — an outro, and more). The full field-by-field reference and worked examples are
 in **[`docs/OPERATOR-GUIDE.md`](docs/OPERATOR-GUIDE.md)** (authoring) and
 **[`HGDW-DESIGN.md`](HGDW-DESIGN.md)** (the brand + frames). You have three ways to produce a script:
 

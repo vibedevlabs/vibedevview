@@ -22,6 +22,7 @@ export const FRAME_TYPES = [
   "C8-figure", //  image / figure with caption
   "C9-grid", //    infographic: grid of stat/info cards
   "C10-flow", //   infographic: horizontal process flow (A → B → C)
+  "C11-icons", //  infographic: emoji/icon feature grid
   "D1-placeholder", // dark demo placeholder (app eyebrow) — used when a recording is missing
   "D2-lowerthird", // lower-third label overlay for a recording
   "O1-outro", //   closing / CTA card
@@ -39,8 +40,12 @@ export const ColumnSchema = z.object({
   items: z.array(z.string()).default([]),
 });
 
-/** A card for the C9-grid infographic frame: an optional big stat, a label, and an optional detail line. */
+/**
+ * A card for the C9-grid / C11-icons infographic frames: an optional leading
+ * emoji/icon, an optional big stat, a label, and an optional detail line.
+ */
 export const CardSchema = z.object({
+  icon: z.string().optional(),
   stat: z.string().optional(),
   title: z.string(),
   body: z.string().optional(),

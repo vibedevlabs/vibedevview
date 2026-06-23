@@ -53,7 +53,8 @@ VISUAL VARIETY — this is important:
 - Prefer infographic, visual frames over plain bullet lists. Do NOT default to C1-bullets.
 - Reserve C1-bullets for content that is genuinely an unordered list with no better structure — aim for at most one bullet slide per lesson.
 - Match the frame to the content's shape:
-  - C9-grid — a SET of related items/metrics/concepts (2–4). Use \`cards: [{ stat?: "80%", title: "label", body?: "one detail line" }]\`. Great for "3 reasons", "key numbers", "4 pillars".
+  - C9-grid — a SET of related items/metrics/concepts (2–4). Use \`cards: [{ icon?: "📈", stat?: "80%", title: "label", body?: "one detail line" }]\`. Great for "3 reasons", "key numbers", "4 pillars". Add a relevant emoji \`icon\` when there's no stat.
+  - C11-icons — a visual feature/benefit grid (2–6). Use \`cards: [{ icon: "⚡", title: "label", body?: "one line" }]\` — a leading emoji per tile. Great for "what you'll learn", "the toolkit", "why it matters". Pick a meaningful emoji per item.
   - C10-flow — a PROCESS or pipeline (A → B → C). Put the ordered step labels in \`body: [..]\`; they render as connected, numbered stages.
   - C4-steps — sequential instructions to follow (numbered list).
   - C3-compare — a trade-off / before-vs-after / X-vs-Y (\`columns: [{ heading, items[] }]\`).

@@ -158,8 +158,9 @@ Fields marked *(falls back …)* will reuse another field if omitted.
 | `C6-code` | `eyebrow`, `title`, `code` | `lang` is accepted but not rendered. |
 | `C7-stat` | `stat` *(falls back to `title`)*, `statLabel` *(falls back to `subtitle`)* | Big number. |
 | `C8-figure` | `title`, `image`, `caption` | `image` = path/URL to a figure. |
-| `C9-grid` | `eyebrow`, `title`, `cards[] {stat?, title, body?}` | **Infographic:** grid of 2–4 stat/info cards. Prefer over bullets for a set of metrics/concepts. |
+| `C9-grid` | `eyebrow`, `title`, `cards[] {icon?, stat?, title, body?}` | **Infographic:** grid of 2–4 stat/info cards (each card can lead with an emoji `icon`). Prefer over bullets for a set of metrics/concepts. |
 | `C10-flow` | `eyebrow`, `title`, `body[]` | **Infographic:** horizontal process flow (A → B → C); `body[]` are the ordered stages. |
+| `C11-icons` | `eyebrow`, `title`, `cards[] {icon, title, body?}` | **Infographic:** emoji/icon feature grid (2–6 tiles). Great for benefits / "what you'll learn" / a toolkit. |
 | `D1-placeholder` | `eyebrow`, `title`, `subtitle` | Demo placeholder (also the auto recording placeholder). |
 | `D2-lowerthird` | `title`, `subtitle` | Lower-third label over a recording. |
 | `O1-outro` | `eyebrow`, `title` *(falls back to wordmark)*, `subtitle` | Closing card. |

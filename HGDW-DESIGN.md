@@ -55,8 +55,9 @@ Each frame is rendered by the Slides Agent and then **individually verified** (s
 | `C6-code` | dark | Code block | `code`, `lang` |
 | `C7-stat` | dark | Big stat / number | `stat`, `statLabel` |
 | `C8-figure` | dark | Image / figure with caption | `image`, `caption` |
-| `C9-grid` | dark | **Infographic:** grid of 2–4 stat/info cards | `title`, `cards[] {stat?, title, body?}` |
+| `C9-grid` | dark | **Infographic:** grid of 2–4 stat/info cards | `title`, `cards[] {icon?, stat?, title, body?}` |
 | `C10-flow` | dark | **Infographic:** horizontal process flow (A → B → C) | `title`, `body[]` (ordered stages) |
+| `C11-icons` | dark | **Infographic:** emoji/icon feature grid (2–6 tiles) | `title`, `cards[] {icon, title, body?}` |
 | `D1-placeholder` | dark | Demo placeholder (app eyebrow) — used when a recording is missing | `eyebrow`, `title` |
 | `D2-lowerthird` | — | Lower-third label overlay for a recording | `title`, `subtitle` |
 | `O1-outro` | gradient | Closing / CTA card | `title`, `subtitle`, `footer` |

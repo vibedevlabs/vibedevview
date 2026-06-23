@@ -35,6 +35,18 @@ describe("SlideSpecSchema — infographic frames", () => {
     ]);
   });
 
+  it("accepts a card with an emoji icon", () => {
+    const spec = SlideSpecSchema.parse({
+      frame: "C11-icons",
+      title: "Toolkit",
+      cards: [{ icon: "⚡", title: "Fast" }, { icon: "🔒", title: "Safe", body: "RLS-gated" }],
+    });
+    expect(spec.cards).toEqual([
+      { icon: "⚡", title: "Fast" },
+      { icon: "🔒", title: "Safe", body: "RLS-gated" },
+    ]);
+  });
+
   it("accepts a C10-flow with body steps", () => {
     const spec = SlideSpecSchema.parse({ frame: "C10-flow", title: "Pipeline", body: ["Script", "Slides", "Voice"] });
     expect(spec.frame).toBe("C10-flow");
@@ -92,6 +104,63 @@ describe("buildDeck — C9-grid", () => {
     expect(evil).toContain("&lt;b&gt;x&lt;/b&gt;");
     expect(evil).not.toContain("<b>x</b>");
   });
+
+  it("renders .card-icon only for cards that set icon", () => {
+    const html2 = deckFor({
+      frame: "C9-grid",
+      title: "mix",
+      cards: [{ icon: "📈", title: "up" }, { stat: "9", title: "nine" }],
+    });
+    expect(count(html2, '<div class="card-icon">')).toBe(1);
+    expect(html2).toContain('<div class="card-icon">📈</div>');
+  });
+});
+
+describe("buildDeck — C11-icons", () => {
+  const html = deckFor({
+    frame: "C11-icons",
+    title: "Your toolkit",
+    cards: [
+      { icon: "⚡", title: "Fast", body: "One script in, video out." },
+      { icon: "🔒", title: "Safe" },
+      { icon: "🎯", title: "Focused" },
+    ],
+  });
+
+  it("renders one .icontile per card, tagged .icongrid--3", () => {
+    expect(count(html, '<div class="icontile">')).toBe(3);
+    expect(html).toContain('class="icongrid icongrid--3"');
+  });
+
+  it("renders the emoji icon and title for each tile, body only when set", () => {
+    expect(count(html, '<div class="icontile-icon">')).toBe(3);
+    expect(html).toContain('<div class="icontile-icon">⚡</div>');
+    expect(html).toContain('<div class="icontile-title">Safe</div>');
+    expect(count(html, '<div class="icontile-body">')).toBe(1);
+    expect(html).toContain('<div class="icontile-body">One script in, video out.</div>');
+  });
+
+  it("falls back to a ✦ glyph when a tile has no icon", () => {
+    const noIcon = deckFor({ frame: "C11-icons", title: "x", cards: [{ title: "plain" }] });
+    expect(noIcon).toContain('<div class="icontile-icon">✦</div>');
+  });
+
+  it("caps the icon grid at .icongrid--3 for 4+ tiles", () => {
+    const four = deckFor({
+      frame: "C11-icons",
+      title: "many",
+      cards: [1, 2, 3, 4].map((n) => ({ icon: "🔹", title: `t${n}` })),
+    });
+    expect(four).toContain("icongrid--3");
+    expect(four).not.toContain("icongrid--4");
+    expect(count(four, '<div class="icontile">')).toBe(4);
+  });
+
+  it("escapes HTML in tile fields", () => {
+    const evil = deckFor({ frame: "C11-icons", title: "x", cards: [{ icon: "⚡", title: "<i>x</i>" }] });
+    expect(evil).toContain("&lt;i&gt;x&lt;/i&gt;");
+    expect(evil).not.toContain("<i>x</i>");
+  });
 });
 
 describe("buildDeck — C10-flow", () => {
@@ -124,5 +193,6 @@ describe("defaultBg", () => {
   it("defaults the infographic content frames to dark", () => {
     expect(defaultBg("C9-grid")).toBe("dark");
     expect(defaultBg("C10-flow")).toBe("dark");
+    expect(defaultBg("C11-icons")).toBe("dark");
   });
 });
