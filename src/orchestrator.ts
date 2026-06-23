@@ -6,6 +6,7 @@ import { runScriptAgent } from "./agents/script-agent.js";
 import { runSlidesAgent, type SlideResult } from "./agents/slides-agent.js";
 import { runVoiceAgent } from "./agents/voice-agent.js";
 import { runRecordingAgent } from "./agents/recording-agent.js";
+import { buildRecordingPlan, needsRecording } from "./recordings.js";
 import { buildPlan, type AssembleResult, type TimelineBackend } from "./timeline/backend.js";
 import { FfmpegBackend } from "./timeline/ffmpeg-backend.js";
 import { PalmierBackend } from "./timeline/palmier-backend.js";
@@ -97,6 +98,18 @@ export async function produce(lessonId: string, opts: ProduceOptions = {}): Prom
     renderer: opts.renderer,
   });
   onEvent({ type: "phase", name: "recording", status: "done" });
+
+  // Surface screen recordings the human still needs to capture — the agent can't
+  // make these, so call them out explicitly (see `palmier recordings <id>`).
+  const recordingNeeds = buildRecordingPlan(manifest, recording, alignment).filter((n) => needsRecording(n.status));
+  if (recordingNeeds.length > 0) {
+    log.warn(
+      "orchestrator",
+      `🎥 ${recordingNeeds.length} screen recording(s) needed: ${recordingNeeds
+        .map((n) => `${n.segId}${n.label ? ` (${n.label})` : ""}`)
+        .join(", ")} — run \`palmier recordings ${lessonId}\` for the capture steps.`,
+    );
+  }
 
   // 6. Assemble onto the timeline backend.
   const plan = buildPlan(manifest, alignment, timeline, recording, ws);

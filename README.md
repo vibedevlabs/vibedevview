@@ -519,6 +519,7 @@ Run any command with `--help` for its options. Live-timeline commands need
 | `palmier correct <id>` | Surgically revise one segment. `--kind narration\|slide\|recording\|retime` + `--seg <id>` or `--at <m:ss>`. |
 | `palmier clear` | Reset the Palmier timeline + media bin between takes/lessons. `--keep-bin` = timeline only. |
 | `palmier status <id>` | List every segment with its id, timestamp span, and which assets exist. |
+| `palmier recordings <id>` | List the screen recordings **you** need to capture (every `DO:` segment) with the exact steps, timestamp + target length, and current status (`recorded`/`placeholder`/`todo`/`pending`). |
 | `palmier course [id]` | Show the course tree from `course.yaml` (modules → lessons in order, with their LMS course/lesson slugs + sort order). Pass a lesson id to print just its placement. `--json`. |
 | `palmier export <id>` | Render one finished MP4 (ffmpeg flatten + ffprobe verify). `-o <path>`, `--tolerance <seconds>`. |
 | `palmier export-slides <id>` | Copy rendered slide PNGs (+ `deck.html`) into `slides-export/` next to `script.md`, named in segment order (`<seg>-<frame>.png`). `-o <dir>`, `--no-deck`. |

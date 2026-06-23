@@ -315,6 +315,26 @@ program
   });
 
 program
+  .command("recordings")
+  .description("List the screen recordings you need to capture (DO segments) + the exact steps for each")
+  .argument("<lessonId>")
+  .action(async (lessonId) => {
+    const { computeAlignment } = await import("./alignment.js");
+    const { buildRecordingPlan, formatRecordingReport } = await import("./recordings.js");
+    const ws = Workspace.for(lessonId);
+    const manifest = await ws.readManifest();
+    const timeline = (await ws.exists(ws.timelinePath)) ? await ws.readTimeline() : undefined;
+    const alignment = timeline ? computeAlignment(manifest, timeline) : undefined;
+    const recording = (await ws.exists(ws.recordingManifestPath)) ? await ws.readRecordingManifest() : undefined;
+    const needs = buildRecordingPlan(manifest, recording, alignment);
+    if (jsonMode()) {
+      process.stdout.write(JSON.stringify({ lessonId: manifest.lessonId, needs }) + "\n");
+      return;
+    }
+    process.stdout.write(formatRecordingReport(manifest.lessonId, needs).join("\n") + "\n");
+  });
+
+program
   .command("course")
   .description("Show the course tree from course.yaml (modules → lessons in order, with LMS slugs + sort order)")
   .argument("[lessonId]", "show just this lesson's placement")
