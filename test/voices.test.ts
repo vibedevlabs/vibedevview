@@ -11,11 +11,11 @@ import { resolveVoice, VOICES } from "../src/voices.js";
  */
 describe("resolveVoice", () => {
   it("returns Ja'dan for undefined", () => {
-    expect(resolveVoice(undefined)).toEqual({ name: "Ja'dan", id: "zNqgrf8rS1DSYcSbugQi" });
+    expect(resolveVoice(undefined)).toEqual({ name: "Ja'dan", id: "LVkRatteKcSRhfqnycJG" });
   });
 
   it("resolves the Ja'dan roster entry to its real ElevenLabs id", () => {
-    expect(resolveVoice("Ja'dan")).toEqual({ name: "Ja'dan", id: "zNqgrf8rS1DSYcSbugQi" });
+    expect(resolveVoice("Ja'dan")).toEqual({ name: "Ja'dan", id: "LVkRatteKcSRhfqnycJG" });
   });
 
   it("treats the Jadan alias as the same voice id as Ja'dan", () => {
@@ -32,7 +32,7 @@ describe("resolveVoice", () => {
   });
 
   it("falls back to Ja'dan for a short/unknown name", () => {
-    expect(resolveVoice("bob").id).toBe("zNqgrf8rS1DSYcSbugQi");
+    expect(resolveVoice("bob").id).toBe("LVkRatteKcSRhfqnycJG");
     expect(resolveVoice("short").name).toBe("Ja'dan"); // 5 chars, not an id
   });
 

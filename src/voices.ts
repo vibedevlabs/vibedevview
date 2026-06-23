@@ -7,8 +7,8 @@ export interface VoiceConfig {
 
 export const VOICES: Record<string, VoiceConfig> = {
   Courtney: { name: "Courtney", id: "lH8FzgwcPEePseQlJiNj" },
-  "Ja'dan": { name: "Ja'dan", id: "zNqgrf8rS1DSYcSbugQi" },
-  Jadan: { name: "Ja'dan", id: "zNqgrf8rS1DSYcSbugQi" },
+  "Ja'dan": { name: "Ja'dan", id: "LVkRatteKcSRhfqnycJG" },
+  Jadan: { name: "Ja'dan", id: "LVkRatteKcSRhfqnycJG" },
 };
 
 export const TTS_MODEL = "eleven_multilingual_v2";
