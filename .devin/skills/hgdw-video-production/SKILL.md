@@ -38,6 +38,28 @@ palmier produce <LESSON_ID>         # full pipeline → videos/<LESSON_ID>-previ
   cannot reach it.
 - `produce` pauses for human review after the script is parsed. Pass `--no-review` for an
   unattended end-to-end run.
+- **Git gate on the live backend.** `produce -b palmier` refuses to run an **uncommitted**
+  `script.md` (so a live/fan-out build can't drift from the repo). Commit the script first, or
+  pass `--allow-uncommitted` to override; `--require-pushed` also requires it be on the upstream.
+  The preview (`ffmpeg`) backend is never gated, so local authoring stays frictionless.
+
+## Multi-machine fan-out (a phase across several Macs)
+
+Producing many lessons in parallel across Macs (one worker per machine) only works if the
+handoff is deterministic. Do these **in order** — the same procedure works for a human, this
+skill, or a Devin parent session (see the `!hgdw_phase` playbook):
+
+1. **Scripts go in git FIRST.** Commit + push every `script.md` (and `course.yaml`) to a named
+   branch. That git branch is the *only* handoff — never `file:///`, `scp`, or "ask the parent";
+   a worker on another VM/Mac can't resolve those. The worker clones the repo, checks out the
+   branch, and points the engine at it with `PALMIER_PRODUCTIONS_DIR="$PWD/hgdw-productions"`.
+2. **Pre-warm each Mac with `palmier preflight <LESSON_ID>`** before handing out work. It is one
+   gate: script exists **+** committed/pushed **+** `doctor` green, with a non-zero exit when
+   not ready — so an orchestrator can `preflight && spawn-worker` and never start a session that
+   immediately blocks. Use `--no-require-pushed` on a worker that's already on the right checkout.
+3. **Hand each worker exactly one resolved Mac block** (host + SSH secret *names*) — no
+   placeholders, no "use X not Y". The known Macs + full fan-out runbook are in
+   [Operator Guide Part 5](../../../docs/OPERATOR-GUIDE.md#part-5--phase-production--multi-machine-fan-out).
 
 ## Deliver a finished lesson (export → publish → attach)
 
@@ -116,6 +138,9 @@ segments need changing, a full re-`produce` is cleaner than many corrections.
 3. Never identify recording order from filenames — use content.
 4. Never skip slide verification, and verify **each slide individually**, not in a batch.
 5. Never edit `script.md` to "fix" content without human approval — flag it.
+6. For any live or fanned-out build, the script must be **committed to git** before producing —
+   the produce git gate enforces this on `-b palmier`. Don't reach for `--allow-uncommitted` to
+   work around an unsaved script; commit it.
 
 ## Verify before declaring done
 
