@@ -94,6 +94,31 @@ function renderFrameBody(spec: SlideSpec): string {
           ? `<img src="${esc(spec.image)}" alt="${esc(spec.caption ?? "")}"/>`
           : `<div class="figure-placeholder">figure</div>`
       }</div>${spec.caption ? `<p class="caption">${esc(spec.caption)}</p>` : ""}</div>`;
+    case "C9-grid": {
+      const cards = spec.cards ?? [];
+      return `<div>${eyebrow(spec)}<h2 class="frame-title">${title}</h2><div class="cards cards--${Math.min(
+        cards.length || 1,
+        4,
+      )}">${cards
+        .map(
+          (c) =>
+            `<div class="card">${c.stat ? `<div class="card-stat">${esc(c.stat)}</div>` : ""}<div class="card-title">${esc(
+              c.title,
+            )}</div>${c.body ? `<div class="card-body">${esc(c.body)}</div>` : ""}</div>`,
+        )
+        .join("")}</div></div>`;
+    }
+    case "C10-flow": {
+      const steps = spec.body ?? [];
+      return `<div>${eyebrow(spec)}<h2 class="frame-title">${title}</h2><div class="flow">${steps
+        .map(
+          (s, i) =>
+            `${i > 0 ? `<div class="flow-arrow">→</div>` : ""}<div class="flow-step"><span class="flow-n">${
+              i + 1
+            }</span><span class="flow-label">${esc(s)}</span></div>`,
+        )
+        .join("")}</div></div>`;
+    }
     case "D1-placeholder":
       return `<div class="center demo">${eyebrow(spec)}<div class="demo-badge">DEMO</div><h2 class="demo-title">${
         title || "Screen recording"
@@ -228,6 +253,27 @@ function deckCss(): string {
   .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
   .column { border: 1px solid var(--border, rgba(246,239,230,0.12)); border-radius: 16px; padding: 24px; background: rgba(246,239,230,0.04); }
   .column-head { font-size: 22px; font-weight: 800; margin-bottom: 16px; color: var(--yellow); }
+
+  .cards { display: grid; gap: 22px; }
+  .cards--1 { grid-template-columns: 1fr; }
+  .cards--2 { grid-template-columns: 1fr 1fr; }
+  .cards--3 { grid-template-columns: repeat(3, 1fr); }
+  .cards--4 { grid-template-columns: repeat(2, 1fr); }
+  .card { border: 1px solid rgba(246,239,230,0.12); border-radius: 18px; padding: 28px 26px;
+    background: rgba(246,239,230,0.04); position: relative; overflow: hidden; }
+  .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--gradient); }
+  .card-stat { font-size: 56px; font-weight: 900; letter-spacing: -0.03em; line-height: 1;
+    background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .card-title { font-size: 24px; font-weight: 800; margin-top: 8px; }
+  .card-body { font-size: 18px; color: var(--soft); margin-top: 8px; line-height: 1.35; }
+
+  .flow { display: flex; align-items: stretch; gap: 14px; flex-wrap: wrap; }
+  .flow-step { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 12px; justify-content: center;
+    border: 1px solid rgba(246,239,230,0.14); border-radius: 16px; padding: 22px 20px; background: rgba(255,126,95,0.08); }
+  .flow-n { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 11px;
+    font-family: var(--mono); font-weight: 700; color: var(--dark); background: var(--gradient); }
+  .flow-label { font-size: 21px; font-weight: 600; line-height: 1.25; }
+  .flow-arrow { display: flex; align-items: center; font-size: 34px; font-weight: 800; color: var(--coral); flex: none; }
 
   .callout { border-left: 4px solid var(--coral); border-radius: 12px; padding: 22px 26px; background: rgba(255,82,99,0.10); }
   .callout p { font-size: 23px; line-height: 1.4; }

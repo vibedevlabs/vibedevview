@@ -7,7 +7,7 @@ is possible but advanced; it lives in the [appendix](#appendix--driving-a-remote
 
 This is the day-to-day runbook. If you've never used any of these tools, start with the
 [README](../README.md) (zero-assumption setup), then come back here for depth. For the visual
-system and the 16 frame types see [`HGDW-DESIGN.md`](../HGDW-DESIGN.md); for the internals see
+system and the frame types see [`HGDW-DESIGN.md`](../HGDW-DESIGN.md); for the internals see
 [`docs/ARCHITECTURE.md`](ARCHITECTURE.md).
 
 ---
@@ -158,6 +158,8 @@ Fields marked *(falls back …)* will reuse another field if omitted.
 | `C6-code` | `eyebrow`, `title`, `code` | `lang` is accepted but not rendered. |
 | `C7-stat` | `stat` *(falls back to `title`)*, `statLabel` *(falls back to `subtitle`)* | Big number. |
 | `C8-figure` | `title`, `image`, `caption` | `image` = path/URL to a figure. |
+| `C9-grid` | `eyebrow`, `title`, `cards[] {stat?, title, body?}` | **Infographic:** grid of 2–4 stat/info cards. Prefer over bullets for a set of metrics/concepts. |
+| `C10-flow` | `eyebrow`, `title`, `body[]` | **Infographic:** horizontal process flow (A → B → C); `body[]` are the ordered stages. |
 | `D1-placeholder` | `eyebrow`, `title`, `subtitle` | Demo placeholder (also the auto recording placeholder). |
 | `D2-lowerthird` | `title`, `subtitle` | Lower-third label over a recording. |
 | `O1-outro` | `eyebrow`, `title` *(falls back to wordmark)*, `subtitle` | Closing card. |
@@ -283,7 +285,7 @@ devin -- "Produce DEMO-1 and load it onto the Palmier timeline."
 The repo ships Devin two skills it auto-discovers from `.devin/skills/`:
 [`hgdw-video-production`](../.devin/skills/hgdw-video-production/SKILL.md) (produce) and
 [`hgdw-revision`](../.devin/skills/hgdw-revision/SKILL.md) (surgical fixes). So Devin already
-knows the segment format, the 16 frames, and the reset behavior.
+knows the segment format, the frames, and the reset behavior.
 
 **What to initiate — example prompts:**
 

@@ -49,6 +49,18 @@ Rules:
 - Use C6-code frames for any code; put the code under the \`code:\` field with \`lang:\`.
 - Open with N1-title, close with O1-outro.
 
+VISUAL VARIETY — this is important:
+- Prefer infographic, visual frames over plain bullet lists. Do NOT default to C1-bullets.
+- Reserve C1-bullets for content that is genuinely an unordered list with no better structure — aim for at most one bullet slide per lesson.
+- Match the frame to the content's shape:
+  - C9-grid — a SET of related items/metrics/concepts (2–4). Use \`cards: [{ stat?: "80%", title: "label", body?: "one detail line" }]\`. Great for "3 reasons", "key numbers", "4 pillars".
+  - C10-flow — a PROCESS or pipeline (A → B → C). Put the ordered step labels in \`body: [..]\`; they render as connected, numbered stages.
+  - C4-steps — sequential instructions to follow (numbered list).
+  - C3-compare — a trade-off / before-vs-after / X-vs-Y (\`columns: [{ heading, items[] }]\`).
+  - C7-stat — ONE headline number (\`stat\`, \`statLabel\`).
+  - C2-statement — one punchy line that should land big.
+  - N4-vocab — key terms (\`tags: [..]\`).
+
 Frame types: ${FRAME_TYPES.join(", ")}.`;
 
 export interface ScriptAgentOptions {

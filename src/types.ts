@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * The 16 HGDW frame types. The Slides Agent renders each, the verifier checks
+ * The HGDW frame types. The Slides Agent renders each, the verifier checks
  * each, and HGDW-DESIGN.md documents them. This array is the source of truth.
  *
  *   N* — narrative / structural   C* — content   D* — demo   O* — outro
@@ -20,6 +20,8 @@ export const FRAME_TYPES = [
   "C6-code", //    code block
   "C7-stat", //    big stat / number
   "C8-figure", //  image / figure with caption
+  "C9-grid", //    infographic: grid of stat/info cards
+  "C10-flow", //   infographic: horizontal process flow (A → B → C)
   "D1-placeholder", // dark demo placeholder (app eyebrow) — used when a recording is missing
   "D2-lowerthird", // lower-third label overlay for a recording
   "O1-outro", //   closing / CTA card
@@ -37,6 +39,14 @@ export const ColumnSchema = z.object({
   items: z.array(z.string()).default([]),
 });
 
+/** A card for the C9-grid infographic frame: an optional big stat, a label, and an optional detail line. */
+export const CardSchema = z.object({
+  stat: z.string().optional(),
+  title: z.string(),
+  body: z.string().optional(),
+});
+export type Card = z.infer<typeof CardSchema>;
+
 /** Declarative slide spec parsed from a SLIDE YAML block in script.md. */
 export const SlideSpecSchema = z.object({
   frame: FrameTypeSchema,
@@ -53,6 +63,7 @@ export const SlideSpecSchema = z.object({
   image: z.string().optional(),
   tags: z.array(z.string()).optional(),
   columns: z.array(ColumnSchema).optional(),
+  cards: z.array(CardSchema).optional(),
   footer: z.string().optional(),
 });
 export type SlideSpec = z.infer<typeof SlideSpecSchema>;
